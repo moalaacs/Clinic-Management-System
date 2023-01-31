@@ -13,11 +13,11 @@ const patientSchema = new mongoose.Schema({
   age: personSchema.age,
   gender: personSchema.gender,
   contactNumber: personSchema.contactNumber,
-  medicalHistory: { type: String, required: false },
   email: personSchema.email,
   address: personSchema.address,
   password: personSchema.password,
   image: personSchema.image,
+  medicalHistory: { type: String, required: false },
 });
 
 /*** auto increment for _id field ***/

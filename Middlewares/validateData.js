@@ -2,24 +2,26 @@ const { check, param } = require("express-validator");
 
 /** validation for patient data using express validator **/
 
-let validateNewPatientData = [
+
+
+let validatePerson = [
   check("_id").optional().isNumeric().withMessage("Id should be a number"),
-  check("name")
+  check("fname")
     .matches(/^[a-zA-Z ]+$/)
     .withMessage("Name should be a string and contain only letters and spaces")
-    .isLength({ min: 5 })
-    .withMessage("length of name should be greater than 5 characters"),
+    .isLength({ min: 3 })
+    .withMessage("length of name should be greater than 3 characters"),
+  check("lname")
+    .matches(/^[a-zA-Z ]+$/)
+    .withMessage("Name should be a string and contain only letters and spaces")
+    .isLength({ min: 3 })
+    .withMessage("length of name should be greater than 3 characters"),
   check("age").isNumeric().withMessage("Age should be a number"),
   check("gender")
     .isIn(["male", "female"])
     .withMessage("gender must be either male or female"),
-  check("contactNumber")
-    .isNumeric()
+  check("contactNumber").matches(/^01[0125](\-)?[0-9]{8}$/)
     .withMessage("Contact number should be a number"),
-  check("medicalHistory")
-    .optional()
-    .isString()
-    .withMessage("medical history should be a string"),
   check("password").isStrongPassword().withMessage("password should be strong"),
   check("email")
     .isEmail()
@@ -45,69 +47,74 @@ let validateNewPatientData = [
     .isLength({ min: 5, max: 5 })
     .withMessage("length of zip code should be 5 characters"),
   check("image").isString().withMessage("image should be string"),
+
 ];
-let validatePatientData = [
+
+
+let validatePatchPerson = [
   check("_id").optional().isNumeric().withMessage("Id should be a number"),
-  check("name")
-    .optional()
+  check("fname").optional()
     .matches(/^[a-zA-Z ]+$/)
     .withMessage("Name should be a string and contain only letters and spaces")
-    .isLength({ min: 5 })
-    .withMessage("length of name should be greater than 5 characters"),
-  check("age").optional().isNumeric().withMessage("Age should be a number"),
-  check("gender")
-    .optional()
+    .isLength({ min: 3 })
+    .withMessage("length of name should be greater than 3 characters"),
+  check("lname").optional()
+    .matches(/^[a-zA-Z ]+$/)
+    .withMessage("Name should be a string and contain only letters and spaces")
+    .isLength({ min: 3 })
+    .withMessage("length of name should be greater than 3 characters"),
+  check("age").optional()
+    .isNumeric().withMessage("Age should be a number"),
+  check("gender").optional()
     .isIn(["male", "female"])
     .withMessage("gender must be either male or female"),
-  check("contactNumber")
-    .optional()
-    .isNumeric()
+  check("contactNumber").optional().matches(/^01[0125](\-)?[0-9]{8}$/)
     .withMessage("Contact number should be a number"),
-  check("medicalHistory")
-    .optional()
-    .isString()
-    .withMessage("medical history should be a string"),
-  check("password")
-    .optional()
-    .isStrongPassword()
-    .withMessage("password should be strong"),
   check("email")
-    .optional()
-    .isEmail()
+    .isEmail().optional()
     .withMessage("email should be in form example@example.com"),
-  check("address.street")
-    .optional()
+  check("password").optional().isStrongPassword().withMessage("password should be strong"),
+  check("address.street").optional()
     .isString()
     .withMessage("street should be string")
     .isLength({ min: 2 })
     .withMessage("length of street should be greater than 1 character"),
-  check("address.city")
-    .optional()
+  check("address.city").optional()
     .matches(/^[a-zA-Z ]+$/)
     .withMessage("city should be string")
     .isLength({ min: 3 })
     .withMessage("length of city should be greater than 2 characters"),
-  check("address.country")
-    .optional()
+  check("address.country").optional()
     .matches(/^[a-zA-Z ]+$/)
     .withMessage("country should be string")
     .isLength({ min: 3 })
     .withMessage("length of country should be greater than 2 characters"),
-  check("address.zipCode")
-    .optional()
+  check("address.zipCode").optional()
     .isInt()
     .withMessage("zip code should be a number")
     .isLength({ min: 5, max: 5 })
     .withMessage("length of zip code should be 5 characters"),
   check("image").optional().isString().withMessage("image should be string"),
 ];
+
+
+let validateNewPatientData = [
+  validatePerson,
+  check("medicalHistory")
+    .optional()
+    .isString()
+    .withMessage("medical history should be a string"),
+];
+let validatePatientData = [
+  validatePatchPerson,
+  check("medicalHistory")
+    .optional()
+    .isString()
+    .withMessage("medical history should be a string"),
+];
 let doctorValidation = [
-  check("name").isString().withMessage("Name must be string"),
+  validatePerson,
   check("specilization").isString().withMessage("Specilization must be string"),
-  check("phone")
-    .isArray()
-    .withMessage("Phone numbers must be entered as an array"),
-  check("phone.*").isString().withMessage("Each phone number must be number"),
   check("clinic").isArray().withMessage("Clinics must be entered as an array"),
   check("clinic.*").isNumeric().withMessage("Each clinic Id must be number"),
   check("appointments")
@@ -126,24 +133,13 @@ let doctorValidation = [
     .optional()
     .isNumeric()
     .withMessage("Patient Id must be Number"),
-  check("email").isEmail().withMessage("Enter a valid email address"),
-  check("password").isStrongPassword().withMessage("Enter strong password"),
-  check("image").isString().withMessage("image url must be string"),
 ];
 let doctorPatchValidation = [
-  check("name").optional().isString().withMessage("Name must be string"),
+  validatePatchPerson,
   check("specilization")
     .optional()
     .isString()
     .withMessage("Specilization must be string"),
-  check("phone")
-    .optional()
-    .isArray()
-    .withMessage("Phone numbers must be entered as an array"),
-  check("phone.*")
-    .optional()
-    .isString()
-    .withMessage("Each phone number must be number"),
   check("clinic")
     .optional()
     .isArray()
@@ -168,15 +164,6 @@ let doctorPatchValidation = [
     .optional()
     .isNumeric()
     .withMessage("Patient Id must be Number"),
-  check("email")
-    .optional()
-    .isEmail()
-    .withMessage("Enter a valid email address"),
-  check("password")
-    .optional()
-    .isStrongPassword()
-    .withMessage("Enter strong password"),
-  check("image").optional().isString().withMessage("image url must be string"),
 ];
 let numberIdBodyValidation = [
   check("id").isInt().withMessage("ID must be number"),
@@ -185,46 +172,17 @@ let numberIdParamsValidation = [
   param("id").isInt().withMessage("ID must be number"),
 ];
 let employeeValidation = [
-  check("name")
-    .matches(/^[a-zA-Z ]+$/)
-    .withMessage("Name should be a string and contain only letters and spaces")
-    .isLength({ min: 5 })
-    .withMessage("length of name should be greater than 5 characters"),
-  check("mobileNumber").isInt().withMessage("mobile number should be number"),
-  check("clinicId").isInt().withMessage("clinicId should be number"),
+  validatePerson,
   check("salary").isInt().withMessage("salary should be number"),
   check("workingHours").isInt().withMessage("workingHours should be number"),
-  check("userName").isString().withMessage("userName should be string"),
-  check("password").isStrongPassword().withMessage("password should be strong"),
-  check("image").isString().withMessage("image should be string"),
 ];
 let employeePatchValidation = [
-  check("name")
-    .optional()
-    .isString()
-    .withMessage("name should be string")
-    .isLength({ max: 15 })
-    .optional()
-    .withMessage("length of name <15"),
-  check("mobileNumber")
-    .optional()
-    .isInt()
-    .withMessage("mobile number should be number"),
-  check("clinicId").optional().isInt().withMessage("clinicId should be number"),
+  validatePatchPerson,
   check("salary").optional().isInt().withMessage("salary should be number"),
   check("workingHours")
     .optional()
     .isInt()
     .withMessage("workingHours should be number"),
-  check("userName")
-    .optional()
-    .isString()
-    .withMessage("userName should be string"),
-  check("password")
-    .optional()
-    .isStrongPassword()
-    .withMessage("password should be strong"),
-  check("image").optional().isString().withMessage("image should be string"),
 ];
 module.exports = {
   validatePatientData,
