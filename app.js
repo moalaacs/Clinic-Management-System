@@ -6,7 +6,7 @@ const mongoose = require("mongoose");
 /**** Import Routes *****/
 const authenticate = require("./Routes/authRouter");
 const authorizationMW = require("./Middlewares/authenticationMW");
-const patientRouter = require("./Routes/patient");
+const patientRouter = require("./Routes/patientRouter");
 const doctorRouter = require("./Routes/doctorRouter");
 
 require("dotenv").config();
