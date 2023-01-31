@@ -1,0 +1,1 @@
+mongod --dbpath "C:\Users\Amr\Desktop\ITI\MongoDB\DB"
