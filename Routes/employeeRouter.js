@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const employeeController = require("../Controllers/employeeController");
+const employeeController = require("../Controller/employeeController");
 const { body, query, param, validationResult } = require("express-validator");
-const validator = require("./../Middlewares/errorValidation");
+const validator = require("../Middlewares/errorValidation");
 const {
   employeeValidation,
   employeePatchValidation,

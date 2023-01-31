@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-require("./../Model/medicineModel");
+require("../Models/medicineModel");
 
 const medicineSchema = mongoose.model("medicine");
 /* *********************************************************** */
