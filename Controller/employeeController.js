@@ -1,56 +1,70 @@
-const Employee = require("./../Models/employeeModel");
+/*** callback fns for CRUD operations ***/
 
-exports.getAllEmployees = (request, response, next) => {
-  Employee.find({})
-    .then((data) => {
-      response.status(200).json({ message: "get all employees", data: data });
-    })
-    .catch((error) => {
-      next(error);
+/* require bcrypt */
+const bcrypt = require("bcrypt");
+
+/* require all needed modules */
+const EmployeeSchema = require("./../Models/employeeModel");
+
+
+/* require helper functions (filter,sort,slice,paginate) */
+const { filterData, sortData, sliceData, paginateData } = require("../helper/helperfns");
+
+
+// Add a new Employee
+exports.addEmployee = async (request, response, next) => {
+  try {
+    const saltRounds = 10;
+    const hash = await bcrypt.hash(request.body.password, saltRounds);
+    const employee = new EmployeeSchema({
+      ...request.body,
+      password: hash
     });
+    await employee.save();
+    response.status(201).json({ message: "Employee created successfully.", employee });
+  } catch (error) { next(error); }
 };
-exports.addEmployee = (request, response, next) => {
-  let employeeObject = new Employee({
-    name: request.body.name,
-    mobileNumber: request.body.mobileNumber,
-    clinicId: request.body.clinicId,
-    salary: request.body.salary,
-    email: request.body.email,
-    address: request.body.address,
-    workingHours: request.body.workingHours,
-    userName: request.body.userName,
-    password: request.body.password,
-    image: request.body.image,
-  });
-  employeeObject
-    .save()
-    .then(() => {
-      response.status(200).json({ message: "add employee" });
-    })
-    .catch((error) => {
-      next(error);
-    });
+
+
+// Edit a Employee
+exports.editEmployee = async (request, response, next) => {
+  try {
+    const employee = await EmployeeSchema.findByIdAndUpdate(request.params.id, request.body, { new: true });
+    response.status(200).json({ message: "Employee updated successfully.", employee });
+  } catch (error) { next(error); }
 };
-exports.updateEmployee = (request, response, next) => {
-  Employee.updateOne(
-    { _id: request.params.id },
-    {
-      $set: { name: request.body.name },
-    }
-  )
-    .then(() => {
-      response.status(200).json({ message: "update employee" });
-    })
-    .catch((error) => {
-      next(error);
-    });
+
+
+// Remove a Employee
+exports.removeEmployee = async (request, response, next) => {
+  try {
+    const employee = await EmployeeSchema.findByIdAndDelete(request.params.id || request.body.id);
+    if (!employee) { return next(new Error('Employee not found')); }
+    response.status(201).json({ message: "Employee removed successfully.", employee });
+  } catch (error) { next(error); }
 };
-exports.deleteEmployee = (request, response) => {
-  Employee.deleteOne({
-    _id: request.params.id,
-  })
-    .then((result) => {
-      response.status(200).json({ message: "deleted" });
-    })
-    .catch((error) => next(error));
+
+
+
+
+//get all Employees
+exports.getEmployees = async (request, response, next) => {
+  try {
+    let Employees = await filterData(EmployeeSchema, request.query);
+    Employees = sortData(Employees, request.query);
+    Employees = paginateData(Employees, request.query);
+    Employees = sliceData(Employees, request.query);
+
+    response.status(200).json({ Employees });
+  } catch (error) { next(error); }
+};
+
+
+// Get a employee by ID
+exports.getEmployeeById = async (request, response, next) => {
+  try {
+    const employee = await EmployeeSchema.findById(request.params.id);
+    if (!employee) { return next(new Error('employee not found')); }
+    response.status(200).json({ employee });
+  } catch (error) { next(error); }
 };

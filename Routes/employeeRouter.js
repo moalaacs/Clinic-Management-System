@@ -1,18 +1,35 @@
 const express = require("express");
-const router = express.Router();
-const employeeController = require("../Controller/employeeController");
+const controller = require("../Controllers/employeeController");
 const { body, query, param, validationResult } = require("express-validator");
-const validator = require("../Middlewares/errorValidation");
+const validator = require("./../Middlewares/errorValidation");
+
+const errorValidation = require("../Middlewares/errorValidation");
 const {
   employeeValidation,
   employeePatchValidation,
+  numberIdParamsValidation,
 } = require("../Middlewares/validateData");
+const authorizationMW = require("../Middlewares/authenticationMW");
+
+const router = express.Router();
 
 router
-  .route("/Employees/:id?")
-  .get(employeeController.getAllEmployees)
-  .post(employeeValidation, validator, employeeController.addEmployee)
-  .patch(employeePatchValidation, validator, employeeController.updateEmployee)
-  .delete(employeeController.deleteEmployee);
+  .route("/employees")
+  .all(authorizationMW.checkAdmin)
+  .get(controller.getEmployees)
+  .post(employeeValidation, errorValidation, controller.addEmployee);
+
+router
+  .route("/patients/:id")
+  .all(authorizationMW.checkEmployee, numberIdParamsValidation)
+  .get(controller.getEmployeeById)
+  .patch(employeePatchValidation, errorValidation, controller.editEmployee);
+
+router
+  .route("/employees/:id")
+  .all(authorizationMW.checkAdmin, numberIdParamsValidation)
+  .get(controller.getEmployeeById)
+  .patch(employeePatchValidation, errorValidation, controller.editEmployee)
+  .delete(controller.removeEmployee);
 
 module.exports = router;

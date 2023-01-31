@@ -53,3 +53,18 @@ module.exports.checkDoctor = (request, response, next) => {
     next(error);
   }
 };
+
+
+module.exports.checkEmployee = (request, response, next) => {
+  if (
+    request.userData.role == "admin" ||
+    (request.userData.role == "employee" &&
+      request.userData.id == request.params.id)
+  ) {
+    next();
+  } else {
+    const error = new Error("You are not authorized to access this resource");
+    error.status = 403;
+    next(error);
+  }
+};
