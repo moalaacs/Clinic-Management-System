@@ -7,6 +7,7 @@ const mongoose = require("mongoose");
 const authenticate = require("./Routes/authRouter");
 const authorizationMW = require("./Middlewares/authenticationMW");
 const patientRouter = require("./Routes/patient");
+const ClinicRouter = require("./Routes/clinic");
 
 
 
@@ -52,6 +53,7 @@ app.use(authorizationMW);
 
 /*Routes*/
 app.use(patientRouter);
+app.use(ClinicRouter);
 
 // d- file not found middleware
 app.use((request, response)=>{
