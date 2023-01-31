@@ -185,46 +185,46 @@ let numberIdParamsValidation = [
   param("id").isInt().withMessage("ID must be number"),
 ];
 let employeeValidation = [
-  body("name")
-    .isString()
-    .withMessage("name should be string")
-    .isLength({ max: 15 })
-    .withMessage("length of name <15"),
-  body("mobileNumber").isInt().withMessage("mobile number should be number"),
-  body("clinicId").isInt().withMessage("clinicId should be number"),
-  body("salary").isInt().withMessage("salary should be number"),
-  body("workingHours").isInt().withMessage("workingHours should be number"),
-  body("userName").isString().withMessage("userName should be string"),
-  body("password").isStrongPassword().withMessage("password should be strong"),
-  body("image").isString().withMessage("image should be string"),
+  check("name")
+    .matches(/^[a-zA-Z ]+$/)
+    .withMessage("Name should be a string and contain only letters and spaces")
+    .isLength({ min: 5 })
+    .withMessage("length of name should be greater than 5 characters"),
+  check("mobileNumber").isInt().withMessage("mobile number should be number"),
+  check("clinicId").isInt().withMessage("clinicId should be number"),
+  check("salary").isInt().withMessage("salary should be number"),
+  check("workingHours").isInt().withMessage("workingHours should be number"),
+  check("userName").isString().withMessage("userName should be string"),
+  check("password").isStrongPassword().withMessage("password should be strong"),
+  check("image").isString().withMessage("image should be string"),
 ];
 let employeePatchValidation = [
-  body("name")
+  check("name")
     .optional()
     .isString()
     .withMessage("name should be string")
     .isLength({ max: 15 })
     .optional()
     .withMessage("length of name <15"),
-  body("mobileNumber")
+  check("mobileNumber")
     .optional()
     .isInt()
     .withMessage("mobile number should be number"),
-  body("clinicId").optional().isInt().withMessage("clinicId should be number"),
-  body("salary").optional().isInt().withMessage("salary should be number"),
-  body("workingHours")
+  check("clinicId").optional().isInt().withMessage("clinicId should be number"),
+  check("salary").optional().isInt().withMessage("salary should be number"),
+  check("workingHours")
     .optional()
     .isInt()
     .withMessage("workingHours should be number"),
-  body("userName")
+  check("userName")
     .optional()
     .isString()
     .withMessage("userName should be string"),
-  body("password")
+  check("password")
     .optional()
     .isStrongPassword()
     .withMessage("password should be strong"),
-  body("image").optional().isString().withMessage("image should be string"),
+  check("image").optional().isString().withMessage("image should be string"),
 ];
 module.exports = {
   validatePatientData,

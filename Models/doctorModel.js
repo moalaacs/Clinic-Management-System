@@ -1,44 +1,24 @@
 const mongoose = require("mongoose");
-const validator = require("mongoose-validator");
 const AutoIncrement = require("mongoose-sequence")(mongoose);
-const addressSchema = require("./addressModel");
+const personSchema = require("./personModel");
 
-/* validate data using mongoose validator */
-const emailValidator = [
-  validator({
-    validator: "isEmail",
-    message: "Email should be a valid email",
-  }),
-];
 
-const nameValidator = [
-  validator({
-    validator: "isLength",
-    arguments: [3, 50],
-    message: "Name should be between {ARGS[0]} and {ARGS[1]} characters",
-  }),
-  validator({
-    validator: "matches",
-    arguments: /^[a-zA-Z\s]+$/,
-    message: "Name should only contain letters and spaces",
-  }),
-];
-
-/*** crete schema for patients collection ***/
+/*** crete schema for doctors collection ***/
 const doctorSchema = new mongoose.Schema({
   _id: { type: Number },
-  name: { type: String, required: true, validate: nameValidator },
+  fname: personSchema.fname,
+  lname: personSchema.lname,
+  age: personSchema.age,
+  gender: personSchema.gender,
+  contactNumber: personSchema.contactNumber,
+  email: personSchema.email,
+  address: personSchema.address,
+  password: personSchema.password,
+  image: personSchema.image,
   specilization: {
     type: String,
     required: true,
   },
-  mobileNumber: [
-    {
-      type: String,
-      match: /^01[0125]{1}(\-)?[0-9]{8}$/,
-      required: true,
-    },
-  ],
   schedule: [
     {
       clinicId: {
@@ -60,16 +40,12 @@ const doctorSchema = new mongoose.Schema({
       ref: "clinic",
     },
   ],
-  address: addressSchema,
   appointments: [
     {
       dateTime: { type: Date, required: true },
       patientId: { type: Number, required: true, ref: "patient" },
     },
   ],
-  email: { type: String, required: true, validate: emailValidator },
-  password: { type: String, required: true, minLength: 8 },
-  image: { type: String, required: true },
 });
 
 /*** auto increment for _id field ***/
