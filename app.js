@@ -61,7 +61,7 @@ app.use((request, response) => {
 });
 
 // e- Error handling middleware
-app.use((error, request, response) => {
+app.use((error, request, response, next) => {
   let errorStatus = error.status || 500;
-  response.status(errorStatus).json({ message: "Error " + error });
+  response.status(errorStatus).json(error.message);
 });

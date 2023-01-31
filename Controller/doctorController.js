@@ -6,14 +6,25 @@ const bcrypt = require("bcrypt");
 /* require all needed modules */
 const doctorSchema = require("../Models/doctorModel");
 
+/* require helper functions (filter,sort,slice,paginate) */
+const {
+  filterData,
+  sortData,
+  sliceData,
+  paginateData,
+} = require("../helper/helperfns");
+
 exports.getAllDoctors = async (request, response, next) => {
   try {
-    let resultData = await doctorSchema.find();
-    response.status(200).json(resultData);
+    let doctors = await filterData(doctorSchema, request.query);
+    doctors = sortData(doctors, request.query);
+    doctors = paginateData(doctors, request.query);
+    doctors = sliceData(doctors, request.query);
+    response.status(200).json({ doctors });
   } catch (error) {
     next(error);
   }
-}; //Doctor
+};
 
 exports.addDoctor = async (request, response, next) => {
   const hash = await bcrypt.hash(request.body.password, 10);
@@ -34,7 +45,7 @@ exports.addDoctor = async (request, response, next) => {
   } catch (error) {
     next(error);
   }
-}; //Doctor
+};
 
 exports.updateDoctorById = async (request, response, next) => {
   try {
@@ -58,7 +69,7 @@ exports.updateDoctorById = async (request, response, next) => {
   } catch (error) {
     next(error);
   }
-}; //Doctor/:id
+}; //PUT
 
 exports.patchDoctorById = async (request, response, next) => {
   let tempDoctor = {};
@@ -95,29 +106,33 @@ exports.patchDoctorById = async (request, response, next) => {
   }
   try {
     let updatedDoctor = await doctorSchema.updateOne(
-      { __id: request.params.id },
+      { _id: request.params.id },
       { $set: tempDoctor }
     );
     response.status(200).json("Patch Succesfully");
   } catch (error) {
     next(error);
   }
-}; //Doctor/:id
+};
 
 exports.getDoctorById = async (request, response, next) => {
   try {
-    let resultData = await doctorSchema.find({ _id: request.params.id });
-    response.status(200).json(resultData);
+    let doctor = await doctorSchema.find({ _id: request.params.id });
+    if (!doctor) {
+      return next(new Error("doctor not found"));
+    }
+    response.status(200).json(doctor);
   } catch (error) {
     next(error);
   }
-}; //Doctor/:id
+};
 
 exports.removeDoctorById = async (request, response, next) => {
   try {
-    let resultData = await doctorSchema.deleteOne({ _id: request.params.id });
+    let doctor = await doctorSchema.deleteOne({ _id: request.params.id });
+    if (!doctor) response.status(200).json("Doctor not found");
     response.status(200).json("Deleted");
   } catch (error) {
     next(error);
   }
-}; //Doctor/:id
+};

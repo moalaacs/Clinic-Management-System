@@ -228,13 +228,38 @@ let employeePatchValidation = [
 ];
 let medicineValidation = [
   check("name").isString().withMessage("Name should be a string"),
-  check("proDate").isString().withMessage("Production Date should be a string"),
-  check("expDate").isString().withMessage("Expiry Date should be a string"),
+  check("productionDate")
+    .isString()
+    .withMessage("Production Date should be a string"),
+  check("expiryDate").isString().withMessage("Expiry Date should be a string"),
   check("leaflet")
     .isString()
     .withMessage("Medicine Leaflet should be a string"),
   check("price").isInt().withMessage("Medicine Price should be a Number"),
   check("quantity").isInt().withMessage("Medicine Price should be a Number"),
+];
+let medicinePatchValidation = [
+  check("name").optional().isString().withMessage("Name should be a string"),
+  check("productionDate")
+    .optional()
+    .isString()
+    .withMessage("Production Date should be a string"),
+  check("expiryDate")
+    .optional()
+    .isString()
+    .withMessage("Expiry Date should be a string"),
+  check("leaflet")
+    .optional()
+    .isString()
+    .withMessage("Medicine Leaflet should be a string"),
+  check("price")
+    .optional()
+    .isInt()
+    .withMessage("Medicine Price should be a Number"),
+  check("quantity")
+    .optional()
+    .isInt()
+    .withMessage("Medicine Price should be a Number"),
 ];
 module.exports = {
   validatePatientData,
@@ -246,4 +271,5 @@ module.exports = {
   numberIdBodyValidation,
   numberIdParamsValidation,
   medicineValidation,
+  medicinePatchValidation,
 };

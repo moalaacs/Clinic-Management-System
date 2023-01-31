@@ -1,75 +1,120 @@
-const mongoose = require("mongoose");
-require("../Models/medicineModel");
+/*** callback fns for CRUD operations ***/
 
-const medicineSchema = mongoose.model("medicine");
-/* *********************************************************** */
-exports.getAllMedicine = (request, response, next) => {
-  medicineSchema
-    .find()
-    .then((data) => {
-      response.status(200).json(data);
-    })
-    .catch((error) => next(error));
+/* require all needed modules */
+const medicineSchema = require("../Models/medicineModel");
+
+/* require helper functions (filter,sort,slice,paginate) */
+const {
+  filterData,
+  sortData,
+  sliceData,
+  paginateData,
+} = require("../helper/helperfns");
+
+exports.getAllMedicine = async (request, response, next) => {
+  try {
+    let medicine = await filterData(medicineSchema, request.query);
+    medicine = sortData(medicine, request.query);
+    medicine = paginateData(medicine, request.query);
+    medicine = sliceData(medicine, request.query);
+    response.status(200).json(medicine);
+  } catch (error) {
+    next(error);
+  }
 };
-/* *********************************************************** */
-exports.addMedicine = (request, response, next) => {
-  let newMedicine = new medicineSchema({
+
+exports.addMedicine = async (request, response, next) => {
+  let addedDoctor = medicineSchema({
     name: request.body.name,
-    productionDate: request.body.proDate,
-    expiryDate: request.body.expDate,
+    productionDate: request.body.productionDate,
+    expiryDate: request.body.expiryDate,
     medicineLeaflet: request.body.leaflet,
     medicinePrice: request.body.price,
     medicineQuantity: request.body.quantity,
   });
-  newMedicine
-    .save()
-    .then((result) => {
-      response.status(201).json(result);
-    })
-    .catch((error) => next(error));
+  try {
+    let resultData = await addedDoctor.save();
+    response.status(200).json({ status: "Added" });
+  } catch (error) {
+    next(error);
+  }
 };
-/* *********************************************************** */
-exports.updateMedicine = (request, response, next) => {
-  medicineSchema
-    .updateOne(
-      {
-        name: request.body.name,
-      },
+
+exports.updateMedicineById = async (request, response, next) => {
+  try {
+    let updatedMedicine = await medicineSchema.updateOne(
+      { _id: request.params.id },
       {
         $set: {
+          name: request.body.name,
+          productionDate: request.body.proDate,
+          expiryDate: request.body.expDate,
+          medicineLeaflet: request.body.leaflet,
           medicinePrice: request.body.price,
           medicineQuantity: request.body.quantity,
         },
       }
-    )
-    .then((result) => {
-      response.status(200).json({ message: "Medicine Info. Updated" });
-    })
-    .catch((error) => next(error));
+    );
+    if (!updatedMedicine)
+      response.status(200).json({ status: "Medicine not found" });
+    response.status(200).json({ status: "Updated", updatedMedicine });
+  } catch (error) {
+    next(error);
+  }
+}; //PUT
+
+exports.patchMedicineById = async (request, response, next) => {
+  let tempMedicine = {};
+  if (request.body.name != null) {
+    tempMedicine.name = request.body.name;
+  }
+  if (request.body.productionDate != null) {
+    tempMedicine.productionDate = request.body.productionDate;
+  }
+  if (request.body.expiryDate != null) {
+    tempMedicine.expiryDate = request.body.expiryDate;
+  }
+  if (request.body.leaflet != null) {
+    tempMedicine.medicineLeaflet = request.body.leaflet;
+  }
+  if (request.body.price != null) {
+    tempMedicine.medicinePrice = request.body.price;
+  }
+  if (request.body.clinic != null) {
+    tempMedicine.clinic = request.body.clinic;
+  }
+  if (request.body.quantity != null) {
+    tempMedicine.medicineQuantity = request.body.quantity;
+  }
+  try {
+    let updatedMedicine = await medicineSchema.updateOne(
+      { _id: request.params.id },
+      { $set: tempMedicine }
+    );
+    response.status(200).json("Patch Succesfully");
+  } catch (error) {
+    next(error);
+  }
+}; //Patch
+
+exports.removeMedicineById = async (request, response, next) => {
+  try {
+    let medicine = await medicineSchema.deleteOne({ _id: request.params.id });
+    if (!medicine) response.status(200).json("Medicine not found");
+    response.status(200).json("Deleted");
+  } catch (error) {
+    next(error);
+  }
 };
-/* *********************************************************** */
-exports.deleteMedicine = (request, response, next) => {
-  teachersSchema
-    .findOneAndDelete({ name: request.params.name })
-    .then((data) => {
-      if (data != null) {
-        response.status(200).json({ message: "Medicine Deleted!" });
-      } else {
-        next(new Error("Medicine doesn't Exist!"));
-      }
-    })
-    .catch((error) => next(error));
+
+exports.getMedicineById = async (request, response, next) => {
+  try {
+    let medicine = await medicineSchema.find({ _id: request.params.id });
+    if (!medicine) {
+      return next(new Error("Medicine not found"));
+    }
+    response.status(200).json(medicine);
+  } catch (error) {
+    next(error);
+  }
 };
-/* *********************************************************** */
-exports.getMedicine = (request, response, next) => {
-  teachersSchema
-    .findOne({ name: request.params.name })
-    .then((data) => {
-      if (data != null) response.status(200).json(data);
-      else {
-        next(new Error("Medicine doesn't Exist!"));
-      }
-    })
-    .catch((error) => next(error));
-};
-/* **********************z************************************* */
