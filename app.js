@@ -6,8 +6,8 @@ const mongoose = require("mongoose");
 /**** Import Routes *****/
 const authenticate = require("./Routes/authRouter");
 const authorizationMW = require("./Middlewares/authenticationMW");
-const patientRouter = require("./Routes/patientRouter");
 const doctorRouter = require("./Routes/doctorRouter");
+const patientRouter = require("./Routes/patientRouter");
 const employeeRouter = require("./Routes/employeeRouter");
 const medicineRouter = require("./Routes/medicineRouter");
 
@@ -51,8 +51,8 @@ app.use(authenticate);
 app.use(authorizationMW);
 
 /*Routes*/
-app.use(patientRouter);
 app.use(doctorRouter);
+app.use(patientRouter);
 app.use(employeeRouter);
 app.use(medicineRouter);
 // d- file not found middleware

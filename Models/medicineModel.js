@@ -21,18 +21,10 @@ const medicineSchema = new mongoose.Schema({
   productionDate: {
     type: String,
     required: true,
-    unique: [
-      true,
-      "Each Medicine should only have a unique value of Production Date ... It Shouldn't be duplicated.",
-    ],
   },
   expiryDate: {
     type: String,
     required: true,
-    unique: [
-      true,
-      "Each Medicine should only have a unique value  for the Expiration Date ... It Shouldn't be duplicated.",
-    ],
   },
   medicineLeaflet: {
     type: String,
@@ -52,7 +44,7 @@ const medicineSchema = new mongoose.Schema({
 medicineSchema.plugin(AutoIncrement, {
   id: "medicine_seq",
   inc_field: "_id",
-  start_seq: 10000,
+  start_seq: 100000,
 });
 
 module.exports = mongoose.model("medicine", medicineSchema);

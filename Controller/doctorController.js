@@ -27,21 +27,16 @@ exports.getAllDoctors = async (request, response, next) => {
 };
 
 exports.addDoctor = async (request, response, next) => {
-  const hash = await bcrypt.hash(request.body.password, 10);
-  let addedDoctor = doctorSchema({
-    name: request.body.name,
-    specilization: request.body.specilization,
-    mobileNumber: request.body.phone,
-    schedule: request.body.schedule,
-    clinic: request.body.clinic,
-    email: request.body.email,
-    password: hash,
-    image: request.body.image,
-    address: request.body.address,
-  });
   try {
-    let resultData = await addedDoctor.save();
-    response.status(200).json({ status: "Added" });
+    const hash = await bcrypt.hash(request.body.password, 10);
+    const doctor = new doctorSchema({
+      ...request.body,
+      password: hash,
+    });
+    await doctor.save();
+    response
+      .status(201)
+      .json({ message: "Doctor created successfully.", doctor });
   } catch (error) {
     next(error);
   }

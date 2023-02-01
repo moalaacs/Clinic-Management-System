@@ -1,5 +1,5 @@
 const express = require("express");
-const controller = require("../Controllers/employeeController");
+const controller = require("../Controller/employeeController");
 const { body, query, param, validationResult } = require("express-validator");
 const validator = require("./../Middlewares/errorValidation");
 
