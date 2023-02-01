@@ -20,7 +20,7 @@ router
   .post(employeeValidation, errorValidation, controller.addEmployee);
 
 router
-  .route("/patients/:id")
+  .route("/employees/:id")
   .all(authorizationMW.checkEmployee, numberIdParamsValidation)
   .get(controller.getEmployeeById)
   .patch(employeePatchValidation, errorValidation, controller.editEmployee);

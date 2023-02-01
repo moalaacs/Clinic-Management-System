@@ -178,17 +178,9 @@ let numberIdParamsValidation = [
   param("id").isInt().withMessage("ID must be number"),
 ];
 let employeeValidation = [
-  check("name")
-    .isString()
-    .withMessage("name should be string")
-    .isLength({ max: 15 })
-    .withMessage("length of name <15"),
-  check("mobileNumber").isInt().withMessage("mobile number should be number"),
-  check("clinicId").isInt().withMessage("clinicId should be number"),
+  validatePerson,
   check("salary").isInt().withMessage("salary should be number"),
   check("workingHours").isInt().withMessage("workingHours should be number"),
-  check("userName").isString().withMessage("userName should be string"),
-  check("password").isStrongPassword().withMessage("password should be strong"),
   check("image").isString().withMessage("image should be string"),
 ];
 let employeePatchValidation = [
@@ -198,14 +190,6 @@ let employeePatchValidation = [
     .optional()
     .isInt()
     .withMessage("workingHours should be number"),
-  check("userName")
-    .optional()
-    .isString()
-    .withMessage("userName should be string"),
-  check("password")
-    .optional()
-    .isStrongPassword()
-    .withMessage("password should be strong"),
   check("image").optional().isString().withMessage("image should be string"),
 ];
 let medicineValidation = [
