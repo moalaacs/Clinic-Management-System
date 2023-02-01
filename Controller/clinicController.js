@@ -1,31 +1,26 @@
 /* require all needed modules */
+const { json } = require("express");
 const Clinic = require("../Models/clinicModel");
-
+const {
+  filterData,
+  sortData,
+  sliceData,
+  paginateData,
+} = require("../helper/helperfns");
 // Create a new clinic
-exports.createClinic = (req, res, next) => {
-  const newClinic = new Clinic({
-    name: req.body.name,
-    contactNumber: req.body.contactNumber,
-    email: req.body.email,
-    address: req.body.location,
-  });
 
-  Clinic.findOne({ name: req.body.name })
-    .then((data) => {
-      if (data != null) {
-        throw new Error("Duplicated clinic");
-      } else {
-        newClinic
-          .save()
-          .then((data) => {
-            res
-              .status(201)
-              .json({ message: "Clinic added successfully", data });
-          })
-          .catch((err) => next(err));
-      }
-    })
-    .catch((err) => next(err));
+exports.createClinic = async (request, response, next) => {
+  try {
+    const clinic = new Clinic({
+      ...request.body,
+    });
+    await clinic.save();
+    response
+      .status(201)
+      .json({ message: "Doctor created successfully.", clinic });
+  } catch (error) {
+    next(error);
+  }
 };
 
 // Edit a clinic
@@ -48,6 +43,18 @@ exports.removeClinic = (req, res, next) => {
       return next(new Error("Clinic not found"));
     }
     res.status(201).json({ message: "Clinic removed successfully.", clinic });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getAllClinics = async (request, response, next) => {
+  try {
+    let clinic = await filterData(Clinic, request.query);
+    clinic = sortData(clinic, request.query);
+    clinic = paginateData(clinic, request.query);
+    clinic = sliceData(clinic, request.query);
+    response.status(200).json(clinic);
   } catch (error) {
     next(error);
   }

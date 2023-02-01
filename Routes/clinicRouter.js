@@ -8,7 +8,7 @@ const router = express.Router();
 router
   .route("/clinics")
   .all(authorizationMW.checkAdmin)
-  // .get(controller.getClinics)
+  .get(controller.getAllClinics)
   .post(controller.createClinic);
 
 router
@@ -16,6 +16,6 @@ router
   .all(authorizationMW.checkAdmin)
   .get(controller.getClinicById)
   .patch(controller.editClinic)
-  .delete(controller.removeClinic)
+  .delete(controller.removeClinic);
 
 module.exports = router;
