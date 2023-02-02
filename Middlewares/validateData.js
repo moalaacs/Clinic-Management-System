@@ -227,6 +227,25 @@ let medicinePatchValidation = [
     .isInt()
     .withMessage("Medicine Price should be a Number"),
 ];
+
+
+let validateAppointment = [
+  check('patientId').isNumeric().withMessage('Patient Id should be a number'),
+  check('doctorId').isNumeric().withMessage('Doctor Id should be a number'),
+  check('date').matches(/^[0-9]{2}\/[0-9]{2}\/[0-9]{4}$/).withMessage('Invalid date format, should be DD/MM/YYYY'),
+  check('time').matches(/^[0-9]{2}:[0-9]{2}$/).withMessage('Invalid time format, should be in the form 00:00'),
+  check('status').isIn(['Pending', 'Accepted', 'Declined', 'Completed']).withMessage('Invalid appointment status')
+];
+
+let validatePatchAppointment = [
+  check('patientId').optional().isNumeric().withMessage('Patient Id should be a number'),
+  check('doctorId').optional().isNumeric().withMessage('Doctor Id should be a number'),
+  check('date').optional().matches(/^[0-9]{2}\/[0-9]{2}\/[0-9]{4}$/).withMessage('Invalid date format, should be DD/MM/YYYY'),
+  check('time').optional().matches(/^\d{2}:\d{2}$/).withMessage('Invalid time format, should be in the form 00:00'),
+  check('status').optional().isIn(['Pending', 'Accepted', 'Declined', 'Completed']).withMessage('Invalid appointment status')
+];
+
+
 module.exports = {
   validatePatient,
   validatePatchPatient,
@@ -238,4 +257,6 @@ module.exports = {
   numberIdParamsValidation,
   medicineValidation,
   medicinePatchValidation,
+  validateAppointment,
+  validatePatchAppointment
 };

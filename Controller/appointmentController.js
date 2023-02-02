@@ -1,0 +1,181 @@
+/*** callback fns for CRUD operations ***/
+
+/* require bcrypt */
+const bcrypt = require("bcrypt");
+
+/* require all needed modules */
+const appointmentSchema = require("../Models/apointmentModel");
+
+/* require helper functions (filter,sort,slice,paginate) */
+const { filterData, sortData, sliceData, paginateData } = require("../helper/helperfns");
+
+
+// Add a new Appointment
+exports.addAppointment = async (request, response, next) => {
+  try {
+
+    const { doctorId, patientId, date, time } = request.body;
+
+    const doctor = await doctorModel.findById(doctorId);
+    if (!doctor) {return response.status(400).json({ message: "Doctor not found." });}
+
+    const patient = await patientModel.findById(patientId);
+    if (!patient) {return response.status(400).json({ message: "Patient not found." });}
+
+
+    const dateRegex = /^\d{2}\/\d{2}\/\d{4}$/;
+    const timeRegex = /^\d{2}:\d{2}$/;
+
+    if (!date.match(dateRegex)) {
+      return response
+        .status(400)
+        .json({ message: "Invalid date format, expected DD/MM/YYYY." });
+    }
+
+    const minutes = time.split(":")[1];
+    if (!time.match(timeRegex) || minutes !== "00" && minutes !== "30" ) {
+      return response
+        .status(400)
+        .json({ message: "Invalid time format, expected HH:00 or HH:30." });
+    }
+
+
+    const appointmentDate = new Date(`${date} ${time}:00`);
+    if (appointmentDate < new Date()) {
+      return response
+        .status(400)
+        .json({ message: "Appointment date must be in the future." });
+    }
+
+    const appointmentID = new Date().getTime();
+
+    const existingAppointment = await appointmentSchema.findOne({
+      doctorID,
+      date,
+      time,
+    });
+    if (existingAppointment) {
+      return response
+        .status(400)
+        .json({ message: "Doctor already has an appointment at this time." });
+    }
+
+    const appointment = new appointmentSchema({
+      appointmentID,
+      doctorID,
+      patientID,
+      date,
+      time,
+    });
+    await appointment.save();
+    response
+      .status(201)
+      .json({ message: "Appointment created successfully.", appointment });
+  } catch (error) {next(error);}
+};
+
+// Edit appointment
+exports.editAppointment = async (request, response, next) => {
+  try {
+    const appointmentId = request.params.id;
+    const { doctorId, patientId, date, time } = request.body;
+
+    if (doctorId) {
+      const doctor = await Doctor.findById(doctorId);
+      if (!doctor) {
+        return response.status(400).json({ message: "Doctor not found." });
+      }
+      appointment.doctorId = doctorId;
+    }
+
+    if (patientId) {
+      const patient = await Patient.findById(patientId);
+      if (!patient) {
+        return response.status(400).json({ message: "Patient not found." });
+      }
+      appointment.patientId = patientId;
+    }
+
+
+  if (date) {
+    const dateRegex = /^\d{2}\/\d{2}\/\d{4}$/;
+    if (!date.match(dateRegex)) {
+      return response.status(400).json({ message: "Invalid date format." });
+    }
+
+    if (time) {
+      const timeRegex = /^\d{2}:\d{2}$/;
+      const minutes = time.split(":")[1];
+      if (!time.match(timeRegex) || minutes !== "00" && minutes !== "30") {
+        return response.status(400).json({ message: "Invalid time format." });
+  }
+
+
+      const appointmentDate = new Date(`${date} ${time}:00`);
+      if (appointmentDate < new Date()) {
+        return response
+          .status(400)
+          .json({ message: "Appointment date must be in the future." });
+      }
+
+      const existingAppointment = await appointmentSchema.findOne({
+        doctorId: appointment.doctorId,
+        date,
+        time,
+      });
+      if (existingAppointment && existingAppointment._id != appointmentId) {
+        return response
+          .status(400)
+          .json({ message: "Doctor already has an appointment at that time." });
+      }
+
+      // appointment.date = appointmentDate;
+    }
+  }
+    
+    // // Update appointment
+    // const updatedAppointment = await appointmentSchema.findOneAndUpdate(
+    //   { _id: appointmentId },
+    //   { $set: { doctorId, patientId, date, time } },
+    //   { new: true }
+    // );
+
+    const updatedAppointment = await appointmentSchema.findByIdAndUpdate(request.params.id, request.body, { new: true });
+    response.status(200).json({ message: "Appointment updated successfully.", updatedAppointment });
+  } catch (error) {next(error);}
+};
+
+
+
+// Remove appointment
+exports.removeAppointment = async (request, response, next) => {
+  try {
+  const appointment = await appointmentSchema.findByIdAndRemove(request.params.id);
+  if (!appointment) {return response.status(400).json({ message: "Appointment not found." });}
+  response.status(200).json({ message: "Appointment removed." });
+  } catch (error) {next(error);}
+};
+  
+  // Get all appointments
+  exports.getAppointments = async (request, response, next) => {
+  try {
+
+  let appointments = await filterData(appointmentSchema, request.query);
+  appointments = sortData(appointments, request.query);
+  appointments = paginateData(appointments, request.query);
+  appointments = sliceData(appointments, request.query);
+
+  response.status(200).json({ appointments });
+  } catch (error) {next(error);}
+};
+
+
+// Get a appointment by ID
+exports.getAppointmentById = async (request, response, next) => {
+  try {
+    const appointment = await appointmentSchema.findById(request.params.id);
+    if (!appointment) { return response.status(400).json({ message: "Appointment not found." });}
+    response.status(200).json({ appointment });
+  } catch (error) { next(error); }
+};
+
