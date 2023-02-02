@@ -51,8 +51,9 @@ const personSchema = new mongoose.Schema(
     email: {
       type: String,
       required: true,
-      unique: true,
       validate: emailValidator,
+      index: { unique: true, dropDups: true },
+      unique: [true, "This email is already in use"],
     },
     address: addressSchema,
     password: { type: String, required: true },
@@ -60,7 +61,7 @@ const personSchema = new mongoose.Schema(
   },
   { _id: false }
 );
-
+personSchema.index({ email: 1 }, { unique: true });
 module.exports = personSchema;
 
 // const ageValidator = [({

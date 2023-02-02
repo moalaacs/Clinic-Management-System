@@ -1,5 +1,8 @@
 /*** callback fns for CRUD operations ***/
 
+/* Clinic Schema */
+const clinicSchema = require("../Models/clinicModel");
+
 /* require bcrypt */
 const bcrypt = require("bcrypt");
 
@@ -28,6 +31,15 @@ exports.getAllDoctors = async (request, response, next) => {
 
 exports.addDoctor = async (request, response, next) => {
   try {
+    const existingClinics = await clinicSchema.find({}, { id: 1 });
+    const sentClinics = request.body.clinic;
+    sentClinics.forEach((sntClinic) => {
+      if (!existingClinics.find((extClinic) => extClinic._id == sntClinic)) {
+        return response
+          .status(400)
+          .json({ message: `No such clinic record for id: ${sntClinic}` });
+      }
+    });
     const hash = await bcrypt.hash(request.body.password, 10);
     const doctor = new doctorSchema({
       ...request.body,

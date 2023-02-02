@@ -3,6 +3,9 @@
 /* require bcrypt */
 const bcrypt = require("bcrypt");
 
+/* Clinic Schema */
+const clinicSchema = require("../Models/clinicModel");
+
 /* require all needed modules */
 const EmployeeSchema = require("./../Models/employeeModel");
 
@@ -14,11 +17,42 @@ const {
   paginateData,
 } = require("../helper/helperfns");
 
+exports.addDoctor = async (request, response, next) => {
+  try {
+    const hash = await bcrypt.hash(request.body.password, 10);
+    const doctor = new doctorSchema({
+      ...request.body,
+      password: hash,
+    });
+    const existingClinics = await clinicSchema.find({}, { id: 1 });
+    const sentClinics = request.body.clinic;
+    sentClinics.forEach((sntClinic) => {
+      if (!existingClinics.find((extClinic) => extClinic._id == sntClinic)) {
+        return response
+          .status(400)
+          .json({ message: `No such record for id: ${sntClinic}` });
+      }
+    });
+    await doctor.save();
+    response
+      .status(201)
+      .json({ message: "Doctor created successfully.", doctor });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // Add a new Employee
 exports.addEmployee = async (request, response, next) => {
   try {
-    const saltRounds = 10;
-    const hash = await bcrypt.hash(request.body.password, saltRounds);
+    const existingClinics = await clinicSchema.find({}, { id: 1 });
+    const sentClinic = request.body.clinicId;
+    if (!existingClinics.find((extClinic) => extClinic._id == sentClinic)) {
+      return response
+        .status(400)
+        .json({ message: `No such clinic record for id: ${sentClinic}` });
+    }
+    const hash = await bcrypt.hash(request.body.password, 10);
     const employee = new EmployeeSchema({
       ...request.body,
       password: hash,
