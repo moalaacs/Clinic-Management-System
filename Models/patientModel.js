@@ -7,7 +7,6 @@ const patientSchema = new mongoose.Schema(
   Object.assign(personSchema.obj, {
     medicalHistory: { type: String },
     _id: { type: Number },
-    clinicId: { type: Number, ref: "clinics" },
   })
 );
 

@@ -11,16 +11,20 @@ const authorizationMW = require("../Middlewares/authenticationMW");
 const router = express.Router();
 
 router
-  .route("/appointemts")
-  .get(authorizationMW.checkAdmin,controller.getAppointments)
-  .post(validateAppointment, errorValidation,authorizationMW.checkPatient, controller.addAppointment);
+  .route("/appointments")
+  .get(authorizationMW.checkAdmin, controller.getAppointments)
+  .post(
+    validateAppointment,
+    errorValidation,
+    authorizationMW.checkPatient,
+    controller.addAppointment
+  );
 
 router
-  .route("/appointemts/:id")
+  .route("/appointments/:id")
   .all(numberIdParamsValidation, errorValidation, authorizationMW.checkAdmin)
   .get(controller.getAppointmentById)
   .patch(validatePatchAppointment, errorValidation, controller.editAppointment)
   .delete(controller.removeAppointment);
-
 
 module.exports = router;
