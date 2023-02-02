@@ -57,7 +57,7 @@ exports.addAppointment = async (request, response, next) => {
     const appointmentID = new Date().getTime();
 
     const existingAppointment = await appointmentSchema.findOne({
-      doctorID,
+      doctorId,
       date,
       time,
     });
@@ -69,8 +69,8 @@ exports.addAppointment = async (request, response, next) => {
 
     const appointment = new appointmentSchema({
       appointmentID,
-      doctorID,
-      patientID,
+      doctorId,
+      patientId,
       date,
       time,
     });
@@ -87,7 +87,7 @@ exports.addAppointment = async (request, response, next) => {
 exports.editAppointment = async (request, response, next) => {
   try {
     const appointmentId = request.params.id;
-    const { doctorId, patientId, date, time } = request.body;
+    let { doctorId, patientId, date, time } = request.body;
 
     const existingAppointment = await appointmentSchema.findById(appointmentId);
     if (!existingAppointment) {
@@ -161,12 +161,10 @@ exports.editAppointment = async (request, response, next) => {
       request.body,
       { new: true }
     );
-    response
-      .status(200)
-      .json({
-        message: "Appointment updated successfully.",
-        updatedAppointment,
-      });
+    response.status(200).json({
+      message: "Appointment updated successfully.",
+      updatedAppointment,
+    });
   } catch (error) {
     next(error);
   }
