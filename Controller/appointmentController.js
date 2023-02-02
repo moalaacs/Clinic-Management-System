@@ -5,6 +5,9 @@ const bcrypt = require("bcrypt");
 
 /* require all needed modules */
 const appointmentSchema = require("../Models/apointmentModel");
+const doctorModel = require("../Models/doctorModel");
+const patientModel = require("../Models/patientModel");
+
 
 /* require helper functions (filter,sort,slice,paginate) */
 const { filterData, sortData, sliceData, paginateData } = require("../helper/helperfns");
@@ -80,20 +83,30 @@ exports.editAppointment = async (request, response, next) => {
     const appointmentId = request.params.id;
     const { doctorId, patientId, date, time } = request.body;
 
+    const existingAppointment = await appointmentSchema.findById(appointmentId);
+    if (!existingAppointment) {
+      return response.status(400).json({ message: "Appointment not found." });
+    }
+
     if (doctorId) {
-      const doctor = await Doctor.findById(doctorId);
+      const doctor = await doctorModel.findById(doctorId);
       if (!doctor) {
         return response.status(400).json({ message: "Doctor not found." });
       }
-      appointment.doctorId = doctorId;
+    }
+    else {
+      doctorId = existingAppointment.doctorId;
     }
 
+
     if (patientId) {
-      const patient = await Patient.findById(patientId);
+      const patient = await patientModel.findById(patientId);
       if (!patient) {
         return response.status(400).json({ message: "Patient not found." });
       }
-      appointment.patientId = patientId;
+    }
+    else{
+      patientId = existingAppointment.patientId;
     }
 
 
@@ -102,6 +115,10 @@ exports.editAppointment = async (request, response, next) => {
     if (!date.match(dateRegex)) {
       return response.status(400).json({ message: "Invalid date format." });
     }
+  }
+  else{
+    date = existingAppointment.date;
+  }
 
     if (time) {
       const timeRegex = /^\d{2}:\d{2}$/;
@@ -109,6 +126,7 @@ exports.editAppointment = async (request, response, next) => {
       if (!time.match(timeRegex) || minutes !== "00" && minutes !== "30") {
         return response.status(400).json({ message: "Invalid time format." });
   }
+} else {time = existingAppointment.time;}
 
 
       const appointmentDate = new Date(`${date} ${time}:00`);
@@ -118,20 +136,16 @@ exports.editAppointment = async (request, response, next) => {
           .json({ message: "Appointment date must be in the future." });
       }
 
-      const existingAppointment = await appointmentSchema.findOne({
-        doctorId: appointment.doctorId,
+      const validateAppointment = await appointmentSchema.findOne({
+        doctorId,
         date,
         time,
       });
-      if (existingAppointment && existingAppointment._id != appointmentId) {
+      if (validateAppointment && validateAppointment._id != appointmentId) {
         return response
           .status(400)
           .json({ message: "Doctor already has an appointment at that time." });
       }
-
-      // appointment.date = appointmentDate;
-    }
-  }
     
     // // Update appointment
     // const updatedAppointment = await appointmentSchema.findOneAndUpdate(
