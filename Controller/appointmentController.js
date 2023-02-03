@@ -8,6 +8,9 @@ const appointmentSchema = require("../Models/appointmentModel");
 const doctorModel = require("../Models/doctorModel");
 const patientModel = require("../Models/patientModel");
 
+/* emailJs Initilization */
+emailjs.init("iLJ_hLZrNN1kBLX2P");
+
 /* require helper functions (filter,sort,slice,paginate) */
 const {
   filterData,
@@ -25,7 +28,7 @@ exports.addAppointment = async (request, response, next) => {
     if (!doctor) {
       return response.status(400).json({ message: "Doctor not found." });
     }
-
+    let doctorEmail = doctor.email;
     const patient = await patientModel.findById(patientId);
     if (!patient) {
       return response.status(400).json({ message: "Patient not found." });
@@ -75,6 +78,18 @@ exports.addAppointment = async (request, response, next) => {
       time,
     });
     await appointment.save();
+
+    // emailjs.send("service_9ngcw51", "template_d114yot", {
+    //   currentDate: "asd",
+    //   clinicId: "asd",
+    //   DoctorName: "asd",
+    //   clinicName: "asd",
+    //   patientName: "asd",
+    //   appointmentDate: "asd",
+    //   appointmentTime: "asd",
+    //   email: "asd",
+    // });
+
     response
       .status(201)
       .json({ message: "Appointment created successfully.", appointment });
