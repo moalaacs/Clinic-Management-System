@@ -5,6 +5,11 @@ const appointmentSchema = new mongoose.Schema({
     type: String,
     default: () => new Date().getTime().toString(),
   },
+  clinicId: {
+    type: Number,
+    ref: "clinics",
+    required: true,
+  },
   patientId: {
     type: Number,
     ref: "patients",

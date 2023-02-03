@@ -25,8 +25,14 @@ exports.addAppointment = async (request, response, next) => {
     if (!clinic) {
       return response.status(400).json({ message: "Clinic not found." });
     }
+    const { doctorId, patientId, clinicId, date, time } = request.body;
 
-    const doctor = await doctorModel.findById(doctorId);
+    const clinic = await clinicModel.findById(clinicId);
+    if (!clinic) {
+      return response.status(400).json({ message: "Clinic not found." });
+    }
+
+    let doctor = await doctorModel.findById(doctorId);
     if (!doctor) {
       return response.status(400).json({ message: "Doctor not found." });
     }
@@ -80,6 +86,16 @@ exports.addAppointment = async (request, response, next) => {
       clinicId,
     });
     await appointment.save();
+
+    const newAppointment = {
+      clinicId,
+      date,
+      time,
+      patientId,
+    };
+
+    doctor.appointments.push(newAppointment);
+    await doctor.save();
 
     response
       .status(201)
@@ -156,13 +172,6 @@ exports.editAppointment = async (request, response, next) => {
         .status(400)
         .json({ message: "Doctor already has an appointment at that time." });
     }
-
-    // // Update appointment
-    // const updatedAppointment = await appointmentSchema.findOneAndUpdate(
-    //   { _id: appointmentId },
-    //   { $set: { doctorId, patientId, date, time } },
-    //   { new: true }
-    // );
 
     const updatedAppointment = await appointmentSchema.findByIdAndUpdate(
       request.params.id,
