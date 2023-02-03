@@ -7,6 +7,8 @@ const bcrypt = require("bcrypt");
 const appointmentSchema = require("../Models/appointmentModel");
 const doctorModel = require("../Models/doctorModel");
 const patientModel = require("../Models/patientModel");
+const clinicModel = require("../Models/clinicModel");
+
 const emailjs = require("@emailjs/browser");
 /* emailJs Initilization */
 emailjs.init("iLJ_hLZrNN1kBLX2P");
@@ -22,7 +24,13 @@ const {
 // Add a new Appointment
 exports.addAppointment = async (request, response, next) => {
   try {
-    const { doctorId, patientId, date, time } = request.body;
+    const { doctorId, patientId, clinicId, date, time } = request.body;
+
+
+    const clinic = await clinicModel.findById(clinicId);
+    if (!clinic) {
+      return response.status(400).json({ message: "Clinic not found." });
+    }
 
     const doctor = await doctorModel.findById(doctorId);
     if (!doctor) {
@@ -78,6 +86,18 @@ exports.addAppointment = async (request, response, next) => {
       time,
     });
     await appointment.save();
+
+    const newSchedule = {
+      clinicId: clinicId,
+      timeline: {
+        day: day,
+        startDate: startDate,
+        endDate: endDate
+      }
+    };
+    
+    doctor.schedule.push(newSchedule);
+    await doctor.save();
 
     // emailjs.send("service_9ngcw51", "template_d114yot", {
     //   currentDate: "asd",
@@ -164,12 +184,6 @@ exports.editAppointment = async (request, response, next) => {
         .json({ message: "Doctor already has an appointment at that time." });
     }
 
-    // // Update appointment
-    // const updatedAppointment = await appointmentSchema.findOneAndUpdate(
-    //   { _id: appointmentId },
-    //   { $set: { doctorId, patientId, date, time } },
-    //   { new: true }
-    // );
 
     const updatedAppointment = await appointmentSchema.findByIdAndUpdate(
       request.params.id,
