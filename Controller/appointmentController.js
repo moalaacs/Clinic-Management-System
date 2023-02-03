@@ -32,7 +32,7 @@ exports.addAppointment = async (request, response, next) => {
       return response.status(400).json({ message: "Clinic not found." });
     }
 
-    const doctor = await doctorModel.findById(doctorId);
+    let doctor = await doctorModel.findById(doctorId);
     if (!doctor) {
       return response.status(400).json({ message: "Doctor not found." });
     }
