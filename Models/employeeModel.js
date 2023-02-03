@@ -7,7 +7,7 @@ const personSchema = require("./personModel");
 const employeeSchema = new mongoose.Schema(
   Object.assign(personSchema.obj, {
     _id: { type: Number },
-    clinicId: { type: Number },
+    clinicId: { type: Number, ref: "clinics" },
     salary: { type: Number },
     workingHours: { type: Number, min: 0, max: 24 },
   })

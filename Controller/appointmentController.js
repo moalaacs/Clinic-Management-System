@@ -7,10 +7,7 @@ const bcrypt = require("bcrypt");
 const appointmentSchema = require("../Models/appointmentModel");
 const doctorModel = require("../Models/doctorModel");
 const patientModel = require("../Models/patientModel");
-const emailjs = require("@emailjs/browser");
-/* emailJs Initilization */
-emailjs.init("iLJ_hLZrNN1kBLX2P");
-
+const clinicModel = require("../Models/clinicModel");
 /* require helper functions (filter,sort,slice,paginate) */
 const {
   filterData,
@@ -22,13 +19,17 @@ const {
 // Add a new Appointment
 exports.addAppointment = async (request, response, next) => {
   try {
-    const { doctorId, patientId, date, time } = request.body;
+    const { doctorId, patientId, date, time, clinicId } = request.body;
+
+    const clinic = await clinicModel.findById(clinicId);
+    if (!clinic) {
+      return response.status(400).json({ message: "Clinic not found." });
+    }
 
     const doctor = await doctorModel.findById(doctorId);
     if (!doctor) {
       return response.status(400).json({ message: "Doctor not found." });
     }
-    let doctorEmail = doctor.email;
     const patient = await patientModel.findById(patientId);
     if (!patient) {
       return response.status(400).json({ message: "Patient not found." });
@@ -57,7 +58,7 @@ exports.addAppointment = async (request, response, next) => {
         .json({ message: "Appointment date must be in the future." });
     }
 
-    const appointmentID = new Date().getTime();
+    const _id = new Date().getTime();
 
     const existingAppointment = await appointmentSchema.findOne({
       doctorId,
@@ -71,24 +72,14 @@ exports.addAppointment = async (request, response, next) => {
     }
 
     const appointment = new appointmentSchema({
-      appointmentID,
+      _id,
       doctorId,
       patientId,
       date,
       time,
+      clinicId,
     });
     await appointment.save();
-
-    // emailjs.send("service_9ngcw51", "template_d114yot", {
-    //   currentDate: "asd",
-    //   clinicId: "asd",
-    //   DoctorName: "asd",
-    //   clinicName: "asd",
-    //   patientName: "asd",
-    //   appointmentDate: "asd",
-    //   appointmentTime: "asd",
-    //   email: "asd",
-    // });
 
     response
       .status(201)
@@ -108,6 +99,8 @@ exports.editAppointment = async (request, response, next) => {
     if (!existingAppointment) {
       return response.status(400).json({ message: "Appointment not found." });
     }
+
+    c;
 
     if (doctorId) {
       const doctor = await doctorModel.findById(doctorId);
