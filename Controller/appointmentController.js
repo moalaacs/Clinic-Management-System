@@ -7,7 +7,7 @@ const bcrypt = require("bcrypt");
 const appointmentSchema = require("../Models/appointmentModel");
 const doctorModel = require("../Models/doctorModel");
 const patientModel = require("../Models/patientModel");
-
+const emailjs = require("@emailjs/browser");
 /* emailJs Initilization */
 emailjs.init("iLJ_hLZrNN1kBLX2P");
 
