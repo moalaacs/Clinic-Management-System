@@ -39,7 +39,12 @@ const clinicSchema = new mongoose.Schema({
     required: true,
     validate: phoneNumberValidator,
   },
-  email: { type: String, required: true, validate: emailValidator },
+  email: {
+    type: String,
+    required: true,
+    validate: emailValidator,
+    unique: true,
+  },
   address: addressSchema,
 });
 

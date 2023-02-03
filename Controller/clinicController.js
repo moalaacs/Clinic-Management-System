@@ -1,6 +1,7 @@
 /* require all needed modules */
 const { json } = require("express");
 const Clinic = require("../Models/clinicModel");
+const emailSchema = require("../Models/emailModel");
 const {
   filterData,
   sortData,
@@ -11,13 +12,21 @@ const {
 
 exports.createClinic = async (request, response, next) => {
   try {
+    let testEmail = await emailSchema.findOne({ email: request.body.email });
+    console.log(testEmail);
+    if (testEmail) {
+      return response.status(400).json({ message: `Email Already in use` });
+    } else {
+      let email = new emailSchema({ email: request.body.email });
+      await email.save();
+    }
     const clinic = new Clinic({
       ...request.body,
     });
     await clinic.save();
     response
       .status(201)
-      .json({ message: "Doctor created successfully.", clinic });
+      .json({ message: "Clinic created successfully.", clinic });
   } catch (error) {
     next(error);
   }

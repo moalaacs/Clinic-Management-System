@@ -1,14 +1,14 @@
 /*** callback fns for CRUD operations ***/
 
-/* Clinic Schema */
-const clinicSchema = require("../Models/clinicModel");
+/* Doctor Schema */
+const doctorSchema = require("../Models/doctorModel");
 
 /* require bcrypt */
 const bcrypt = require("bcrypt");
 
 /* require all needed modules */
-const doctorSchema = require("../Models/doctorModel");
-
+const clinicSchema = require("../Models/clinicModel");
+const emailSchema = require("../Models/emailModel");
 /* require helper functions (filter,sort,slice,paginate) */
 const {
   filterData,
@@ -40,6 +40,13 @@ exports.addDoctor = async (request, response, next) => {
           .json({ message: `No such clinic record for id: ${sntClinic}` });
       }
     });
+    let testEmail = await emailSchema.findOne({ email: request.body.email });
+    if (testEmail) {
+      return response.status(400).json({ message: `Email Already in use` });
+    } else {
+      let email = new emailSchema({ email: request.body.email });
+      await email.save();
+    }
     const hash = await bcrypt.hash(request.body.password, 10);
     const doctor = new doctorSchema({
       ...request.body,

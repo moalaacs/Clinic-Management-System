@@ -52,7 +52,6 @@ const personSchema = new mongoose.Schema(
       type: String,
       required: true,
       validate: emailValidator,
-      index: { unique: true, dropDups: true },
       unique: [true, "This email is already in use"],
     },
     address: addressSchema,
