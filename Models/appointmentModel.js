@@ -37,7 +37,7 @@ const appointmentSchema = new mongoose.Schema({
     required: true,
     validate: {
       validator: function (value) {
-        return /^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/.test(value);
+        return /^([0-9]|0[0-9]|1[0-9]|2[0-4]):[0-5][0-9]$/.test(value);
       },
       message: "Invalid time format, should be in the form 00:00 ",
     },

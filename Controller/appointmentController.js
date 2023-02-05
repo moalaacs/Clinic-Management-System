@@ -25,12 +25,6 @@ exports.addAppointment = async (request, response, next) => {
     if (!clinic) {
       return response.status(400).json({ message: "Clinic not found." });
     }
-    const { doctorId, patientId, clinicId, date, time } = request.body;
-
-    const clinic = await clinicModel.findById(clinicId);
-    if (!clinic) {
-      return response.status(400).json({ message: "Clinic not found." });
-    }
 
     let doctor = await doctorModel.findById(doctorId);
     if (!doctor) {
@@ -41,8 +35,7 @@ exports.addAppointment = async (request, response, next) => {
       return response.status(400).json({ message: "Patient not found." });
     }
 
-    const dateRegex = /^\d{2}\/\d{2}\/\d{4}$/;
-    const timeRegex = /^\d{2}:\d{2}$/;
+    // const timeRegex = /^\d{2}:\d{2}$/;
 
     if (!date.match(dateRegex)) {
       return response
@@ -51,7 +44,7 @@ exports.addAppointment = async (request, response, next) => {
     }
 
     const minutes = time.split(":")[1];
-    if (!time.match(timeRegex) || (minutes !== "00" && minutes !== "30")) {
+    if (minutes !== "00" && minutes !== "30") {
       return response
         .status(400)
         .json({ message: "Invalid time format, expected HH:00 or HH:30." });
@@ -79,22 +72,22 @@ exports.addAppointment = async (request, response, next) => {
 
     const appointment = new appointmentSchema({
       _id,
-      doctorId,
-      patientId,
       date,
       time,
+      doctorId,
+      patientId,
       clinicId,
     });
     await appointment.save();
 
-    const newAppointment = {
-      clinicId,
+    const newAppointmentForDoctor = {
       date,
       time,
+      clinicId,
       patientId,
     };
+    doctor.appointments.push(newAppointmentForDoctor);
 
-    doctor.appointments.push(newAppointment);
     await doctor.save();
 
     response
@@ -115,8 +108,6 @@ exports.editAppointment = async (request, response, next) => {
     if (!existingAppointment) {
       return response.status(400).json({ message: "Appointment not found." });
     }
-
-    c;
 
     if (doctorId) {
       const doctor = await doctorModel.findById(doctorId);
@@ -146,9 +137,9 @@ exports.editAppointment = async (request, response, next) => {
     }
 
     if (time) {
-      const timeRegex = /^\d{2}:\d{2}$/;
+      // const timeRegex = /^\d{2}:\d{2}$/;
       const minutes = time.split(":")[1];
-      if (!time.match(timeRegex) || (minutes !== "00" && minutes !== "30")) {
+      if (minutes !== "00" && minutes !== "30") {
         return response.status(400).json({ message: "Invalid time format." });
       }
     } else {
