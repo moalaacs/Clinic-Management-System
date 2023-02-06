@@ -15,6 +15,7 @@ router
     .all(authorizationMW.checkDoctor)
     .get(controller.getPrescription)
     .post(validatePrescription, errorValidation, controller.addPrescription);
+    
 router
     .route("/prescription/:id")
     .all(numberIdParamsValidation, errorValidation, authorizationMW.checkDoctor)

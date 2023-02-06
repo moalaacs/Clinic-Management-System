@@ -23,17 +23,24 @@ const prescroptionSchema = new mongoose.Schema({
     ref: "doctor",
   },
 
-  medicineRef: [
-    {
-      type: Number,
-      required: [true, "Medicine is required"],
-      ref: "medicine",
-    },
-  ],
-  dateRef: {
-    type: String,
-    required: [true, "date is required"],
-  },
+  // medicineRef: [
+  //   {
+  //     type: Number,
+  //     required: [true, "Medicine is required"],
+  //     ref: "medicine",
+  //   },
+  // ],
+  medications: [{
+    name: { type: String, required: true },
+    dose: { type: String, required: true },
+    frequency: { type: String, required: true },
+    duration: { type: Number, required: true }
+    }],
+  instructions: { type: String, required: false },
+  date: {type: String,required: true,  default: (new Date()).toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'numeric',
+    year: 'numeric'})},
 });
 
 prescroptionSchema.plugin(AutoIncrement, {

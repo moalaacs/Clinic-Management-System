@@ -298,39 +298,34 @@ let validatePatchAppointment = [
     .withMessage("Invalid appointment status"),
 ];
 let validatePrescription = [
-  check("clinic").isNumeric().withMessage("clinic Ref should be a number"),
-  check("patient").isNumeric().withMessage("patient Ref should be a number"),
-  check("doctor").isNumeric().withMessage("clinic Ref should be a number"),
-  check("medicine").isNumeric().withMessage("medicine Ref should be a number"),
-  check("date")
-    .matches(
-      /^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]|(?:Jan|Mar|May|Jul|Aug|Oct|Dec)))\1|(?:(?:29|30)(\/|-|\.)(?:0?[1,3-9]|1[0-2]|(?:Jan|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec))\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)(?:0?2|(?:Feb))\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9]|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep))|(?:1[0-2]|(?:Oct|Nov|Dec)))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$/
-    )
-    .withMessage("Invalid Date format, Date Foramt should be DD/MM/YYYY"),
+  check("clinic").isNumeric().withMessage("Clinic is required and should be a number"),
+  check("patient").isNumeric().withMessage("Patient is required and should be a number"),
+  check("doctor").isNumeric().withMessage("Doctor is required and should be a number"),
+  check("medicine").isArray().withMessage("medicine should be an array"),
+  check("medicine.*.name").isString().withMessage("medicine name should be a string"),
+  check("medicine.*.dose").isString().withMessage("medicine dose should be a string"),
+  check("medicine.*.frequency").isString().withMessage("medicine frequency should be a string"),
+  check("medicine.*.duration").isNumeric().withMessage("medicine duration should be a number"),
+  // check("medicine").isArray().withMessage("Medicine is required and should be an array"),
+  check("instructions", "Instructions should have a minimum length of 5 characters")
+  .optional()
+  .if((value) => value)
+  .isLength({ min: 5 })
 ];
 let validatePatchPrescription = [
-  check("clinic")
-    .optional()
-    .isNumeric()
-    .withMessage("clinic Ref should be a number"),
-  check("patient")
-    .optional()
-    .isNumeric()
-    .withMessage("patient Ref should be a number"),
-  check("doctor")
-    .optional()
-    .isNumeric()
-    .withMessage("clinic Ref should be a number"),
-  check("medicine")
-    .optional()
-    .isNumeric()
-    .withMessage("medicine Ref should be a number"),
-  check("date")
-    .optional()
-    .matches(
-      /^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]|(?:Jan|Mar|May|Jul|Aug|Oct|Dec)))\1|(?:(?:29|30)(\/|-|\.)(?:0?[1,3-9]|1[0-2]|(?:Jan|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec))\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)(?:0?2|(?:Feb))\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9]|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep))|(?:1[0-2]|(?:Oct|Nov|Dec)))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$/
-    )
-    .withMessage("Invalid Date format, Date Foramt should be DD/MM/YYYY"),
+  check("clinic").optional().isNumeric().withMessage("Clinic is required and should be a number"),
+  check("patient").optional().isNumeric().withMessage("Patient is required and should be a number"),
+  check("doctor").optional().isNumeric().withMessage("Doctor is required and should be a number"),
+  check("medicine").optional().isArray().withMessage("medicine should be an array"),
+  check("medicine.*.name").optional().isString().withMessage("medicine name should be a string"),
+  check("medicine.*.dose").optional().isString().withMessage("medicine dose should be a string"),
+  check("medicine.*.frequency").optional().isString().withMessage("medicine frequency should be a string"),
+  check("medicine.*.duration").optional().isNumeric().withMessage("medicine duration should be a number"),
+  // check("medicine").optional().isArray().withMessage("Medicine is required and should be an array"),
+  check("instructions", "Instructions should have a minimum length of 5 characters")
+  .optional()
+  .if((value) => value)
+  .isLength({ min: 5 })
 ];
 let validateInvoice = [
   check("patientId").isNumeric().withMessage("Patient Id should be a number"),
