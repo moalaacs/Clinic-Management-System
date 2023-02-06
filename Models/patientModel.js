@@ -5,7 +5,7 @@ const personSchema = require("./personModel");
 /*** crete schema for patients collection ***/
 const patientSchema = new mongoose.Schema(
   Object.assign(personSchema.obj, {
-    medicalHistory: { type: String },
+    _medicalHistory: { type: String },
     _id: { type: Number },
   })
 );
@@ -18,4 +18,4 @@ patientSchema.plugin(AutoIncrement, {
 });
 
 /*** mapping schema bind collection  ***/
-module.exports = mongoose.model("patients", patientSchema);
+module.exports = mongoose.model("patient", patientSchema);

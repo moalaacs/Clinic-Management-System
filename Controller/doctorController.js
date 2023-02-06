@@ -40,17 +40,27 @@ exports.addDoctor = async (request, response, next) => {
           .json({ message: `No such clinic record for id: ${sntClinic}` });
       }
     });
-    let testEmail = await emailSchema.findOne({ email: request.body.email });
+    let testEmail = await emailSchema.findOne({ _email: request.body.email });
     if (testEmail) {
       return response.status(400).json({ message: `Email Already in use` });
     } else {
-      let email = new emailSchema({ email: request.body.email });
+      let email = new emailSchema({ _email: request.body.email });
       await email.save();
     }
+
     const hash = await bcrypt.hash(request.body.password, 10);
     const doctor = new doctorSchema({
-      ...request.body,
-      password: hash,
+      _fname: request.body.firstname,
+      _lname: request.body.lastname,
+      _age: request.body.age,
+      _gender: request.body.gender,
+      _contactNumber: request.body.phone,
+      _email: request.body.email,
+      _address: request.body.address,
+      _password: hash,
+      _image: request.body.profileImage,
+      _specilization: request.body.speciality,
+      _clinics: request.body.clinic,
     });
     await doctor.save();
     response
@@ -61,69 +71,100 @@ exports.addDoctor = async (request, response, next) => {
   }
 };
 
-exports.updateDoctorById = async (request, response, next) => {
+exports.putDoctorById = async (request, response, next) => {
   try {
-    let updatedDoctor = await doctorSchema.updateOne(
+    const updatedDoctor = await doctorSchema.updateOne(
       { _id: request.params.id },
       {
         $set: {
-          name: request.body.name,
-          specilization: request.body.specilization,
-          mobileNumber: request.body.phone,
-          schedule: request.body.schedule,
-          clinic: request.body.clinic,
-          email: request.body.email,
-          password: request.body.password,
-          image: request.body.image,
-          address: request.body.address,
+          _fname: request.body.firstname,
+          _lname: request.body.lastname,
+          _age: request.body.age,
+          _gender: request.body.gender,
+          _contactNumber: request.body.phone,
+          _email: request.body.email,
+          _address: request.body.address,
+          _password: hash,
+          _image: request.body.profileImage,
+          _specilization: request.body.speciality,
+          _clinics: request.body.clinic,
         },
       }
     );
-    response.status(200).json({ status: "Updated", updatedDoctor });
+    response
+      .status(200)
+      .json({ status: "Doctor updated successfully", updatedDoctor });
   } catch (error) {
     next(error);
   }
-}; //PUT
+};
 
 exports.patchDoctorById = async (request, response, next) => {
   let tempDoctor = {};
-  if (request.body.name != null) {
-    tempDoctor.name = request.body.name;
+  if (request.body.firstname) {
+    tempPatient._fname = request.body.firstname;
   }
-  if (request.body.specilization != null) {
-    tempDoctor.specilization = request.body.specilization;
+  if (request.body.lastname) {
+    tempPatient._lname = request.body.lastname;
+  }
+  if (request.body.speciality != null) {
+    tempDoctor._specilization = request.body.speciality;
   }
   if (request.body.phone != null) {
-    tempDoctor.mobileNumber = request.body.phone;
+    tempDoctor._contactNumber = request.body.phone;
   }
-  if (request.body.employees != null) {
-    tempDoctor.employees = request.body.employees;
-  }
+  //
   if (request.body.schedule != null) {
     tempDoctor.schedule = request.body.schedule;
   }
+  //
   if (request.body.clinic != null) {
-    tempDoctor.clinic = request.body.clinic;
+    tempDoctor._clinics = request.body.clinic;
   }
   if (request.body.email != null) {
-    tempDoctor.email = request.body.email;
+    tempDoctor._email = request.body.email;
   }
   if (request.body.password != null) {
     const hash = await bcrypt.hash(request.body.password, 10);
-    tempDoctor.password = hash;
+    tempDoctor._password = hash;
   }
   if (request.body.image != null) {
-    tempDoctor.image = request.body.image;
+    tempDoctor._image = request.body.profileImage;
   }
-  if (request.body.address != null) {
-    tempDoctor.address = request.body.address;
+  if (request.body.address) {
+    if (
+      request.body.address.street ||
+      request.body.address.city ||
+      request.body.address.country ||
+      request.body.address.zipCode
+    ) {
+      if (request.body.address.street)
+        tempClinic["_address.street"] = request.body.address.street;
+      if (request.body.address.city)
+        tempClinic["_address.city"] = request.body.address.city;
+      if (request.body.address.country)
+        tempClinic["_address.country"] = request.body.address.country;
+      if (request.body.address.zipCode)
+        tempClinic["_address.zipCode"] = request.body.address.zipCode;
+    } else {
+      return response.status(200).json({ message: `Address can't be empty` });
+    }
   }
+  if (request.body.gender != null) {
+    tempDoctor._gender = request.body.gender;
+  }
+  if (request.body.age != null) {
+    tempDoctor._age = request.body.age;
+  }
+
   try {
     let updatedDoctor = await doctorSchema.updateOne(
       { _id: request.params.id },
       { $set: tempDoctor }
     );
-    response.status(200).json("Patch Succesfully");
+    response
+      .status(200)
+      .json({ message: "Doctor updated successfully.", tempDoctor });
   } catch (error) {
     next(error);
   }

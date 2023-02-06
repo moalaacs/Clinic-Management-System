@@ -23,7 +23,9 @@ exports.addAppointment = async (request, response, next) => {
 
     const clinic = await clinicModel.findById(clinicId);
     if (!clinic) {
-      return response.status(400).json({ message: "Clinic not found." });
+      return response
+        .status(400)
+        .json({ message: `Clinic ${clinicId} not found.` });
     }
 
     let doctor = await doctorModel.findById(doctorId);
@@ -36,12 +38,6 @@ exports.addAppointment = async (request, response, next) => {
     }
 
     // const timeRegex = /^\d{2}:\d{2}$/;
-
-    if (!date.match(dateRegex)) {
-      return response
-        .status(400)
-        .json({ message: "Invalid date format, expected DD/MM/YYYY." });
-    }
 
     const minutes = time.split(":")[1];
     if (minutes !== "00" && minutes !== "30") {
@@ -61,8 +57,8 @@ exports.addAppointment = async (request, response, next) => {
 
     const existingAppointment = await appointmentSchema.findOne({
       doctorId,
-      date,
-      time,
+      _date: date,
+      _time: time,
     });
     if (existingAppointment) {
       return response
@@ -72,21 +68,21 @@ exports.addAppointment = async (request, response, next) => {
 
     const appointment = new appointmentSchema({
       _id,
-      date,
-      time,
-      doctorId,
-      patientId,
-      clinicId,
+      _date: date,
+      _time: time,
+      _doctorId: doctorId,
+      _patientId: patientId,
+      _clinicId: clinicId,
     });
     await appointment.save();
 
     const newAppointmentForDoctor = {
-      date,
-      time,
-      clinicId,
-      patientId,
+      _date: date,
+      _time: time,
+      _clinicId: clinicId,
+      _patientId: patientId,
     };
-    doctor.appointments.push(newAppointmentForDoctor);
+    doctor._appointments.push(newAppointmentForDoctor);
 
     await doctor.save();
 
@@ -98,8 +94,8 @@ exports.addAppointment = async (request, response, next) => {
   }
 };
 
-// Edit appointment
-exports.editAppointment = async (request, response, next) => {
+// Patch appointment
+exports.patchAppointment = async (request, response, next) => {
   try {
     const appointmentId = request.params.id;
     let { doctorId, patientId, date, time } = request.body;
@@ -115,7 +111,7 @@ exports.editAppointment = async (request, response, next) => {
         return response.status(400).json({ message: "Doctor not found." });
       }
     } else {
-      doctorId = existingAppointment.doctorId;
+      doctorId = existingAppointment._doctorId;
     }
 
     if (patientId) {
@@ -124,7 +120,7 @@ exports.editAppointment = async (request, response, next) => {
         return response.status(400).json({ message: "Patient not found." });
       }
     } else {
-      patientId = existingAppointment.patientId;
+      patientId = existingAppointment._patientId;
     }
 
     if (date) {
@@ -133,7 +129,7 @@ exports.editAppointment = async (request, response, next) => {
         return response.status(400).json({ message: "Invalid date format." });
       }
     } else {
-      date = existingAppointment.date;
+      date = existingAppointment._date;
     }
 
     if (time) {
@@ -143,7 +139,7 @@ exports.editAppointment = async (request, response, next) => {
         return response.status(400).json({ message: "Invalid time format." });
       }
     } else {
-      time = existingAppointment.time;
+      time = existingAppointment._time;
     }
 
     const appointmentDate = new Date(`${date} ${time}:00`);
@@ -152,22 +148,25 @@ exports.editAppointment = async (request, response, next) => {
         .status(400)
         .json({ message: "Appointment date must be in the future." });
     }
-
+    let tempAppointment = {
+      _doctorId: doctorId,
+      _patientId: patientId,
+      _date: date,
+      _time: time,
+    };
     const validateAppointment = await appointmentSchema.findOne({
-      doctorId,
-      date,
-      time,
+      _doctorId: doctorId,
+      _date: date,
+      _time: time,
     });
     if (validateAppointment && validateAppointment._id != appointmentId) {
       return response
         .status(400)
         .json({ message: "Doctor already has an appointment at that time." });
     }
-
-    const updatedAppointment = await appointmentSchema.findByIdAndUpdate(
-      request.params.id,
-      request.body,
-      { new: true }
+    const updatedAppointment = await appointmentSchema.updateOne(
+      { _id: request.params.id },
+      { $set: tempAppointment }
     );
     response.status(200).json({
       message: "Appointment updated successfully.",
@@ -179,7 +178,7 @@ exports.editAppointment = async (request, response, next) => {
 };
 
 // Remove appointment
-exports.removeAppointment = async (request, response, next) => {
+exports.removeAppointmentById = async (request, response, next) => {
   try {
     const appointment = await appointmentSchema.findByIdAndRemove(
       request.params.id
@@ -194,7 +193,7 @@ exports.removeAppointment = async (request, response, next) => {
 };
 
 // Get all appointments
-exports.getAppointments = async (request, response, next) => {
+exports.getAllAppointments = async (request, response, next) => {
   try {
     let appointments = await filterData(appointmentSchema, request.query);
     appointments = sortData(appointments, request.query);

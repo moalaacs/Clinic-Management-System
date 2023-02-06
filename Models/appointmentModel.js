@@ -5,22 +5,22 @@ const appointmentSchema = new mongoose.Schema({
     type: String,
     default: () => new Date().getTime().toString(),
   },
-  clinicId: {
+  _clinicId: {
     type: Number,
-    ref: "clinics",
+    ref: "clinic",
     required: true,
   },
-  patientId: {
+  _patientId: {
     type: Number,
-    ref: "patients",
+    ref: "patient",
     required: true,
   },
-  doctorId: {
+  _doctorId: {
     type: Number,
     ref: "doctor",
     required: true,
   },
-  date: {
+  _date: {
     type: String,
     required: true,
     validate: {
@@ -32,7 +32,7 @@ const appointmentSchema = new mongoose.Schema({
       message: "Invalid date format, should be DD/MM/YYYY",
     },
   },
-  time: {
+  _time: {
     type: String,
     required: true,
     validate: {
@@ -42,13 +42,13 @@ const appointmentSchema = new mongoose.Schema({
       message: "Invalid time format, should be in the form 00:00 ",
     },
   },
-  status: {
+  _status: {
     type: String,
     required: true,
     default: "Pending",
     enum: ["Pending", "Accepted", "Declined", "Completed"],
   },
-  clinicId: { type: Number, ref: "clinics" },
+  _clinicId: { type: Number, ref: "clinic" },
 });
 
-module.exports = mongoose.model("Appointment", appointmentSchema);
+module.exports = mongoose.model("appointment", appointmentSchema);

@@ -25,12 +25,12 @@ exports.getAllMedicine = async (request, response, next) => {
 
 exports.addMedicine = async (request, response, next) => {
   let addedDoctor = medicineSchema({
-    name: request.body.name,
-    productionDate: request.body.productionDate,
-    expiryDate: request.body.expiryDate,
-    medicineLeaflet: request.body.leaflet,
-    medicinePrice: request.body.price,
-    medicineQuantity: request.body.quantity,
+    _name: request.body.name,
+    _productionDate: request.body.production,
+    _expiryDate: request.body.expiry,
+    _leaflet: request.body.usage,
+    _pricePerUnit: request.body.price,
+    _quantity: request.body.quantity,
   });
   try {
     let resultData = await addedDoctor.save();
@@ -40,18 +40,18 @@ exports.addMedicine = async (request, response, next) => {
   }
 };
 
-exports.updateMedicineById = async (request, response, next) => {
+exports.putMedicineById = async (request, response, next) => {
   try {
     let updatedMedicine = await medicineSchema.updateOne(
       { _id: request.params.id },
       {
         $set: {
-          name: request.body.name,
-          productionDate: request.body.proDate,
-          expiryDate: request.body.expDate,
-          medicineLeaflet: request.body.leaflet,
-          medicinePrice: request.body.price,
-          medicineQuantity: request.body.quantity,
+          _name: request.body.name,
+          _productionDate: request.body.production,
+          _expiryDate: request.body.expiry,
+          _leaflet: request.body.usage,
+          _pricePerUnit: request.body.price,
+          _quantity: request.body.quantity,
         },
       }
     );
@@ -61,30 +61,27 @@ exports.updateMedicineById = async (request, response, next) => {
   } catch (error) {
     next(error);
   }
-}; //PUT
+};
 
 exports.patchMedicineById = async (request, response, next) => {
   let tempMedicine = {};
   if (request.body.name != null) {
-    tempMedicine.name = request.body.name;
+    tempMedicine._name = request.body.name;
   }
-  if (request.body.productionDate != null) {
-    tempMedicine.productionDate = request.body.productionDate;
+  if (request.body.production != null) {
+    tempMedicine._productionDate = request.body.productionDate;
   }
-  if (request.body.expiryDate != null) {
-    tempMedicine.expiryDate = request.body.expiryDate;
+  if (request.body.expiry != null) {
+    tempMedicine._expiryDate = request.body.expiryDate;
   }
-  if (request.body.leaflet != null) {
-    tempMedicine.medicineLeaflet = request.body.leaflet;
+  if (request.body.usage != null) {
+    tempMedicine._leaflet = request.body.leaflet;
   }
   if (request.body.price != null) {
-    tempMedicine.medicinePrice = request.body.price;
-  }
-  if (request.body.clinic != null) {
-    tempMedicine.clinic = request.body.clinic;
+    tempMedicine._pricePerUnit = request.body.price;
   }
   if (request.body.quantity != null) {
-    tempMedicine.medicineQuantity = request.body.quantity;
+    tempMedicine._quantity = request.body.quantity;
   }
   try {
     let updatedMedicine = await medicineSchema.updateOne(
@@ -95,7 +92,7 @@ exports.patchMedicineById = async (request, response, next) => {
   } catch (error) {
     next(error);
   }
-}; //Patch
+};
 
 exports.removeMedicineById = async (request, response, next) => {
   try {

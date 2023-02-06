@@ -4,18 +4,6 @@ const AutoIncrement = require("mongoose-sequence")(mongoose);
 const addressSchema = require("./addressModel");
 
 /* validate data using mongoose validator */
-const nameValidator = [
-  validator({
-    validator: "isLength",
-    arguments: [3, 50],
-    message: "Name should be between {ARGS[0]} and {ARGS[1]} characters",
-  }),
-  validator({
-    validator: "matches",
-    arguments: /^[a-zA-Z\s]+$/,
-    message: "Name should only contain letters and spaces",
-  }),
-];
 const phoneNumberValidator = [
   validator({
     validator: "matches",
@@ -33,19 +21,17 @@ const emailValidator = [
 /* crete schema for clinics collection */
 const clinicSchema = new mongoose.Schema({
   _id: { type: Number },
-  name: { type: String, required: true, validate: nameValidator },
-  contactNumber: {
+  _contactNumber: {
     type: String,
     required: true,
     validate: phoneNumberValidator,
   },
-  email: {
+  _email: {
     type: String,
     required: true,
     validate: emailValidator,
-    unique: true,
   },
-  address: addressSchema,
+  _address: addressSchema,
 });
 
 /* auto increment for _id field */
@@ -56,4 +42,4 @@ clinicSchema.plugin(AutoIncrement, {
 });
 
 /* mapping schema bind collection */
-module.exports = mongoose.model("clinics", clinicSchema);
+module.exports = mongoose.model("clinic", clinicSchema);

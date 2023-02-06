@@ -1,29 +1,33 @@
 /* require all needed modules */
-const { json } = require("express");
 const Clinic = require("../Models/clinicModel");
-const emailSchema = require("../Models/emailModel");
 const {
   filterData,
   sortData,
   sliceData,
   paginateData,
 } = require("../helper/helperfns");
-// Create a new clinic
 
-exports.createClinic = async (request, response, next) => {
+// Calling other schemas //
+const emailSchema = require("../Models/emailModel");
+const employeeSchema = require("../Models/employeeModel");
+const doctorSchema = require("../Models/doctorModel");
+
+// Create a new clinic
+exports.addClinic = async (request, response, next) => {
   try {
-    let testEmail = await emailSchema.findOne({ email: request.body.email });
-    console.log(testEmail);
+    let testEmail = await emailSchema.findOne({ _email: request.body.email });
     if (testEmail) {
       return response.status(400).json({ message: `Email Already in use` });
     } else {
-      let email = new emailSchema({ email: request.body.email });
+      let email = new emailSchema({ _email: request.body.email });
       await email.save();
     }
     const clinic = new Clinic({
-      ...request.body,
+      _contactNumber: request.body.phone,
+      _email: request.body.email,
+      _address: request.body.address,
     });
-    await clinic.save();
+    let saved = await clinic.save();
     response
       .status(201)
       .json({ message: "Clinic created successfully.", clinic });
@@ -33,25 +37,80 @@ exports.createClinic = async (request, response, next) => {
 };
 
 // Edit a clinic
-exports.editClinic = (req, res, next) => {
+exports.patchClinic = async (request, response, next) => {
+  let tempClinic = {};
+  if (request.body.phone) {
+    tempClinic._contactNumber = request.body.phone;
+  }
+  if (request.body.email) {
+    let testEmail = await emailSchema.findOne({ _email: request.body.email });
+    if (testEmail) {
+      return response.status(400).json({ message: `Email Already in use` });
+    } else {
+      let email = new emailSchema({ _email: request.body.email });
+      await email.save();
+    }
+    tempClinic._email = request.body.email;
+  }
+  if (request.body.address) {
+    if (
+      request.body.address.street ||
+      request.body.address.city ||
+      request.body.address.country ||
+      request.body.address.zipCode
+    ) {
+      if (request.body.address.street)
+        tempClinic["_address.street"] = request.body.address.street;
+      if (request.body.address.city)
+        tempClinic["_address.city"] = request.body.address.city;
+      if (request.body.address.country)
+        tempClinic["_address.country"] = request.body.address.country;
+      if (request.body.address.zipCode)
+        tempClinic["_address.zipCode"] = request.body.address.zipCode;
+    } else {
+      return response.status(200).json({ message: `Address can't be empty` });
+    }
+  }
   try {
-    const clinic = Clinic.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
-    res.status(200).json({ message: "Clinic updated successfully.", clinic });
+    const clinic = await Clinic.updateOne(
+      { _id: request.params.id },
+      {
+        $set: tempClinic,
+      }
+    );
+    response
+      .status(200)
+      .json({ message: "Clinic updated successfully.", Updated: tempClinic });
   } catch (error) {
     next(error);
   }
 };
 
 // Remove a clinic
-exports.removeClinic = (req, res, next) => {
+exports.removeClinicById = async (request, response, next) => {
   try {
-    const clinic = Clinic.findByIdAndDelete(req.params.id);
+    const clinic = await Clinic.findByIdAndDelete(request.params.id);
     if (!clinic) {
       return next(new Error("Clinic not found"));
     }
-    res.status(201).json({ message: "Clinic removed successfully.", clinic });
+    await employeeSchema.deleteMany({ _clinic: request.params.id });
+    await doctorSchema
+      .updateMany(
+        { _clinics: request.params.id },
+        {
+          $pull: {
+            _clinics: request.params.id,
+          },
+        }
+      )
+      .exec(() => {
+        console.log(this);
+        console.log("hello");
+        console.log("_________");
+      });
+    response
+      .status(201)
+      .json({ message: "Clinic removed successfully.", clinic });
   } catch (error) {
     next(error);
   }
@@ -70,13 +129,13 @@ exports.getAllClinics = async (request, response, next) => {
 };
 
 // Get a clinic by ID
-exports.getClinicById = (req, res, next) => {
+exports.getClinicById = async (request, response, next) => {
   try {
-    const clinic = Clinic.findById(req.params.id);
+    const clinic = await Clinic.findById(request.params.id);
     if (!clinic) {
       return next(new Error("Clinic not found"));
     }
-    res.status(200).json({ clinic });
+    response.status(200).json({ clinic });
   } catch (error) {
     next(error);
   }

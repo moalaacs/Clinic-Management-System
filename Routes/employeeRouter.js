@@ -1,9 +1,6 @@
 const express = require("express");
 const controller = require("../Controller/employeeController");
-const { body, query, param, validationResult } = require("express-validator");
-const validator = require("./../Middlewares/errorValidation");
-
-const errorValidation = require("../Middlewares/errorValidation");
+const validatorMiddleware = require("../Middlewares/errorValidation");
 const {
   employeeValidation,
   employeePatchValidation,
@@ -14,22 +11,34 @@ const authorizationMW = require("../Middlewares/authenticationMW");
 const router = express.Router();
 
 router
-  .route("/employees")
+  .route("/employee")
   .all(authorizationMW.checkAdmin)
-  .get(controller.getEmployees)
-  .post(employeeValidation, errorValidation, controller.addEmployee);
+  .get(controller.getAllEmployees)
+  .post(employeeValidation, validatorMiddleware, controller.addEmployee);
 
 router
-  .route("/employees/:id")
-  .all(authorizationMW.checkEmployee, numberIdParamsValidation)
+  .route("/employee/:id")
+  .all(
+    authorizationMW.checkEmployee,
+    numberIdParamsValidation,
+    validatorMiddleware
+  )
   .get(controller.getEmployeeById)
-  .patch(employeePatchValidation, errorValidation, controller.editEmployee);
+  .patch(
+    employeePatchValidation,
+    validatorMiddleware,
+    controller.patchEmployee
+  );
 
 router
-  .route("/employees/:id")
-  .all(authorizationMW.checkAdmin, numberIdParamsValidation)
+  .route("/employee/:id")
+  .all(
+    authorizationMW.checkAdmin,
+    numberIdParamsValidation,
+    validatorMiddleware
+  )
   .get(controller.getEmployeeById)
-  .patch(employeePatchValidation, errorValidation, controller.editEmployee)
-  .delete(controller.removeEmployee);
+  .patch(employeePatchValidation, validatorMiddleware, controller.patchEmployee)
+  .delete(controller.removeEmployeeById);
 
 module.exports = router;
