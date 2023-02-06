@@ -2,12 +2,12 @@ const mongoose = require("mongoose");
 
 /*** crete schema for admins collection ***/
 const adminSchema = new mongoose.Schema({
-  username: {
+  _username: {
     type: String,
     required: true,
     minLength: 2,
   },
-  password: {
+  _password: {
     type: String,
     required: true,
     minLength: 8,
@@ -15,4 +15,4 @@ const adminSchema = new mongoose.Schema({
 });
 
 /*** mapping schema bind collection  ***/
-module.exports = mongoose.model("admins", adminSchema);
+module.exports = mongoose.model("admin", adminSchema);

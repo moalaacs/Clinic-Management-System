@@ -1,6 +1,6 @@
 const express = require("express");
 const controller = require("../Controller/appointmentController");
-const errorValidation = require("../Middlewares/errorValidation");
+const validatorMiddleware = require("../Middlewares/errorValidation");
 const {
   validateAppointment,
   validatePatchAppointment,
@@ -11,20 +11,28 @@ const authorizationMW = require("../Middlewares/authenticationMW");
 const router = express.Router();
 
 router
-  .route("/appointments")
-  .get(authorizationMW.checkAdmin, controller.getAppointments)
+  .route("/appointment")
+  .get(authorizationMW.checkAdmin, controller.getAllAppointments)
   .post(
     validateAppointment,
-    errorValidation,
+    validatorMiddleware,
     authorizationMW.checkPatient,
     controller.addAppointment
   );
 
 router
-  .route("/appointments/:id")
-  .all(numberIdParamsValidation, errorValidation, authorizationMW.checkAdmin)
+  .route("/appointment/:id")
+  .all(
+    numberIdParamsValidation,
+    validatorMiddleware,
+    authorizationMW.checkAdmin
+  )
   .get(controller.getAppointmentById)
-  .patch(validatePatchAppointment, errorValidation, controller.editAppointment)
-  .delete(controller.removeAppointment);
+  .patch(
+    validatePatchAppointment,
+    validatorMiddleware,
+    controller.patchAppointment
+  )
+  .delete(controller.removeAppointmentById);
 
 module.exports = router;

@@ -6,11 +6,11 @@ const personSchema = require("./personModel");
 const doctorSchema = new mongoose.Schema(
   Object.assign(personSchema.obj, {
     _id: { type: Number },
-    specilization: {
+    _specilization: {
       type: String,
       required: true,
     },
-    schedule: [
+    _schedule: [
       {
         clinicId: {
           type: Number,
@@ -18,22 +18,22 @@ const doctorSchema = new mongoose.Schema(
           ref: "clinics",
         },
         timeline: {
-          day: { type: String, required: true },
+          day: { type: Number, required: true, min: 0, max: 6 }, //Sunday = 0, Monday = 1
           startDate: { type: Number, min: 8, max: 24, required: true },
           endDate: { type: Number, min: 8, max: 24, required: true },
         },
       },
     ],
-    clinic: [
+    _clinics: [
       {
         type: Number,
         required: true,
         ref: "clinics",
       },
     ],
-    appointments: [
+    _appointments: [
       {
-        date: {
+        _date: {
           type: String,
           required: true,
           validate: {
@@ -45,7 +45,7 @@ const doctorSchema = new mongoose.Schema(
             message: "Invalid date format, should be DD/MM/YYYY",
           },
         },
-        time: {
+        _time: {
           type: String,
           required: true,
           validate: {
@@ -55,13 +55,14 @@ const doctorSchema = new mongoose.Schema(
             message: "Invalid time format, should be in the form 00:00 ",
           },
         },
-        patientId: { type: Number, required: true, ref: "patient" },
-        clinicId: {
+        _patientId: { type: Number, required: true, ref: "patient" },
+        _clinicId: {
           type: Number,
           required: true,
           ref: "clinics",
         },
       },
+      { _id: false },
     ],
   })
 );

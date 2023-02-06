@@ -34,29 +34,29 @@ const phoneNumberValidator = [
 
 const personSchema = new mongoose.Schema(
   {
-    fname: { type: String, required: true, validate: nameValidator },
-    lname: { type: String, required: true, validate: nameValidator },
-    age: {
+    _fname: { type: String, required: true, validate: nameValidator },
+    _lname: { type: String, required: true, validate: nameValidator },
+    _age: {
       type: Number,
       required: true,
       min: [18, "Age must be at least 18"],
       max: [60, "Age must be at most 60"],
     },
-    gender: { type: String, required: true },
-    contactNumber: {
+    _gender: { type: String, required: true },
+    _contactNumber: {
       type: String,
       required: true,
       validate: phoneNumberValidator,
     },
-    email: {
+    _email: {
       type: String,
       required: true,
       validate: emailValidator,
       unique: [true, "This email is already in use"],
     },
-    address: addressSchema,
-    password: { type: String, required: true },
-    image: { type: String, required: true },
+    _address: addressSchema,
+    _password: { type: String, required: true },
+    _image: { type: String, required: true },
   },
   { _id: false }
 );

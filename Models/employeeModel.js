@@ -7,9 +7,9 @@ const personSchema = require("./personModel");
 const employeeSchema = new mongoose.Schema(
   Object.assign(personSchema.obj, {
     _id: { type: Number },
-    clinicId: { type: Number, ref: "clinics" },
-    salary: { type: Number },
-    workingHours: { type: Number, min: 0, max: 24 },
+    _clinic: { type: Number, ref: "clinic" },
+    _monthlyRate: { type: Number },
+    _workingHours: { type: Number, min: 0, max: 24 },
   })
 );
 
@@ -21,4 +21,4 @@ employeeSchema.plugin(AutoIncrement, {
 });
 
 /*** mapping schema bind collection  ***/
-module.exports = mongoose.model("employees", employeeSchema);
+module.exports = mongoose.model("employee", employeeSchema);

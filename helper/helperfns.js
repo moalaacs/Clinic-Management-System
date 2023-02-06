@@ -18,7 +18,6 @@ const filterData = (model, query) => {
       filter[key] = query[key];
     }
   }
-  console.log(filter);
   return model.find({ ...filter });
 };
 

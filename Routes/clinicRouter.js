@@ -1,21 +1,30 @@
 const express = require("express");
 const controller = require("../Controller/clinicController");
-const errorValidation = require("../Middlewares/errorValidation");
+const validatorMiddleware = require("../Middlewares/errorValidation");
 const authorizationMW = require("../Middlewares/authenticationMW");
+const {
+  numberIdParamsValidation,
+  validateClinic,
+  validatePatchClinic,
+} = require("../Middlewares/validateData");
 
 const router = express.Router();
 
 router
-  .route("/clinics")
-  .all(authorizationMW.checkAdmin)
+  .route("/clinic")
+  .all(authorizationMW.authorize("admin"))
   .get(controller.getAllClinics)
-  .post(controller.createClinic);
+  .post(validateClinic, validatorMiddleware, controller.addClinic);
 
 router
-  .route("/clinics/:id")
-  .all(authorizationMW.checkAdmin)
+  .route("/clinic/:id")
+  .all(
+    authorizationMW.checkAdmin,
+    numberIdParamsValidation,
+    validatorMiddleware
+  )
   .get(controller.getClinicById)
-  .patch(controller.editClinic)
-  .delete(controller.removeClinic);
+  .patch(validatePatchClinic, validatorMiddleware, controller.patchClinic)
+  .delete(controller.removeClinicById);
 
 module.exports = router;

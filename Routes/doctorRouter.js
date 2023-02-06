@@ -15,23 +15,10 @@ router
 
 router
   .route("/doctor/:id")
-  .get(numberIdParamsValidation, validatorMiddleware, controller.getDoctorById)
-  .put(
-    numberIdParamsValidation,
-    doctorValidation,
-    validatorMiddleware,
-    controller.updateDoctorById
-  )
-  .patch(
-    numberIdParamsValidation,
-    doctorPatchValidation,
-    validatorMiddleware,
-    controller.patchDoctorById
-  )
-  .delete(
-    numberIdParamsValidation,
-    validatorMiddleware,
-    controller.removeDoctorById
-  );
+  .all(numberIdParamsValidation, validatorMiddleware)
+  .get(controller.getDoctorById)
+  .put(doctorValidation, validatorMiddleware, controller.putDoctorById)
+  .patch(doctorPatchValidation, validatorMiddleware, controller.patchDoctorById)
+  .delete(controller.removeDoctorById);
 
 module.exports = router;

@@ -54,6 +54,18 @@ module.exports.checkDoctor = (request, response, next) => {
   }
 };
 
+module.exports.authorize = (...roles) => {
+  return (request, response, next) => {
+    console.log(roles.includes(request.userData.role));
+    console.log(roles);
+    if (!roles.includes(request.userData.role)) {
+      const error = new Error("You are not authorized to access this resource");
+      error.status = 403;
+      next(error);
+    }
+    next();
+  };
+};
 
 module.exports.checkEmployee = (request, response, next) => {
   if (

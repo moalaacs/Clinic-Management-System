@@ -12,6 +12,8 @@ const employeeRouter = require("./Routes/employeeRouter");
 const medicineRouter = require("./Routes/medicineRouter");
 const clinicRouter = require("./Routes/clinicRouter");
 const appointmentRouter = require("./Routes/appointmentRouter");
+const prescriptionRouter = require("./Routes/prescriptionRouter");
+const invoiceRouter = require("./Routes/invoiceRouter");
 
 require("dotenv").config();
 
@@ -59,7 +61,8 @@ app.use(employeeRouter);
 app.use(medicineRouter);
 app.use(clinicRouter);
 app.use(appointmentRouter);
-
+app.use(prescriptionRouter);
+app.use(invoiceRouter);
 // d- file not found middleware
 app.use((request, response) => {
   response.status(404).json({ data: "Page Not Found 404" });
