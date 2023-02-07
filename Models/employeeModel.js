@@ -5,7 +5,7 @@ const personSchema = require("./personModel");
 /*** crete schema for employees collection ***/
 
 const employeeSchema = new mongoose.Schema(
-  Object.assign(personSchema.obj, {
+  Object.assign({}, personSchema.obj, {
     _id: { type: Number },
     _clinic: { type: Number, ref: "clinic" },
     _monthlyRate: { type: Number },
