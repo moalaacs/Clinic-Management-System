@@ -1,6 +1,3 @@
-/* Doctor Schema */
-const doctorSchema = require("../Models/doctorModel");
-
 /* require bcrypt */
 const bcrypt = require("bcrypt");
 
@@ -14,6 +11,7 @@ const {
   sortData,
   sliceData,
   paginateData,
+  mapSpecilityToSpecilization,
 } = require("../helper/helperfns");
 
 exports.getAllDoctors = async (request, response, next) => {
