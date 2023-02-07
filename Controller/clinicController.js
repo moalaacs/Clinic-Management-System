@@ -169,7 +169,7 @@ exports.removeClinicById = async (request, response, next) => {
 exports.getAllClinics = async (request, response, next) => {
   try {
     let query = reqNamesToSchemaNames(request.query);
-    let clinic = await filterData(Clinic, query);
+    let clinic = await filterData(clinicSchema, query);
     clinic = sortData(clinic, query);
     clinic = paginateData(clinic, request.query);
     clinic = sliceData(clinic, request.query);
@@ -182,7 +182,7 @@ exports.getAllClinics = async (request, response, next) => {
 // Get a clinic by ID
 exports.getClinicById = async (request, response, next) => {
   try {
-    const clinic = await Clinic.findById(request.params.id);
+    const clinic = await clinicSchema.findById(request.params.id);
     if (!clinic) {
       return next(new Error("Clinic not found"));
     }

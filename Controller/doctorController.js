@@ -11,6 +11,7 @@ const {
   sortData,
   sliceData,
   paginateData,
+  mapSpecilityToSpecilization,
 } = require("../helper/helperfns");
 
 exports.getAllDoctors = async (request, response, next) => {
