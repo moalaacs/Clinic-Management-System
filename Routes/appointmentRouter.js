@@ -21,6 +21,10 @@ router
   );
 
 router
+  .route("/appointmentReports/all")
+  .get(authorizationMW.checkAdmin, controller.allAppointmentsReports);
+
+router
   .route("/appointment/:id")
   .all(
     numberIdParamsValidation,
@@ -36,7 +40,3 @@ router
   .delete(controller.removeAppointmentById);
 
 module.exports = router;
-
-router
-  .route("/appointment/allreports")
-  .get(authorizationMW.checkAdmin, controller.allAppointmentsReports);
