@@ -147,6 +147,6 @@ const reqNamesToSchemaNames = (query) => {
             }
         }
         replacedQuery[newKey] = query[key];
-       }
+    }
     return replacedQuery;
 }

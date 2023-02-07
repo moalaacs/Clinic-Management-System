@@ -13,11 +13,6 @@ const medicineSchema = new mongoose.Schema(
 );
 
 
-
-
-
-
-
 const prescriptionSchema = new mongoose.Schema({
   _id: {
     type: Number,
@@ -55,7 +50,7 @@ const prescriptionSchema = new mongoose.Schema({
     year: 'numeric'})},
 });
 
-prescroptionSchema.plugin(AutoIncrement, {
+prescriptionSchema.plugin(AutoIncrement, {
   id: "prescription_seq",
   inc_field: "_id",
   start_seq: 20000,
