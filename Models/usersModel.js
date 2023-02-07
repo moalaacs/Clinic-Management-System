@@ -29,8 +29,6 @@ const userSchema = new mongoose.Schema({
   },
   _forClinic: {
     type: Number,
-    min: 0,
-    max: 10,
     default: 0,
   },
   _password: { type: String, required: true },

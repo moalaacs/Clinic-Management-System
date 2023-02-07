@@ -32,16 +32,15 @@ let validateClinic = [
     .isString()
     .withMessage("Speciality must be string")
     .isIn([
-      "Pediatrician",
-      "Gynecologist",
-      "Cardiologist",
-      "Oncologist",
-      "Dermatologist",
-      "Psychiatrist",
-      "Neurologist",
-      "Radiologist",
-      "Dentist",
-      "Surgeon",
+      "Pediatrics",
+      "Women's Health",
+      "Cardiology",
+      "Neurology",
+      "Dental",
+      "Physical Therapy",
+      "Radiologic",
+      "Dermatology",
+      "Surgical",
     ])
     .withMessage("Clinic's speciality isn't available"),
 ];
@@ -83,16 +82,15 @@ let validatePatchClinic = [
     .isString()
     .withMessage("Speciality must be string")
     .isIn([
-      "Pediatrician",
-      "Gynecologist",
-      "Cardiologist",
-      "Oncologist",
-      "Dermatologist",
-      "Psychiatrist",
-      "Neurologist",
-      "Radiologist",
-      "Dentist",
-      "Surgeon",
+      "Pediatrics",
+      "Women's Health",
+      "Cardiology",
+      "Neurology",
+      "Dental",
+      "Physical Therapy",
+      "Radiologic",
+      "Dermatology",
+      "Surgical",
     ])
     .withMessage("Clinic's speciality isn't available"),
 ];
@@ -224,7 +222,6 @@ let doctorValidation = [
       "Pediatrician",
       "Gynecologist",
       "Cardiologist",
-      "Oncologist",
       "Dermatologist",
       "Psychiatrist",
       "Neurologist",
@@ -243,7 +240,6 @@ let doctorPatchValidation = [
       "Pediatrician",
       "Gynecologist",
       "Cardiologist",
-      "Oncologist",
       "Dermatologist",
       "Psychiatrist",
       "Neurologist",

@@ -13,6 +13,7 @@ const {
   sortData,
   sliceData,
   paginateData,
+  mapSpecilityToSpecilization,
 } = require("../helper/helperfns");
 
 // Get all Doctors
@@ -33,14 +34,17 @@ exports.addDoctor = async (request, response, next) => {
   try {
     const existingClinics = await clinicSchema.find(
       {},
-      { id: 1, _specilization: 1 }
+      { _id: 1, _specilization: 1 }
+    );
+    let specialityClinicId = mapSpecilityToSpecilization(
+      request.body.speciality
     );
     specialityClinicId = existingClinics.find(
-      (element) => element._specilization == request.body.speciality
+      (element) => element._specilization == specialityClinicId
     );
     if (!specialityClinicId)
       return response.status(400).json({
-        message: `Sorry, We don't have a department for : ${request.body.speciality} yet`,
+        message: `Sorry, We don't have a department for ${request.body.speciality} yet`,
       });
     let testEmailandPhone = await users.findOne({
       $or: [
@@ -93,14 +97,17 @@ exports.putDoctorById = async (request, response, next) => {
   try {
     const existingClinics = await clinicSchema.find(
       {},
-      { id: 1, _specilization: 1 }
+      { _id: 1, _specilization: 1 }
+    );
+    let specialityClinicId = mapSpecilityToSpecilization(
+      request.body.speciality
     );
     specialityClinicId = existingClinics.find(
-      (element) => element._specilization == request.body.speciality
+      (element) => element._specilization == specialityClinicId
     );
     if (!specialityClinicId)
       return response.status(400).json({
-        message: `Sorry, We don't have a department for : ${request.body.speciality} yet`,
+        message: `Sorry, We don't have a department for ${request.body.speciality} yet`,
       });
     let testEmailandPhone = await users.findOne({
       $or: [
@@ -166,14 +173,17 @@ exports.patchDoctorById = async (request, response, next) => {
     if (request.body.speciality) {
       const existingClinics = await clinicSchema.find(
         {},
-        { id: 1, _specilization: 1 }
+        { _id: 1, _specilization: 1 }
+      );
+      let specialityClinicId = mapSpecilityToSpecilization(
+        request.body.speciality
       );
       specialityClinicId = existingClinics.find(
-        (element) => element._specilization == request.body.speciality
+        (element) => element._specilization == specialityClinicId
       );
       if (!specialityClinicId)
         return response.status(400).json({
-          message: `Sorry, We don't have a department for : ${request.body.speciality} yet`,
+          message: `Sorry, We don't have a department for ${request.body.speciality} yet`,
         });
       tempDoctor._specilization = request.body.speciality;
       tempDoctor._clinic = specialityClinicId._id;

@@ -61,7 +61,6 @@ exports.addPatient = async (request, response, next) => {
       password: hash,
     });
     let savedPatient = await patient.save();
-    console.log(patient);
     const newUser = new users({
       _id: savedPatient._id,
       _role: "patient",

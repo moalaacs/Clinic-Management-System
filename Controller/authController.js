@@ -12,7 +12,6 @@ exports.login = async (request, response, next) => {
       _email: email,
       _password: password,
     });
-    console.log(foundUser);
     if (foundUser) {
       switch (foundUser._role) {
         case "admin": {

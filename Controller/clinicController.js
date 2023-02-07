@@ -5,6 +5,7 @@ const {
   sortData,
   sliceData,
   paginateData,
+  fillClinicServices,
 } = require("../helper/helperfns");
 
 // Calling other schemas //
@@ -42,8 +43,9 @@ exports.addClinic = async (request, response, next) => {
       _email: request.body.email,
       _address: request.body.address,
       _specilization: request.body.speciality,
+      _services: fillClinicServices(request.body.speciality),
     });
-    let savedClinic = await clinicSchema.save();
+    let savedClinic = await clinic.save();
     let email = new users({
       _email: request.body.email,
       _password: "admin",
@@ -112,6 +114,7 @@ exports.patchClinicById = async (request, response, next) => {
           .status(400)
           .json({ message: `There is already a clinic with this speciality` });
       tempClinic._specilization = request.body.speciality;
+      tempClinic._services = fillClinicServices(request.body.speciality);
     }
     await clinicSchema.updateOne(
       { _id: request.params.id },
