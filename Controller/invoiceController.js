@@ -75,7 +75,7 @@ exports.addInvoice = async (request, response, next) => {
     "marginBottom": 25,
     "settings": {locale: 'en-US', currency: 'USD'},
     "sender": {
-    "company": clinic._id,
+    "company": `Alwafaa-${clinic._id}`,
     "address": clinic._address.street,
     "zip": clinic._address.zipCode,
     "city": clinic._address.city,
@@ -114,14 +114,11 @@ exports.addInvoice = async (request, response, next) => {
     const invoicePdf = async ()=>{
     let result = await easyinvoice.createInvoice(data);
     fs.writeFile(`invoices/${addedInvoice._id}.pdf`, result.pdf,'base64',function (error) {
-            if (error) {
-              next(error);
-    } 
-  });
+      if (error) {next(error);}});
 
     }
     await invoicePdf();
-    response.status(200).json({ status: "Invoice Added and Saved to File" });
+    response.status(200).json({ status: "Invoice Added and Saved to File", invoice: addedInvoice });
 
   } catch (error) { next(error);}
 };
@@ -131,23 +128,24 @@ exports.addInvoice = async (request, response, next) => {
 exports.editInvoice = async (request, response, next) => {
   try {
     const existingInvoice = await invoiceSchema.findById(request.params.id);
+    let clinic,patient;
     if (!existingInvoice) {
-    return response.status(400).json({ message: "Prescription not found." });
+    return response.status(400).json({ message: "Invoice not found." });
     }
 
     let { clinicId, patientId, services} = request.body;
     let total = existingInvoice.total;
 
     if (clinicId) {
-      const isClinic = await clinicSchema.findById(clinicId);
-      if (!isClinic) {
+      clinic = await clinicSchema.findById(clinicId);
+      if (!clinic) {
           return response.status(400).json({ message: "Clinic not found." });
       }
   } else {clinicId = existingInvoice.clinic_Id;}
 
   if (patientId) {
-    const isPatient = await patientSchema.findById(patientId);
-    if (!isPatient) {
+    patient = await patientSchema.findById(patientId);
+    if (!patient) {
         return response.status(400).json({ message: "Patient not found." });
     }
 } else {patientId = existingInvoice.patient_Id;}
@@ -168,10 +166,73 @@ exports.editInvoice = async (request, response, next) => {
   total:total,
   };
 
+
   const updatedInvoice = await invoiceSchema.updateOne(
       { _id: request.params.id },
       { $set: tempInvoice }
   );
+  if(!clinic)  {clinic = await clinicSchema.findById(clinicId)};
+  if(!patient) {patient = await patientSchema.findById(patientId)};
+  
+  fs.unlinkSync(`invoices/${existingInvoice._id}.pdf`);
+
+    const date = new Date();
+    const dueDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+
+    let data = {
+    //"documentTitle": "RECEIPT", //Defaults to INVOICE
+    "currency": "USD",
+    "taxNotation": "vat", //or gst
+    "marginTop": 25,
+    "marginRight": 25,
+    "marginLeft": 25,
+    "marginBottom": 25,
+    "settings": {locale: 'en-US', currency: 'USD'},
+    "sender": {
+    "company": `Alwafaa-${clinic._id}`,
+    "address": clinic._address.street,
+    "zip": clinic._address.zipCode,
+    "city": clinic._address.city,
+    "country": clinic._address.country
+    },
+    "client": {
+        "company": patient._fname + " " + patient._lname,
+        "address": patient._address.street,
+        "zip": patient._address.zipCode,
+        "city": patient._address.city,
+        "country": patient._address.country
+    },
+
+    "images": {
+      logo: "https://seeklogo.com/images/H/hospital-clinic-plus-logo-7916383C7A-seeklogo.com.png",
+    },
+  
+    "information": {
+      // Invoice number
+      "number": existingInvoice._id,
+      // Invoice data
+      "date": `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`,
+      // Invoice due date
+      "due-date": `${dueDate.getDate()}/${dueDate.getMonth() + 1}/${dueDate.getFullYear()}`
+  },
+  "products": tempInvoice.services.map((service) => ({
+    "quantity": "1",
+    "description": service.name,
+    "tax-rate": 14,
+    "price": service.cost
+    })),
+"bottom-notice": "Kindly pay your invoice within 30 days.",
+
+    };
+
+    const invoicePdf = async ()=>{
+    let result = await easyinvoice.createInvoice(data);
+    fs.writeFile(`invoices/${existingInvoice._id}.pdf`, result.pdf,'base64',function (error) {
+      if (error) {next(error);}});
+
+    }
+    await invoicePdf();
   response
       .status(200)
       .json({ message: "invoice updated successfully.", updatedInvoice });
@@ -189,6 +250,8 @@ exports.removeInvoice = async (request, response, next) => {
     if (!invoice) {
       return next(new Error("invoice not found"));
     }
+    console.log(invoice._id);
+    fs.unlinkSync(`invoices/${invoice._id}.pdf`);
     response
       .status(201)
       .json({ message: "Invoice removed successfully.", invoice });
