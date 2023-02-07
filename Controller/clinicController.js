@@ -118,8 +118,9 @@ exports.removeClinicById = async (request, response, next) => {
 
 exports.getAllClinics = async (request, response, next) => {
   try {
-    let clinic = await filterData(Clinic, request.query);
-    clinic = sortData(clinic, request.query);
+    let query = reqNamesToSchemaNames(request.query);
+    let clinic = await filterData(Clinic, query);
+    clinic = sortData(clinic, query);
     clinic = paginateData(clinic, request.query);
     clinic = sliceData(clinic, request.query);
     response.status(200).json(clinic);
@@ -140,3 +141,28 @@ exports.getClinicById = async (request, response, next) => {
     next(error);
   }
 };
+
+
+
+
+const reqNamesToSchemaNames = (query) => {
+  const fieldsToReplace = {
+    id:'_id',
+    phone: '_contactNumber',
+    email: '_email',
+    address: '_address',
+  };
+
+  const replacedQuery = {};
+  for (const key in query) {
+    let newKey = key;
+    for (const replaceKey in fieldsToReplace) {
+      if (key.includes(replaceKey)) {
+        newKey = key.replace(replaceKey, fieldsToReplace[replaceKey]);
+        break;
+      }
+    }
+    replacedQuery[newKey] = query[key];
+  }
+  return replacedQuery;
+}

@@ -5,9 +5,7 @@ const {
     validatePrescription,
     validatePatchPrescription,
     numberIdParamsValidation,
-    // valiadtion module  
 } = require("../Middlewares/validateData");
-// checkDoctor
 const authorizationMW = require("../Middlewares/authenticationMW");
 const router = express.Router();
 router
@@ -15,7 +13,7 @@ router
     .all(authorizationMW.checkDoctor)
     .get(controller.getPrescription)
     .post(validatePrescription, errorValidation, controller.addPrescription);
-    
+
 router
     .route("/prescription/:id")
     .all(numberIdParamsValidation, errorValidation, authorizationMW.checkDoctor)

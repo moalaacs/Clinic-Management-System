@@ -17,8 +17,9 @@ const {
 //get all patients
 exports.getAllPatients = async (request, response, next) => {
   try {
-    let patients = await filterData(patientSchema, request.query);
-    patients = sortData(patients, request.query);
+    let query = reqNamesToSchemaNames(request.query);
+    let patients = await filterData(patientSchema, query);
+    patients = sortData(patients, query);
     patients = paginateData(patients, request.query);
     patients = sliceData(patients, request.query);
 
@@ -31,18 +32,19 @@ exports.getAllPatients = async (request, response, next) => {
 // Add a new patient
 exports.addPatient = async (request, response, next) => {
   try {
+    let email;
     const hash = await bcrypt.hash(request.body.password, 10);
     let testEmail = await emailSchema.findOne({ _email: request.body.email });
     if (testEmail) {
       return response.status(400).json({ message: `Email Already in use` });
     } else {
-      let email = new emailSchema({ _email: request.body.email });
-      await email.save();
+      email = new emailSchema({ _email: request.body.email });
+     
     }
     const patient = new patientSchema({
       _fname: request.body.firstname,
       _lname: request.body.lastname,
-      _age: request.body.age,
+      _dateOfBirth: request.body.dateOfBirth,
       _gender: request.body.gender,
       _contactNumber: request.body.phone,
       _email: request.body.email,
@@ -50,9 +52,9 @@ exports.addPatient = async (request, response, next) => {
       _password: hash,
       _image: request.body.profileImage,
       _medicalHistory: request.body.medicalHistory,
-      password: hash,
     });
     await patient.save();
+    await email.save();
     response
       .status(201)
       .json({ message: "Patient created successfully.", patient });
@@ -66,7 +68,7 @@ exports.putPatientById = async (request, response, next) => {
   let tempPatient = {
     _fname: request.body.firstname,
     _lname: request.body.lastname,
-    _age: request.body.age,
+    _dateOfBirth: request.body.dateOfBirth,
     _gender: request.body.gender,
     _contactNumber: request.body.phone,
     _email: request.body.email,
@@ -74,7 +76,6 @@ exports.putPatientById = async (request, response, next) => {
     _password: hash,
     _image: request.body.profileImage,
     _medicalHistory: request.body.medicalHistory,
-    password: hash,
   };
   try {
     const updatedPatient = await patientSchema.updateOne(
@@ -137,7 +138,7 @@ exports.patchPatientById = async (request, response, next) => {
     tempPatient._gender = request.body.gender;
   }
   if (request.body.age) {
-    tempPatient._age = request.body.age;
+    tempPatient._dateOfBirth = request.body.dateOfBirth;
   }
 
   try {
@@ -147,7 +148,7 @@ exports.patchPatientById = async (request, response, next) => {
     );
     response
       .status(200)
-      .json({ message: "Patient updated successfully.", tempPatient });
+      .json({ message: "Patient updated successfully.",updatedPatient, tempPatient });
   } catch (error) {
     next(error);
   }
@@ -182,3 +183,36 @@ exports.getPatientById = async (request, response, next) => {
     next(error);
   }
 };
+
+
+
+
+
+const reqNamesToSchemaNames = (query) => {
+  const fieldsToReplace = {
+    id:'_id',
+    firstname: '_fname',
+    lastname: '_lname',
+    dateOfBirth: '_dateOfBirth',
+    age: '_age',
+    gender: '_gender',
+    phone: '_contactNumber',
+    email: '_email',
+    address: '_address',
+    profileImage: '_image',
+    medicalHistory: '_medicalHistory'
+  };
+
+  const replacedQuery = {};
+  for (const key in query) {
+    let newKey = key;
+    for (const replaceKey in fieldsToReplace) {
+      if (key.includes(replaceKey)) {
+        newKey = key.replace(replaceKey, fieldsToReplace[replaceKey]);
+        break;
+      }
+    }
+    replacedQuery[newKey] = query[key];
+  }
+  return replacedQuery;
+}

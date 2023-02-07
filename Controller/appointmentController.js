@@ -134,7 +134,6 @@ exports.patchAppointment = async (request, response, next) => {
     }
 
     if (time) {
-      // const timeRegex = /^\d{2}:\d{2}$/;
       const minutes = time.split(":")[1];
       if (minutes !== "00" && minutes !== "30") {
         return response.status(400).json({ message: "Invalid time format." });
@@ -196,8 +195,13 @@ exports.removeAppointmentById = async (request, response, next) => {
 // Get all appointments
 exports.getAllAppointments = async (request, response, next) => {
   try {
-    let appointments = await filterData(appointmentSchema, request.query);
-    appointments = sortData(appointments, request.query);
+    let query = reqNamesToSchemaNames(request.query);
+    let appointments = await filterData(appointmentSchema, query,[
+      { path: '_doctorId', options: { strictPopulate: false } },
+      { path: '_patientId', options: { strictPopulate: false } },
+      { path: '_clinicId', options: { strictPopulate: false } },
+    ]);
+    appointments = sortData(appointments, query);
     appointments = paginateData(appointments, request.query);
     appointments = sliceData(appointments, request.query);
 
@@ -220,14 +224,6 @@ exports.getAppointmentById = async (request, response, next) => {
   }
 };
 
-// exports.allAppointmentsReports = async (request, response, next)=>{
-//   try {
-//     appointmentSchema.find()
-//     .populate({path: "patient", select:{_id:0}})
-//     .
-//   }
-// }
-
 // All Appointments Reports
 exports.allAppointmentsReports = (request, response, next) => {
   appointmentSchema
@@ -241,35 +237,27 @@ exports.allAppointmentsReports = (request, response, next) => {
     .catch((error) => next(error));
 };
 
-// // Appointments Daily Reports
-// exports.dailyAppointmentsReports = (request, response, next) => {
-//   let date = new Date();
-//   date.setHours(0, 0, 0);
-//   let day = 60 * 60 * 24 * 1000;
-//   let nextDay = new Date(date.getTime() + day);
-//   appointmentSchema
-//     .find()
-//     .where("date".gt(date).lt(nextDay))
-//     .populate({ path: "patientID", select: { _id: 0 } })
-//     .populate({
-//       path: "doctorID",
-//       select: { _id: 0, appointmentNo: 0, workingHours: 0 },
-//     })
-//     .populate({ path: "clinicID", select: { _id: 0 } })
-//     .then((data) => {
-//       response.status(200).json(data);
-//     })
-//     .catch((error) => next(error));
-// };
+const reqNamesToSchemaNames = (query) => {
+  const fieldsToReplace = {
+    id:'_id',
+    date:'_date',
+    time:'_time',
+    doctorId:'_doctorId',
+    patientId:'_patientId',
+    clinicId:'_clinicId',
+  };
 
-// // Patient Appointments
-// exports.patientAppointmentsReports = (request,response,next){
-//   appointmentSchema.find({patientID: request.params.id})
-//   .populate({path:"patientID",select:{_id:0}})
-//   .populate({path:"doctorID",select:{_id:0}})
-//   .populate({path:"clinicID",select:{_id:0}})
-//   .then((data)=>{
-//     request.status(200).json(data);
-//   })
-//   .catch((error)=>next(error));
-// }
+  const replacedQuery = {};
+  for (const key in query) {
+    let newKey = key;
+    for (const replaceKey in fieldsToReplace) {
+      if (key.includes(replaceKey)) {
+        newKey = key.replace(replaceKey, fieldsToReplace[replaceKey]);
+        break;
+      }
+    }
+    replacedQuery[newKey] = query[key];
+  }
+  return replacedQuery;
+}
+>>>>>>> 55a738b0fb1c66f1f67dd936d1bc5d8bbf833f91

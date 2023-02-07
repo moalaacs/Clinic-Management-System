@@ -19,8 +19,13 @@ const {
 
 exports.getAllDoctors = async (request, response, next) => {
   try {
-    let doctors = await filterData(doctorSchema, request.query);
-    doctors = sortData(doctors, request.query);
+    let query = reqNamesToSchemaNames(request.query);
+    let doctors = await filterData(doctorSchema, query,[
+      { path: 'clinicId', options: { strictPopulate: false } },
+      { path: '_clinics', options: { strictPopulate: false } },
+      { path: '_clinics', options: { strictPopulate: false } },
+    ]);
+    doctors = sortData(doctors, query);
     doctors = paginateData(doctors, request.query);
     doctors = sliceData(doctors, request.query);
     response.status(200).json({ doctors });
@@ -52,7 +57,7 @@ exports.addDoctor = async (request, response, next) => {
     const doctor = new doctorSchema({
       _fname: request.body.firstname,
       _lname: request.body.lastname,
-      _age: request.body.age,
+      _dateOfBirth: request.body.dateOfBirth,
       _gender: request.body.gender,
       _contactNumber: request.body.phone,
       _email: request.body.email,
@@ -79,7 +84,7 @@ exports.putDoctorById = async (request, response, next) => {
         $set: {
           _fname: request.body.firstname,
           _lname: request.body.lastname,
-          _age: request.body.age,
+          _dateOfBirth: request.body.dateOfBirth,
           _gender: request.body.gender,
           _contactNumber: request.body.phone,
           _email: request.body.email,
@@ -154,7 +159,7 @@ exports.patchDoctorById = async (request, response, next) => {
     tempDoctor._gender = request.body.gender;
   }
   if (request.body.age != null) {
-    tempDoctor._age = request.body.age;
+    tempDoctor._dateOfBirth = request.body.dateOfBirth;
   }
 
   try {
@@ -191,3 +196,34 @@ exports.removeDoctorById = async (request, response, next) => {
     next(error);
   }
 };
+
+
+const reqNamesToSchemaNames = (query) => {
+  const fieldsToReplace = {
+    id:'_id',
+    firstname: '_fname',
+    lastname: '_lname',
+    dateOfBirth: '_dateOfBirth',
+    age: '_age',
+    gender: '_gender',
+    phone: '_contactNumber',
+    email: '_email',
+    address: '_address',
+    profileImage: '_image',
+    speciality: '_specilization',
+    clinic: '_clinics',
+  };
+
+  const replacedQuery = {};
+  for (const key in query) {
+    let newKey = key;
+    for (const replaceKey in fieldsToReplace) {
+      if (key.includes(replaceKey)) {
+        newKey = key.replace(replaceKey, fieldsToReplace[replaceKey]);
+        break;
+      }
+    }
+    replacedQuery[newKey] = query[key];
+  }
+  return replacedQuery;
+}

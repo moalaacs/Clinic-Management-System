@@ -20,8 +20,11 @@ const {
 //get all Employees
 exports.getAllEmployees = async (request, response, next) => {
   try {
-    let Employees = await filterData(EmployeeSchema, request.query);
-    Employees = sortData(Employees, request.query);
+    let query = reqNamesToSchemaNames(request.query);
+    let Employees = await filterData(EmployeeSchema, query,[
+      { path: '_clinic', options: { strictPopulate: false } },
+    ]);
+    Employees = sortData(Employees, query);
     Employees = paginateData(Employees, request.query);
     Employees = sliceData(Employees, request.query);
 
@@ -52,14 +55,13 @@ exports.addEmployee = async (request, response, next) => {
     const employee = new EmployeeSchema({
       _fname: request.body.firstname,
       _lname: request.body.lastname,
-      _age: request.body.age,
+      _dateOfBirth: request.body.dateOfBirth,
       _gender: request.body.gender,
       _contactNumber: request.body.phone,
       _email: request.body.email,
       _address: request.body.address,
       _password: hash,
       _image: request.body.profileImage,
-      password: hash,
       _clinic: request.body.clinic,
       _monthlyRate: request.body.salary,
       _workingHours: request.body.workingHours,
@@ -82,14 +84,13 @@ exports.putEmployee = async (request, response, next) => {
         $set: {
           _fname: request.body.firstname,
           _lname: request.body.lastname,
-          _age: request.body.age,
+          _dateOfBirth: request.body.dateOfBirth,
           _gender: request.body.gender,
           _contactNumber: request.body.phone,
           _email: request.body.email,
           _address: request.body.address,
           _password: hash,
           _image: request.body.profileImage,
-          password: hash,
           _clinics: request.body.clinic,
           _monthlyRate: request.body.salary,
           _workingHours: request.body.workingHours,
@@ -151,7 +152,7 @@ exports.patchEmployee = async (request, response, next) => {
     tempEmployee._gender = request.body.gender;
   }
   if (request.body.age) {
-    tempEmployee._age = request.body.age;
+    tempEmployee._dateOfBirth = request.body.dateOfBirth;
   }
   if (request.body.salary) {
     tempEmployee._monthlyRate = request.body.salary;
@@ -200,3 +201,36 @@ exports.removeEmployeeById = async (request, response, next) => {
     next(error);
   }
 };
+
+
+
+const reqNamesToSchemaNames = (query) => {
+  const fieldsToReplace = {
+    id:'_id',
+    firstname: '_fname',
+    lastname: '_lname',
+    dateOfBirth: '_dateOfBirth',
+    age: '_age',
+    gender: '_gender',
+    phone: '_contactNumber',
+    email: '_email',
+    address: '_address',
+    profileImage: '_image',
+    clinic: '_clinic',
+    salary: '_monthlyRate',
+    workingHours: '_workingHours',
+  };
+
+  const replacedQuery = {};
+  for (const key in query) {
+    let newKey = key;
+    for (const replaceKey in fieldsToReplace) {
+      if (key.includes(replaceKey)) {
+        newKey = key.replace(replaceKey, fieldsToReplace[replaceKey]);
+        break;
+      }
+    }
+    replacedQuery[newKey] = query[key];
+  }
+  return replacedQuery;
+}

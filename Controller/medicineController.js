@@ -2,6 +2,30 @@
 
 /* require all needed modules */
 const medicineSchema = require("../Models/medicineModel");
+const multer = require('multer');
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, './upload/');
+  },
+  filename: function (req, file, cb) {
+    cb(null, new Date().toISOString() + file.originalname);
+  }
+});
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype === "image/jpeg" || file.mimetype === "image/jpg" || file.mimetype === "image/png") {
+    cb(null, true);
+  } else {
+    cb(null, false);
+  }
+}
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 1024 * 1024 * 10
+  },
+  fileFilter: fileFilter
+});
+exports.uploadImage = upload.single('photo')
 
 /* require helper functions (filter,sort,slice,paginate) */
 const {
@@ -13,8 +37,9 @@ const {
 
 exports.getAllMedicine = async (request, response, next) => {
   try {
-    let medicine = await filterData(medicineSchema, request.query);
-    medicine = sortData(medicine, request.query);
+    let query = reqNamesToSchemaNames(request.query);
+    let medicine = await filterData(medicineSchema, query);
+    medicine = sortData(medicine, query);
     medicine = paginateData(medicine, request.query);
     medicine = sliceData(medicine, request.query);
     response.status(200).json(medicine);
@@ -65,22 +90,22 @@ exports.putMedicineById = async (request, response, next) => {
 
 exports.patchMedicineById = async (request, response, next) => {
   let tempMedicine = {};
-  if (request.body.name != null) {
+  if (request.body.name) {
     tempMedicine._name = request.body.name;
   }
-  if (request.body.production != null) {
+  if (request.body.production) {
     tempMedicine._productionDate = request.body.productionDate;
   }
-  if (request.body.expiry != null) {
+  if (request.body.expiry) {
     tempMedicine._expiryDate = request.body.expiryDate;
   }
-  if (request.body.usage != null) {
+  if (request.body.usage) {
     tempMedicine._leaflet = request.body.leaflet;
   }
-  if (request.body.price != null) {
+  if (request.body.price) {
     tempMedicine._pricePerUnit = request.body.price;
   }
-  if (request.body.quantity != null) {
+  if (request.body.quantity) {
     tempMedicine._quantity = request.body.quantity;
   }
   try {
@@ -88,7 +113,7 @@ exports.patchMedicineById = async (request, response, next) => {
       { _id: request.params.id },
       { $set: tempMedicine }
     );
-    response.status(200).json("Patch Succesfully");
+    response.status(200).json("Patch Succesfully",updatedMedicine);
   } catch (error) {
     next(error);
   }
@@ -115,3 +140,31 @@ exports.getMedicineById = async (request, response, next) => {
     next(error);
   }
 };
+
+
+
+const reqNamesToSchemaNames = (query) => {
+  const fieldsToReplace = {
+    id:'_id',
+    name: '_name',
+    production: '_productionDate',
+    expiry: '_expiryDate',
+    usage: '_leaflet',
+    price: '_pricePerUnit',
+    quantity: '_quantity',
+      
+  };
+
+  const replacedQuery = {};
+  for (const key in query) {
+    let newKey = key;
+    for (const replaceKey in fieldsToReplace) {
+      if (key.includes(replaceKey)) {
+        newKey = key.replace(replaceKey, fieldsToReplace[replaceKey]);
+        break;
+      }
+    }
+    replacedQuery[newKey] = query[key];
+  }
+  return replacedQuery;
+}

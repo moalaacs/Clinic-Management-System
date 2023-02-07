@@ -1,25 +1,34 @@
-const filterData = (model, query) => {
+const filterData = (model, query, fieldsToPopulate = []) => {
   let filter = {};
   for (let key in query) {
-    let value = key;
-    if (value.includes("<")) {
-      value.charAt(value.length - 1) == "<"
-        ? (filter[key.slice(0, key.indexOf("<"))] = { $lte: query[key] })
-        : (filter[key.slice(0, key.indexOf("<"))] = {
-            $lt: +value.slice(value.indexOf("<") + 1),
-          });
-    } else if (value.includes(">")) {
-      value.charAt(value.length - 1) == ">"
-        ? (filter[key.slice(0, key.indexOf(">"))] = { $gte: query[key] })
-        : (filter[key.slice(0, key.indexOf(">"))] = {
-            $gt: +value.slice(value.indexOf(">") + 1),
-          });
+    if (typeof query[key] === 'object') {
+      for (let nestedKey in query[key]) {
+        filter[`${key}.${nestedKey}`] = query[key][nestedKey];
+      }
     } else {
-      filter[key] = query[key];
+      let value = key;
+      if (value.includes("<")) {
+        value.charAt(value.length - 1) == "<"
+          ? (filter[key.slice(0, key.indexOf("<"))] = { $lte: query[key] })
+          : (filter[key.slice(0, key.indexOf("<"))] = {
+              $lt: +value.slice(value.indexOf("<") + 1),
+            });
+      } else if (value.includes(">")) {
+        value.charAt(value.length - 1) == ">"
+          ? (filter[key.slice(0, key.indexOf(">"))] = { $gte: query[key] })
+          : (filter[key.slice(0, key.indexOf(">"))] = {
+              $gt: +value.slice(value.indexOf(">") + 1),
+            });
+      } else {
+        filter[key] = query[key];
+      }
     }
   }
-  return model.find({ ...filter });
+  return fieldsToPopulate.length
+  ? model.find(filter).populate(fieldsToPopulate)
+  : model.find(filter);
 };
+
 
 const paginateData = (data, query) => {
   let page = query.page || 1;
