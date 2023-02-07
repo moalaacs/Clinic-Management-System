@@ -6,23 +6,19 @@ const {
   validatePatchPatient,
   numberIdParamsValidation,
 } = require("../Middlewares/validateData");
-const authorizationMW = require("../Middlewares/authenticationMW");
+const { authorize } = require("../Middlewares/authenticationMW");
 
 const router = express.Router();
 
 router
   .route("/patient")
-  .all(authorizationMW.checkAdmin)
+  .all(authorize("admin"))
   .get(controller.getAllPatients)
   .post(validatePatient, validatorMiddleware, controller.addPatient);
 
 router
   .route("/patient/:id")
-  .all(
-    authorizationMW.checkPatient,
-    numberIdParamsValidation,
-    validatorMiddleware
-  )
+  .all(authorize("patient"), numberIdParamsValidation, validatorMiddleware)
   .get(controller.getPatientById)
   .patch(
     validatePatchPatient,
@@ -32,11 +28,7 @@ router
 
 router
   .route("/patient/:id")
-  .all(
-    authorizationMW.checkAdmin,
-    numberIdParamsValidation,
-    validatorMiddleware
-  )
+  .all(authorize("admin"), numberIdParamsValidation, validatorMiddleware)
   .get(controller.getPatientById)
   .patch(validatePatchPatient, validatorMiddleware, controller.patchPatientById)
   .delete(controller.removePatientById);

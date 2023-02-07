@@ -4,18 +4,30 @@ const personSchema = require("./personModel");
 
 /*** crete schema for doctors collection ***/
 const doctorSchema = new mongoose.Schema(
-  Object.assign(personSchema.obj, {
+  Object.assign({}, personSchema.obj, {
     _id: { type: Number },
     _specilization: {
       type: String,
       required: true,
+      enum: [
+        "Pediatrician",
+        "Gynecologist",
+        "Cardiologist",
+        "Oncologist",
+        "Dermatologist",
+        "Psychiatrist",
+        "Neurologist",
+        "Radiologist",
+        "Dentist",
+        "Surgeon",
+      ],
     },
     _schedule: [
       {
         clinicId: {
           type: Number,
           required: true,
-          ref: "clinics",
+          ref: "clinic",
         },
         timeline: {
           day: { type: Number, required: true, min: 0, max: 6 }, //Sunday = 0, Monday = 1
@@ -24,45 +36,17 @@ const doctorSchema = new mongoose.Schema(
         },
       },
     ],
-    _clinics: [
+    _clinic: {
+      type: Number,
+      required: true,
+      ref: "clinic",
+    },
+    _appointments: [
       {
         type: Number,
         required: true,
-        ref: "clinics",
+        ref: "appointment",
       },
-    ],
-    _appointments: [
-      {
-        _date: {
-          type: String,
-          required: true,
-          validate: {
-            validator: function (value) {
-              return /^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]|(?:Jan|Mar|May|Jul|Aug|Oct|Dec)))\1|(?:(?:29|30)(\/|-|\.)(?:0?[1,3-9]|1[0-2]|(?:Jan|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec))\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)(?:0?2|(?:Feb))\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9]|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep))|(?:1[0-2]|(?:Oct|Nov|Dec)))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$/.test(
-                value
-              );
-            },
-            message: "Invalid date format, should be DD/MM/YYYY",
-          },
-        },
-        _time: {
-          type: String,
-          required: true,
-          validate: {
-            validator: function (value) {
-              return /^([0-9]|0[0-9]|1[0-9]|2[0-4]):[0-5][0-9]$/.test(value);
-            },
-            message: "Invalid time format, should be in the form 00:00 ",
-          },
-        },
-        _patientId: { type: Number, required: true, ref: "patient" },
-        _clinicId: {
-          type: Number,
-          required: true,
-          ref: "clinics",
-        },
-      },
-      { _id: false },
     ],
   })
 );

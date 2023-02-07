@@ -6,23 +6,19 @@ const {
   employeePatchValidation,
   numberIdParamsValidation,
 } = require("../Middlewares/validateData");
-const authorizationMW = require("../Middlewares/authenticationMW");
+const { authorize } = require("../Middlewares/authenticationMW");
 
 const router = express.Router();
 
 router
   .route("/employee")
-  .all(authorizationMW.checkAdmin)
+  .all(authorize("admin"))
   .get(controller.getAllEmployees)
   .post(employeeValidation, validatorMiddleware, controller.addEmployee);
 
 router
   .route("/employee/:id")
-  .all(
-    authorizationMW.checkEmployee,
-    numberIdParamsValidation,
-    validatorMiddleware
-  )
+  .all(authorize("employee"), numberIdParamsValidation, validatorMiddleware)
   .get(controller.getEmployeeById)
   .patch(
     employeePatchValidation,
@@ -32,11 +28,7 @@ router
 
 router
   .route("/employee/:id")
-  .all(
-    authorizationMW.checkAdmin,
-    numberIdParamsValidation,
-    validatorMiddleware
-  )
+  .all(authorize("admin"), numberIdParamsValidation, validatorMiddleware)
   .get(controller.getEmployeeById)
   .patch(employeePatchValidation, validatorMiddleware, controller.patchEmployee)
   .delete(controller.removeEmployeeById);

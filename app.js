@@ -11,10 +11,7 @@ const patientRouter = require("./Routes/patientRouter");
 const employeeRouter = require("./Routes/employeeRouter");
 const medicineRouter = require("./Routes/medicineRouter");
 const clinicRouter = require("./Routes/clinicRouter");
-const appointmentRouter = require("./Routes/appointmentRouter");
-const prescriptionRouter = require("./Routes/prescriptionRouter");
-const invoiceRouter = require("./Routes/invoiceRouter");
-
+const registerRouter = require("./Routes/registerRouter");
 require("dotenv").config();
 
 /**** Open Server ****/
@@ -44,28 +41,22 @@ mongoose
 // a- logger middleware
 app.use(morgan("dev"));
 
-// upload // 
-app.use('/upload', express.static('upload'));
-
 // b- body parser middleware
 app.use(express.json());
 
 // c- Routes (End points)  middleware
-
+/*Register New User */
+app.use(registerRouter);
 /*Authenticate user */
 app.use(authenticate);
 /*Authorization user */
 app.use(authorizationMW);
-
 /*Routes*/
 app.use(doctorRouter);
 app.use(patientRouter);
 app.use(employeeRouter);
 app.use(medicineRouter);
 app.use(clinicRouter);
-app.use(appointmentRouter);
-app.use(prescriptionRouter);
-app.use(invoiceRouter);
 // d- file not found middleware
 app.use((request, response) => {
   response.status(404).json({ data: "Page Not Found 404" });

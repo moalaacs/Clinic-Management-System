@@ -6,13 +6,13 @@ const {
   validatePatchAppointment,
   numberIdParamsValidation,
 } = require("../Middlewares/validateData");
-const authorizationMW = require("../Middlewares/authenticationMW");
+const { authorize } = require("../Middlewares/authenticationMW");
 
 const router = express.Router();
 
 router
   .route("/appointment")
-  .get(authorizationMW.checkAdmin, controller.getAllAppointments)
+  .get(authorize("admin"), controller.getAllAppointments)
   .post(
     validateAppointment,
     validatorMiddleware,

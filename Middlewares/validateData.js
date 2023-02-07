@@ -28,6 +28,22 @@ let validateClinic = [
   check("phone")
     .matches(/^01[0125](\-)?[0-9]{8}$/)
     .withMessage("Contact number should be a number"),
+  check("speciality")
+    .isString()
+    .withMessage("Speciality must be string")
+    .isIn([
+      "Pediatrician",
+      "Gynecologist",
+      "Cardiologist",
+      "Oncologist",
+      "Dermatologist",
+      "Psychiatrist",
+      "Neurologist",
+      "Radiologist",
+      "Dentist",
+      "Surgeon",
+    ])
+    .withMessage("Clinic's speciality isn't available"),
 ];
 let validatePatchClinic = [
   check("address.street")
@@ -62,6 +78,23 @@ let validatePatchClinic = [
     .optional()
     .matches(/^01[0125](\-)?[0-9]{8}$/)
     .withMessage("Contact number should be a number"),
+  check("speciality")
+    .optional()
+    .isString()
+    .withMessage("Speciality must be string")
+    .isIn([
+      "Pediatrician",
+      "Gynecologist",
+      "Cardiologist",
+      "Oncologist",
+      "Dermatologist",
+      "Psychiatrist",
+      "Neurologist",
+      "Radiologist",
+      "Dentist",
+      "Surgeon",
+    ])
+    .withMessage("Clinic's speciality isn't available"),
 ];
 let validatePerson = [
   check("_id").optional().isNumeric().withMessage("Id should be a number"),
@@ -75,10 +108,7 @@ let validatePerson = [
     .withMessage("Name should be a string and contain only letters and spaces")
     .isLength({ min: 3 })
     .withMessage("length of name should be greater than 3 characters"),
-  check("dateOfBirth").matches(
-    /^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]|(?:Jan|Mar|May|Jul|Aug|Oct|Dec)))\1|(?:(?:29|30)(\/|-|\.)(?:0?[1,3-9]|1[0-2]|(?:Jan|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec))\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)(?:0?2|(?:Feb))\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9]|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep))|(?:1[0-2]|(?:Oct|Nov|Dec)))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$/
-  )
-  .withMessage("Invalid date format, should be DD/MM/YYYY"),
+  check("age").isNumeric().withMessage("Age should be a number"),
   check("gender")
     .isIn(["male", "female"])
     .withMessage("gender must be either male or female"),
@@ -125,10 +155,7 @@ let validatePatchPerson = [
     .withMessage("Name should be a string and contain only letters and spaces")
     .isLength({ min: 3 })
     .withMessage("length of name should be greater than 3 characters"),
-  check("dateOfBirth").optional() .matches(
-    /^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]|(?:Jan|Mar|May|Jul|Aug|Oct|Dec)))\1|(?:(?:29|30)(\/|-|\.)(?:0?[1,3-9]|1[0-2]|(?:Jan|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec))\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)(?:0?2|(?:Feb))\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9]|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep))|(?:1[0-2]|(?:Oct|Nov|Dec)))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$/
-  )
-  .withMessage("Invalid date format, should be DD/MM/YYYY"),
+  check("age").optional().isNumeric().withMessage("Age should be a number"),
   check("gender")
     .optional()
     .isIn(["male", "female"])
@@ -190,30 +217,48 @@ let validatePatchPatient = [
 ];
 let doctorValidation = [
   validatePerson,
-  check("speciality").isString().withMessage("Speciality must be string"),
-  check("clinic").isArray().withMessage("Clinics must be entered as an array"),
-  check("clinic.*").isNumeric().withMessage("Each clinic Id must be number"),
+  check("speciality")
+    .isString()
+    .withMessage("Speciality must be string")
+    .isIn([
+      "Pediatrician",
+      "Gynecologist",
+      "Cardiologist",
+      "Oncologist",
+      "Dermatologist",
+      "Psychiatrist",
+      "Neurologist",
+      "Radiologist",
+      "Dentist",
+      "Surgeon",
+    ])
+    .withMessage("Doctor's speciality isn't provided"),
 ];
 let doctorPatchValidation = [
   validatePatchPerson,
   check("speciality")
-    .optional()
     .isString()
-    .withMessage("Speciality must be string"),
-  check("clinic")
-    .optional()
-    .isArray()
-    .withMessage("Clinics must be entered as an array"),
-  check("clinic.*")
-    .optional()
-    .isNumeric()
-    .withMessage("Each clinic Id must be number"),
+    .withMessage("Speciality must be string")
+    .isIn([
+      "Pediatrician",
+      "Gynecologist",
+      "Cardiologist",
+      "Oncologist",
+      "Dermatologist",
+      "Psychiatrist",
+      "Neurologist",
+      "Radiologist",
+      "Dentist",
+      "Surgeon",
+    ])
+    .withMessage("Doctor's speciality isn't available"),
 ];
 let numberIdParamsValidation = [
   param("id").isInt().withMessage("ID must be number"),
 ];
 let employeeValidation = [
   validatePerson,
+  check("clinic").isInt().withMessage("clinicId should be number"),
   check("salary").isInt().withMessage("salary should be number"),
   check("workingHours").isInt().withMessage("workingHours should be number"),
 ];
@@ -303,64 +348,7 @@ let validatePatchAppointment = [
     .isIn(["Pending", "Accepted", "Declined", "Completed"])
     .withMessage("Invalid appointment status"),
 ];
-let validatePrescription = [
-  check("clinic").isNumeric().withMessage("Clinic is required and should be a number"),
-  check("patient").isNumeric().withMessage("Patient is required and should be a number"),
-  check("doctor").isNumeric().withMessage("Doctor is required and should be a number"),
-  check("medicine").isArray().withMessage("medicine should be an array"),
-  check("medicine.*.name").isString().withMessage("medicine name should be a string"),
-  check("medicine.*.dose").isString().withMessage("medicine dose should be a string"),
-  check("medicine.*.frequency").isString().withMessage("medicine frequency should be a string"),
-  check("medicine.*.type").isIn(["syrup", "tablet", "capsule", "injection"])
-  .withMessage("Medication type must be either syrup, tablet, capsule, or injection"),
-  check("instructions", "Instructions should have a minimum length of 5 characters")
-  .optional()
-  .if((value) => value)
-  .isLength({ min: 5 })
-];
-let validatePatchPrescription = [
-  check("clinic").optional().isNumeric().withMessage("Clinic is required and should be a number"),
-  check("patient").optional().isNumeric().withMessage("Patient is required and should be a number"),
-  check("doctor").optional().isNumeric().withMessage("Doctor is required and should be a number"),
-  check("medicine").optional().isArray().withMessage("medicine should be an array"),
-  check("medicine.*.name").optional().isString().withMessage("medicine name should be a string"),
-  check("medicine.*.dose").optional().isString().withMessage("medicine dose should be a string"),
-  check("medicine.*.frequency").optional().isString().withMessage("medicine frequency should be a string"),
-  check("medicine.*.type").optional().isIn(["syrup", "tablet", "capsule", "injection"])
-  .withMessage("Medication type must be either syrup, tablet, capsule, or injection"),
-  check("instructions", "Instructions should have a minimum length of 5 characters")
-  .optional()
-  .if((value) => value)
-  .isLength({ min: 5 })
-];
-let validateInvoice = [
-  check("patientId").isNumeric().withMessage("Patient Id should be a number"),
-  check("clinicId").isNumeric().withMessage("clinic Id should be a number"),
-  check("services")
-    .isArray()
-    .withMessage("Services must be entered as an array"),
-  check("services.*.name").isString().withMessage("services name should be a string"),
-  check("services.*.cost").isNumeric().withMessage("services cost should be a number"),
-];
-let validatePatchInvoice = [
-  check("patientId")
-    .optional()
-    .isNumeric()
-    .withMessage("Patient Id should be a number"),
-  check("clinicId")
-    .optional()
-    .isNumeric()
-    .withMessage("clinic Id should be a number"),
-    check("services").optional()
-    .isArray()
-    .withMessage("Services must be entered as an array"),
-  check("services.*.name").isString().withMessage("services name should be a string"),
-  check("services.*.cost").isNumeric().withMessage("services cost should be a number"),
-  // check("paymentMethod")
-  //   .optional()
-  //   .isIn(["cash", "credit", "insurance"])
-  //   .withMessage("Invalid paymentMethod status"),
-];
+
 module.exports = {
   validateClinic,
   validatePatchClinic,
@@ -375,8 +363,4 @@ module.exports = {
   medicinePatchValidation,
   validateAppointment,
   validatePatchAppointment,
-  validatePrescription,
-  validatePatchPrescription,
-  validateInvoice,
-  validatePatchInvoice,
 };

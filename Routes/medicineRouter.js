@@ -6,21 +6,18 @@ const {
   numberIdParamsValidation,
   medicinePatchValidation,
 } = require("../Middlewares/validateData");
-const authorizationMW = require("../Middlewares/authenticationMW");
+const { authorize } = require("../Middlewares/authenticationMW");
 const router = express.Router();
 
 router
   .route("/medicine")
+  .all(authorize("admin"))
   .get(controller.getAllMedicine)
-  .post(controller.uploadImage, medicineValidation, validatorMiddleware, controller.addMedicine);
+  .post(medicineValidation, validatorMiddleware, controller.addMedicine);
 
 router
   .route("/medicine/:id")
-  .all(
-    authorizationMW.checkAdmin,
-    numberIdParamsValidation,
-    validatorMiddleware
-  )
+  .all(authorize("admin"), numberIdParamsValidation, validatorMiddleware)
   .get(validatorMiddleware, controller.getMedicineById)
   .patch(
     medicinePatchValidation,

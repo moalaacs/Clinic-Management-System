@@ -1,34 +1,25 @@
-const filterData = (model, query, fieldsToPopulate = []) => {
+const filterData = (model, query) => {
   let filter = {};
   for (let key in query) {
-    if (typeof query[key] === 'object') {
-      for (let nestedKey in query[key]) {
-        filter[`${key}.${nestedKey}`] = query[key][nestedKey];
-      }
+    let value = key;
+    if (value.includes("<")) {
+      value.charAt(value.length - 1) == "<"
+        ? (filter[key.slice(0, key.indexOf("<"))] = { $lte: query[key] })
+        : (filter[key.slice(0, key.indexOf("<"))] = {
+            $lt: +value.slice(value.indexOf("<") + 1),
+          });
+    } else if (value.includes(">")) {
+      value.charAt(value.length - 1) == ">"
+        ? (filter[key.slice(0, key.indexOf(">"))] = { $gte: query[key] })
+        : (filter[key.slice(0, key.indexOf(">"))] = {
+            $gt: +value.slice(value.indexOf(">") + 1),
+          });
     } else {
-      let value = key;
-      if (value.includes("<")) {
-        value.charAt(value.length - 1) == "<"
-          ? (filter[key.slice(0, key.indexOf("<"))] = { $lte: query[key] })
-          : (filter[key.slice(0, key.indexOf("<"))] = {
-              $lt: +value.slice(value.indexOf("<") + 1),
-            });
-      } else if (value.includes(">")) {
-        value.charAt(value.length - 1) == ">"
-          ? (filter[key.slice(0, key.indexOf(">"))] = { $gte: query[key] })
-          : (filter[key.slice(0, key.indexOf(">"))] = {
-              $gt: +value.slice(value.indexOf(">") + 1),
-            });
-      } else {
-        filter[key] = query[key];
-      }
+      filter[key] = query[key];
     }
   }
-  return fieldsToPopulate.length
-  ? model.find(filter).populate(fieldsToPopulate)
-  : model.find(filter);
+  return model.find({ ...filter });
 };
-
 
 const paginateData = (data, query) => {
   let page = query.page || 1;
@@ -52,6 +43,59 @@ const sliceData = (data, query) => {
   let start = query.start || 0;
   let end = query.end || data.length;
   return data.slice(start, end);
+};
+
+const fillClinicServices = (specility) => {
+  switch (specility) {
+    case "Pediatrician": {
+      return [
+        {
+          name: "Baby Checkup",
+          cost: 150,
+        },
+        {
+          name: "Vaccination",
+          cost: 60,
+        },
+        {
+          name: "Medical Consult",
+          cost: 30,
+        },
+        {
+          name: "Ear Piercing",
+          cost: 80,
+        },
+        {
+          name: "Ear cleaning",
+          cost: 60,
+        },
+        {
+          name: "Tongue tie release",
+          cost: 40,
+        },
+        {
+          name: "Hearing loss",
+          cost: 80,
+        },
+        {
+          name: "Ear infection",
+          cost: 70,
+        },
+        {
+          name: "Throught infection",
+          cost: 150,
+        },
+        {
+          name: "Thyroid mass",
+          cost: 90,
+        },
+        {
+          name: "Tonsillectomy",
+          cost: 200,
+        },
+      ];
+    }
+  }
 };
 
 module.exports = {

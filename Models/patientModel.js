@@ -4,7 +4,7 @@ const personSchema = require("./personModel");
 
 /*** crete schema for patients collection ***/
 const patientSchema = new mongoose.Schema(
-  Object.assign(personSchema.obj, {
+  Object.assign({}, personSchema.obj, {
     _medicalHistory: { type: String },
     _id: { type: Number },
   })

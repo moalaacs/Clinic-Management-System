@@ -18,6 +18,13 @@ const emailValidator = [
     message: "Email should be in the format of example@domain.com",
   }),
 ];
+const serviceSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    cost: { type: Number, required: true },
+  },
+  { _id: false }
+);
 /* crete schema for clinics collection */
 const clinicSchema = new mongoose.Schema({
   _id: { type: Number },
@@ -32,6 +39,24 @@ const clinicSchema = new mongoose.Schema({
     validate: emailValidator,
   },
   _address: addressSchema,
+  _specilization: {
+    type: String,
+    unique: true,
+    required: true,
+    enum: [
+      "Pediatrician",
+      "Gynecologist",
+      "Cardiologist",
+      "Oncologist",
+      "Dermatologist",
+      "Psychiatrist",
+      "Neurologist",
+      "Radiologist",
+      "Dentist",
+      "Surgeon",
+    ],
+  },
+  _services: [{ type: serviceSchema }],
 });
 
 /* auto increment for _id field */

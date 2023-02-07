@@ -32,45 +32,16 @@ const phoneNumberValidator = [
   }),
 ];
 
-function dateOfBirthValidator(value) {
-  let now = new Date();
-  let age = now.getFullYear() - value.split("/")[2];
-  if (now.getMonth() < value.split("/")[1]) {
-    age--;
-  }
-  return age >= 18 && age <= 60 
-  && /^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]|(?:Jan|Mar|May|Jul|Aug|Oct|Dec)))\1|(?:(?:29|30)(\/|-|\.)(?:0?[1,3-9]|1[0-2]|(?:Jan|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec))\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)(?:0?2|(?:Feb))\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9]|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep))|(?:1[0-2]|(?:Oct|Nov|Dec)))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$/.test(
-    value
-  );
-}
-
-
 const personSchema = new mongoose.Schema(
   {
     _fname: { type: String, required: true, validate: nameValidator },
     _lname: { type: String, required: true, validate: nameValidator },
-    _dateOfBirth: {
-      type: String,
+    _age: {
+      type: Number,
       required: true,
-      validate: [
-        dateOfBirthValidator,
-        "Age must be at least 18 and at most 60"
-      ],
-      set: function(value) {
-        let date = new Date(value);
-        return date.toLocaleDateString('en-GB', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric'
-        });
-      }
+      min: [18, "Age must be at least 18"],
+      max: [60, "Age must be at most 60"],
     },
-    // _age: {
-    //   type: Number,
-    //   required: true,
-    //   min: [18, "Age must be at least 18"],
-    //   max: [60, "Age must be at most 60"],
-    // },
     _gender: { type: String, required: true },
     _contactNumber: {
       type: String,
@@ -80,8 +51,8 @@ const personSchema = new mongoose.Schema(
     _email: {
       type: String,
       required: true,
+      unique: true,
       validate: emailValidator,
-      unique: [true, "This email is already in use"],
     },
     _address: addressSchema,
     _password: { type: String, required: true },
@@ -89,6 +60,12 @@ const personSchema = new mongoose.Schema(
   },
   { _id: false }
 );
-personSchema.index({ email: 1 }, { unique: true });
+
 module.exports = personSchema;
 
+// const ageValidator = [({
+//   validator: value => {
+//     return value >= 18 && value <= 60;
+//   },
+//   message: "Age must be between 18 and 60"
+// })];

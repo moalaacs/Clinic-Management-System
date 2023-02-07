@@ -133,6 +133,7 @@ exports.patchAppointment = async (request, response, next) => {
     }
 
     if (time) {
+      // const timeRegex = /^\d{2}:\d{2}$/;
       const minutes = time.split(":")[1];
       if (minutes !== "00" && minutes !== "30") {
         return response.status(400).json({ message: "Invalid time format." });
@@ -194,13 +195,8 @@ exports.removeAppointmentById = async (request, response, next) => {
 // Get all appointments
 exports.getAllAppointments = async (request, response, next) => {
   try {
-    let query = reqNamesToSchemaNames(request.query);
-    let appointments = await filterData(appointmentSchema, query,[
-      { path: '_doctorId', options: { strictPopulate: false } },
-      { path: '_patientId', options: { strictPopulate: false } },
-      { path: '_clinicId', options: { strictPopulate: false } },
-    ]);
-    appointments = sortData(appointments, query);
+    let appointments = await filterData(appointmentSchema, request.query);
+    appointments = sortData(appointments, request.query);
     appointments = paginateData(appointments, request.query);
     appointments = sliceData(appointments, request.query);
 
@@ -222,29 +218,3 @@ exports.getAppointmentById = async (request, response, next) => {
     next(error);
   }
 };
-
-
-
-const reqNamesToSchemaNames = (query) => {
-  const fieldsToReplace = {
-    id:'_id',
-    date:'_date',
-    time:'_time',
-    doctorId:'_doctorId',
-    patientId:'_patientId',
-    clinicId:'_clinicId',
-  };
-
-  const replacedQuery = {};
-  for (const key in query) {
-    let newKey = key;
-    for (const replaceKey in fieldsToReplace) {
-      if (key.includes(replaceKey)) {
-        newKey = key.replace(replaceKey, fieldsToReplace[replaceKey]);
-        break;
-      }
-    }
-    replacedQuery[newKey] = query[key];
-  }
-  return replacedQuery;
-}
