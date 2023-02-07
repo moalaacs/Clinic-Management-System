@@ -5,7 +5,7 @@ const mongoose = require("mongoose");
 
 /**** Import Routes *****/
 const authenticate = require("./Routes/authRouter");
-const authorizationMW = require("./Middlewares/authenticationMW");
+const authorizationMW = require("./Middlewares/authorizationMW");
 const doctorRouter = require("./Routes/doctorRouter");
 const patientRouter = require("./Routes/patientRouter");
 const employeeRouter = require("./Routes/employeeRouter");

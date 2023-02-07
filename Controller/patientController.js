@@ -33,18 +33,23 @@ exports.getAllPatients = async (request, response, next) => {
 exports.addPatient = async (request, response, next) => {
   try {
     let email;
-    const hash = await bcrypt.hash(request.body.password, 10);
     let testEmail = await emailSchema.findOne({ _email: request.body.email });
     if (testEmail) {
       return response.status(400).json({ message: `Email Already in use` });
     } else {
       email = new emailSchema({ _email: request.body.email });
-     
     }
+    const hash = await bcrypt.hash(request.body.password, 10);
+
+    let now = new Date();
+    let age = now.getFullYear() - request.body.dateOfBirth.split("/")[2];
+    if (now.getMonth() < request.body.dateOfBirth.split("/")[1]) { age--;}      
+
     const patient = new patientSchema({
       _fname: request.body.firstname,
       _lname: request.body.lastname,
       _dateOfBirth: request.body.dateOfBirth,
+      _age: age,
       _gender: request.body.gender,
       _contactNumber: request.body.phone,
       _email: request.body.email,
@@ -65,10 +70,15 @@ exports.addPatient = async (request, response, next) => {
 
 // Put a patient
 exports.putPatientById = async (request, response, next) => {
+  let now = new Date();
+  let age = now.getFullYear() - request.body.dateOfBirth.split("/")[2];
+  if (now.getMonth() < request.body.dateOfBirth.split("/")[1]) { age--;}      
+
   let tempPatient = {
     _fname: request.body.firstname,
     _lname: request.body.lastname,
     _dateOfBirth: request.body.dateOfBirth,
+    _age: age,
     _gender: request.body.gender,
     _contactNumber: request.body.phone,
     _email: request.body.email,
@@ -84,7 +94,7 @@ exports.putPatientById = async (request, response, next) => {
     );
     response
       .status(200)
-      .json({ message: "Patient updated successfully.", tempPatient });
+      .json({ message: "Patient updated successfully.", updatedPatient });
   } catch (error) {
     next(error);
   }
@@ -137,8 +147,12 @@ exports.patchPatientById = async (request, response, next) => {
   if (request.body.gender) {
     tempPatient._gender = request.body.gender;
   }
-  if (request.body.age) {
+  if (request.body.dateOfBirth) {
     tempPatient._dateOfBirth = request.body.dateOfBirth;
+    let now = new Date();
+    let age = now.getFullYear() - request.body.dateOfBirth.split("/")[2];
+    if (now.getMonth() < request.body.dateOfBirth.split("/")[1]) { age--;} 
+    tempPatient._age = age;     
   }
 
   try {

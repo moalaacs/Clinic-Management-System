@@ -23,6 +23,7 @@ const medicineSchema = new mongoose.Schema({
   _leaflet: {type: String,required: true},
   _pricePerUnit: {type: Number, required: true},
   _quantity: {type: Number, required: true},
+  _image: {type: String, required: true},
 });
 
 /*** auto increment for _id field ***/

@@ -45,19 +45,25 @@ exports.addDoctor = async (request, response, next) => {
           .json({ message: `No such clinic record for id: ${sntClinic}` });
       }
     });
+    let email;
     let testEmail = await emailSchema.findOne({ _email: request.body.email });
     if (testEmail) {
       return response.status(400).json({ message: `Email Already in use` });
     } else {
-      let email = new emailSchema({ _email: request.body.email });
-      await email.save();
+      email = new emailSchema({ _email: request.body.email });
+      
     }
 
     const hash = await bcrypt.hash(request.body.password, 10);
+
+    let now = new Date();
+    let age = now.getFullYear() - request.body.dateOfBirth.split("/")[2];
+    if (now.getMonth() < request.body.dateOfBirth.split("/")[1]) { age--;} 
     const doctor = new doctorSchema({
       _fname: request.body.firstname,
       _lname: request.body.lastname,
       _dateOfBirth: request.body.dateOfBirth,
+      _age: age,
       _gender: request.body.gender,
       _contactNumber: request.body.phone,
       _email: request.body.email,
@@ -68,6 +74,7 @@ exports.addDoctor = async (request, response, next) => {
       _clinics: request.body.clinic,
     });
     await doctor.save();
+    await email.save();
     response
       .status(201)
       .json({ message: "Doctor created successfully.", doctor });
@@ -78,6 +85,9 @@ exports.addDoctor = async (request, response, next) => {
 
 exports.putDoctorById = async (request, response, next) => {
   try {
+    let now = new Date();
+    let age = now.getFullYear() - request.body.dateOfBirth.split("/")[2];
+    if (now.getMonth() < request.body.dateOfBirth.split("/")[1]) { age--;}
     const updatedDoctor = await doctorSchema.updateOne(
       { _id: request.params.id },
       {
@@ -85,6 +95,7 @@ exports.putDoctorById = async (request, response, next) => {
           _fname: request.body.firstname,
           _lname: request.body.lastname,
           _dateOfBirth: request.body.dateOfBirth,
+          _age: age,
           _gender: request.body.gender,
           _contactNumber: request.body.phone,
           _email: request.body.email,
@@ -112,28 +123,27 @@ exports.patchDoctorById = async (request, response, next) => {
   if (request.body.lastname) {
     tempPatient._lname = request.body.lastname;
   }
-  if (request.body.speciality != null) {
+  if (request.body.speciality) {
     tempDoctor._specilization = request.body.speciality;
   }
-  if (request.body.phone != null) {
+  if (request.body.phone) {
     tempDoctor._contactNumber = request.body.phone;
   }
-  //
-  if (request.body.schedule != null) {
+  if (request.body.schedule) {
     tempDoctor.schedule = request.body.schedule;
   }
-  //
-  if (request.body.clinic != null) {
+
+  if (request.body.clinic) {
     tempDoctor._clinics = request.body.clinic;
   }
-  if (request.body.email != null) {
+  if (request.body.email) {
     tempDoctor._email = request.body.email;
   }
-  if (request.body.password != null) {
+  if (request.body.password) {
     const hash = await bcrypt.hash(request.body.password, 10);
     tempDoctor._password = hash;
   }
-  if (request.body.image != null) {
+  if (request.body.image) {
     tempDoctor._image = request.body.profileImage;
   }
   if (request.body.address) {
@@ -155,11 +165,15 @@ exports.patchDoctorById = async (request, response, next) => {
       return response.status(200).json({ message: `Address can't be empty` });
     }
   }
-  if (request.body.gender != null) {
+  if (request.body.gender) {
     tempDoctor._gender = request.body.gender;
   }
-  if (request.body.age != null) {
-    tempDoctor._dateOfBirth = request.body.dateOfBirth;
+  if (request.body.dateOfBirth) {
+    tempPatient._dateOfBirth = request.body.dateOfBirth;
+    let now = new Date();
+    let age = now.getFullYear() - request.body.dateOfBirth.split("/")[2];
+    if (now.getMonth() < request.body.dateOfBirth.split("/")[1]) { age--;} 
+    tempPatient._age = age;     
   }
 
   try {
@@ -169,7 +183,7 @@ exports.patchDoctorById = async (request, response, next) => {
     );
     response
       .status(200)
-      .json({ message: "Doctor updated successfully.", tempDoctor });
+      .json({ message: "Doctor updated successfully.", updatedDoctor });
   } catch (error) {
     next(error);
   }

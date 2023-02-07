@@ -44,18 +44,25 @@ exports.addEmployee = async (request, response, next) => {
         .status(400)
         .json({ message: `No such clinic record for id: ${sentClinic}` });
     }
+    let email;
     let testEmail = await emailSchema.findOne({ _email: request.body.email });
     if (testEmail) {
       return response.status(400).json({ message: `Email Already in use` });
     } else {
-      let email = new emailSchema({ _email: request.body.email });
-      await email.save();
+      email = new emailSchema({ _email: request.body.email });
     }
     const hash = await bcrypt.hash(request.body.password, 10);
+
+
+    let now = new Date();
+    let age = now.getFullYear() - request.body.dateOfBirth.split("/")[2];
+    if (now.getMonth() < request.body.dateOfBirth.split("/")[1]) { age--;} 
+
     const employee = new EmployeeSchema({
       _fname: request.body.firstname,
       _lname: request.body.lastname,
       _dateOfBirth: request.body.dateOfBirth,
+      _age: age,
       _gender: request.body.gender,
       _contactNumber: request.body.phone,
       _email: request.body.email,
@@ -67,6 +74,7 @@ exports.addEmployee = async (request, response, next) => {
       _workingHours: request.body.workingHours,
     });
     await employee.save();
+    await email.save();
     response
       .status(201)
       .json({ message: "Employee created successfully.", employee });
@@ -78,6 +86,9 @@ exports.addEmployee = async (request, response, next) => {
 // Edit a Employee
 exports.putEmployee = async (request, response, next) => {
   try {
+  let now = new Date();
+  let age = now.getFullYear() - request.body.dateOfBirth.split("/")[2];
+  if (now.getMonth() < request.body.dateOfBirth.split("/")[1]) { age--;}  
     const updatedEmployee = await EmployeeSchema.updateOne(
       { _id: request.params.id },
       {
@@ -85,6 +96,7 @@ exports.putEmployee = async (request, response, next) => {
           _fname: request.body.firstname,
           _lname: request.body.lastname,
           _dateOfBirth: request.body.dateOfBirth,
+          _age: age,
           _gender: request.body.gender,
           _contactNumber: request.body.phone,
           _email: request.body.email,
@@ -99,7 +111,7 @@ exports.putEmployee = async (request, response, next) => {
     );
     response
       .status(200)
-      .json({ message: "Employee updated successfully.", employee });
+      .json({ message: "Employee updated successfully.", updatedEmployee });
   } catch (error) {
     next(error);
   }
@@ -151,9 +163,14 @@ exports.patchEmployee = async (request, response, next) => {
   if (request.body.gender) {
     tempEmployee._gender = request.body.gender;
   }
-  if (request.body.age) {
-    tempEmployee._dateOfBirth = request.body.dateOfBirth;
+  if (request.body.dateOfBirth) {
+    tempPatient._dateOfBirth = request.body.dateOfBirth;
+    let now = new Date();
+    let age = now.getFullYear() - request.body.dateOfBirth.split("/")[2];
+    if (now.getMonth() < request.body.dateOfBirth.split("/")[1]) { age--;} 
+    tempPatient._age = age;     
   }
+
   if (request.body.salary) {
     tempEmployee._monthlyRate = request.body.salary;
   }
@@ -166,7 +183,7 @@ exports.patchEmployee = async (request, response, next) => {
       { _id: request.params.id },
       { $set: tempEmployee }
     );
-    response.status(200).json("Patch Succesfully");
+    response.status(200).json("Patch Succesfully", updatedDoctor);
   } catch (error) {
     next(error);
   }
