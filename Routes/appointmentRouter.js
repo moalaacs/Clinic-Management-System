@@ -25,6 +25,10 @@ router
   .get(authorizationMW.checkAdmin, controller.allAppointmentsReports);
 
 router
+  .route("/appointmentReports/daily")
+  .get(authorizationMW.checkAdmin, controller.dailyAppointmentsReports);
+
+router
   .route("/appointment/:id")
   .all(
     numberIdParamsValidation,

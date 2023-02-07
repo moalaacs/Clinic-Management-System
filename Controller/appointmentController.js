@@ -228,8 +228,29 @@ exports.getAppointmentById = async (request, response, next) => {
 exports.allAppointmentsReports = (request, response, next) => {
   appointmentSchema
     .find()
-    .populate({ path: "_clinicId", select: { _id: 0 } })
+    .populate({ path: "_patientId", select: { _id: 0 } })
     .populate({ path: "_doctorId", select: { _id: 0 } })
+    .populate({ path: "_clinicId", select: { _id: 0 } })
+    .then((data) => {
+      response.status(200).json(data);
+    })
+    .catch((error) => next(error));
+};
+
+// Appointments Daily Reports
+exports.dailyAppointmentsReports = (request, response, next) => {
+  let date = new Date();
+  date.setHours(0, 0, 0);
+  let day = 60 * 60 * 24 * 1000;
+  let nextDay = new Date(date.getTime() + day);
+  appointmentSchema
+    .find()
+    // .where("date".gt(date).lt(nextDay))
+    .populate({ path: "_patientId", select: { _id: 0 } })
+    .populate({
+      path: "_doctorId",
+      select: { _id: 0, appointmentNo: 0, workingHours: 0 },
+    })
     .populate({ path: "_clinicId", select: { _id: 0 } })
     .then((data) => {
       response.status(200).json(data);
