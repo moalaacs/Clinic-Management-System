@@ -32,18 +32,19 @@ exports.getAllPatients = async (request, response, next) => {
 // Add a new patient
 exports.addPatient = async (request, response, next) => {
   try {
+    let email;
     const hash = await bcrypt.hash(request.body.password, 10);
     let testEmail = await emailSchema.findOne({ _email: request.body.email });
     if (testEmail) {
       return response.status(400).json({ message: `Email Already in use` });
     } else {
-      let email = new emailSchema({ _email: request.body.email });
-      await email.save();
+      email = new emailSchema({ _email: request.body.email });
+     
     }
     const patient = new patientSchema({
       _fname: request.body.firstname,
       _lname: request.body.lastname,
-      _age: request.body.age,
+      _dateOfBirth: request.body.dateOfBirth,
       _gender: request.body.gender,
       _contactNumber: request.body.phone,
       _email: request.body.email,
@@ -53,6 +54,7 @@ exports.addPatient = async (request, response, next) => {
       _medicalHistory: request.body.medicalHistory,
     });
     await patient.save();
+    await email.save();
     response
       .status(201)
       .json({ message: "Patient created successfully.", patient });
@@ -66,7 +68,7 @@ exports.putPatientById = async (request, response, next) => {
   let tempPatient = {
     _fname: request.body.firstname,
     _lname: request.body.lastname,
-    _age: request.body.age,
+    _dateOfBirth: request.body.dateOfBirth,
     _gender: request.body.gender,
     _contactNumber: request.body.phone,
     _email: request.body.email,
@@ -136,7 +138,7 @@ exports.patchPatientById = async (request, response, next) => {
     tempPatient._gender = request.body.gender;
   }
   if (request.body.age) {
-    tempPatient._age = request.body.age;
+    tempPatient._dateOfBirth = request.body.dateOfBirth;
   }
 
   try {
@@ -191,6 +193,7 @@ const reqNamesToSchemaNames = (query) => {
     id:'_id',
     firstname: '_fname',
     lastname: '_lname',
+    dateOfBirth: '_dateOfBirth',
     age: '_age',
     gender: '_gender',
     phone: '_contactNumber',

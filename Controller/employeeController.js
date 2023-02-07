@@ -55,7 +55,7 @@ exports.addEmployee = async (request, response, next) => {
     const employee = new EmployeeSchema({
       _fname: request.body.firstname,
       _lname: request.body.lastname,
-      _age: request.body.age,
+      _dateOfBirth: request.body.dateOfBirth,
       _gender: request.body.gender,
       _contactNumber: request.body.phone,
       _email: request.body.email,
@@ -84,7 +84,7 @@ exports.putEmployee = async (request, response, next) => {
         $set: {
           _fname: request.body.firstname,
           _lname: request.body.lastname,
-          _age: request.body.age,
+          _dateOfBirth: request.body.dateOfBirth,
           _gender: request.body.gender,
           _contactNumber: request.body.phone,
           _email: request.body.email,
@@ -152,7 +152,7 @@ exports.patchEmployee = async (request, response, next) => {
     tempEmployee._gender = request.body.gender;
   }
   if (request.body.age) {
-    tempEmployee._age = request.body.age;
+    tempEmployee._dateOfBirth = request.body.dateOfBirth;
   }
   if (request.body.salary) {
     tempEmployee._monthlyRate = request.body.salary;
@@ -209,6 +209,7 @@ const reqNamesToSchemaNames = (query) => {
     id:'_id',
     firstname: '_fname',
     lastname: '_lname',
+    dateOfBirth: '_dateOfBirth',
     age: '_age',
     gender: '_gender',
     phone: '_contactNumber',

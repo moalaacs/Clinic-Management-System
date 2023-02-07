@@ -75,7 +75,10 @@ let validatePerson = [
     .withMessage("Name should be a string and contain only letters and spaces")
     .isLength({ min: 3 })
     .withMessage("length of name should be greater than 3 characters"),
-  check("age").isNumeric().withMessage("Age should be a number"),
+  check("dateOfBirth").matches(
+    /^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]|(?:Jan|Mar|May|Jul|Aug|Oct|Dec)))\1|(?:(?:29|30)(\/|-|\.)(?:0?[1,3-9]|1[0-2]|(?:Jan|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec))\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)(?:0?2|(?:Feb))\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9]|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep))|(?:1[0-2]|(?:Oct|Nov|Dec)))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$/
+  )
+  .withMessage("Invalid date format, should be DD/MM/YYYY"),
   check("gender")
     .isIn(["male", "female"])
     .withMessage("gender must be either male or female"),
@@ -122,7 +125,10 @@ let validatePatchPerson = [
     .withMessage("Name should be a string and contain only letters and spaces")
     .isLength({ min: 3 })
     .withMessage("length of name should be greater than 3 characters"),
-  check("age").optional().isNumeric().withMessage("Age should be a number"),
+  check("dateOfBirth").optional() .matches(
+    /^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]|(?:Jan|Mar|May|Jul|Aug|Oct|Dec)))\1|(?:(?:29|30)(\/|-|\.)(?:0?[1,3-9]|1[0-2]|(?:Jan|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec))\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)(?:0?2|(?:Feb))\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9]|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep))|(?:1[0-2]|(?:Oct|Nov|Dec)))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$/
+  )
+  .withMessage("Invalid date format, should be DD/MM/YYYY"),
   check("gender")
     .optional()
     .isIn(["male", "female"])

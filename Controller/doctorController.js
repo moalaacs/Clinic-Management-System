@@ -23,7 +23,7 @@ exports.getAllDoctors = async (request, response, next) => {
     let doctors = await filterData(doctorSchema, query,[
       { path: 'clinicId', options: { strictPopulate: false } },
       { path: '_clinics', options: { strictPopulate: false } },
-      { path: '_patientId', options: { strictPopulate: false } },
+      { path: '_clinics', options: { strictPopulate: false } },
     ]);
     doctors = sortData(doctors, query);
     doctors = paginateData(doctors, request.query);
@@ -57,7 +57,7 @@ exports.addDoctor = async (request, response, next) => {
     const doctor = new doctorSchema({
       _fname: request.body.firstname,
       _lname: request.body.lastname,
-      _age: request.body.age,
+      _dateOfBirth: request.body.dateOfBirth,
       _gender: request.body.gender,
       _contactNumber: request.body.phone,
       _email: request.body.email,
@@ -84,7 +84,7 @@ exports.putDoctorById = async (request, response, next) => {
         $set: {
           _fname: request.body.firstname,
           _lname: request.body.lastname,
-          _age: request.body.age,
+          _dateOfBirth: request.body.dateOfBirth,
           _gender: request.body.gender,
           _contactNumber: request.body.phone,
           _email: request.body.email,
@@ -159,7 +159,7 @@ exports.patchDoctorById = async (request, response, next) => {
     tempDoctor._gender = request.body.gender;
   }
   if (request.body.age != null) {
-    tempDoctor._age = request.body.age;
+    tempDoctor._dateOfBirth = request.body.dateOfBirth;
   }
 
   try {
@@ -203,6 +203,7 @@ const reqNamesToSchemaNames = (query) => {
     id:'_id',
     firstname: '_fname',
     lastname: '_lname',
+    dateOfBirth: '_dateOfBirth',
     age: '_age',
     gender: '_gender',
     phone: '_contactNumber',
