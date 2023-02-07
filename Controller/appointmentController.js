@@ -258,10 +258,10 @@ exports.dailyAppointmentsReports = (request, response, next) => {
     .catch((error) => next(error));
 };
 
-// Patient Appointments
+// Patient Appointments Reports
 exports.patientAppointmentsReports = (request, response, next) => {
   appointmentSchema
-    .find({ patientID: request.params.id })
+    .find({ _patientId: request.params.id })
     .populate({ path: "_patientId", select: { _id: 0 } })
     .populate({ path: "_doctorId", select: { _id: 0 } })
     .populate({ path: "_clinicId", select: { _id: 0 } })
@@ -270,6 +270,20 @@ exports.patientAppointmentsReports = (request, response, next) => {
     })
     .catch((error) => next(error));
 };
+
+// Doctor Appointments Reports
+exports.doctorAppointmentsReports = (request, response, next) => {
+  appointmentSchema
+    .find({ _doctorId: request.params.id })
+    .populate({ path: "_patientId", select: { _id: 0 } })
+    .populate({ path: "_doctorId", select: { _id: 0 } })
+    .populate({ path: "_clinicId", select: { _id: 0 } })
+    .then((data) => {
+      request.status(200).json(data);
+    })
+    .catch((error) => next(error));
+};
+
 
 const reqNamesToSchemaNames = (query) => {
   const fieldsToReplace = {

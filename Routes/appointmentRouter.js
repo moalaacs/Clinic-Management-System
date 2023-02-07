@@ -33,6 +33,10 @@ router
   .get(authorizationMW.checkAdmin, controller.patientAppointmentsReports);
 
 router
+  .route("/appointmentReports/doctor")
+  .get(authorizationMW.checkAdmin, controller.doctorAppointmentsReports);
+
+router
   .route("/appointment/:id")
   .all(
     numberIdParamsValidation,
