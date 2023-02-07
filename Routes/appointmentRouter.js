@@ -36,3 +36,7 @@ router
   .delete(controller.removeAppointmentById);
 
 module.exports = router;
+
+router
+  .route("/appointment/allreports")
+  .get(authorizationMW.checkAdmin, controller.allAppointmentsReports);

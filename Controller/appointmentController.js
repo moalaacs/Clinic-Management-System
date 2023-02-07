@@ -15,6 +15,7 @@ const {
   sliceData,
   paginateData,
 } = require("../helper/helperfns");
+const { request, response } = require("express");
 
 // Add a new Appointment
 exports.addAppointment = async (request, response, next) => {
@@ -223,7 +224,18 @@ exports.getAppointmentById = async (request, response, next) => {
   }
 };
 
-
+// All Appointments Reports
+exports.allAppointmentsReports = (request, response, next) => {
+  appointmentSchema
+    .find()
+    .populate({ path: "_clinicId", select: { _id: 0 } })
+    .populate({ path: "_doctorId", select: { _id: 0 } })
+    .populate({ path: "_clinicId", select: { _id: 0 } })
+    .then((data) => {
+      response.status(200).json(data);
+    })
+    .catch((error) => next(error));
+};
 
 const reqNamesToSchemaNames = (query) => {
   const fieldsToReplace = {
@@ -248,3 +260,4 @@ const reqNamesToSchemaNames = (query) => {
   }
   return replacedQuery;
 }
+>>>>>>> 55a738b0fb1c66f1f67dd936d1bc5d8bbf833f91
