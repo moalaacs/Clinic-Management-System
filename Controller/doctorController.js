@@ -21,7 +21,7 @@ exports.getAllDoctors = async (request, response, next) => {
   try {
     let query = reqNamesToSchemaNames(request.query);
     let doctors = await filterData(doctorSchema, query,[
-      { path: 'clinicId', options: { strictPopulate: false } },
+      { path: '_schedule.clinicId', options: { strictPopulate: false } },
       { path: '_clinics', options: { strictPopulate: false } },
       { path: '_clinics', options: { strictPopulate: false } },
     ]);
