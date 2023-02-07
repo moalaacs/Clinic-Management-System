@@ -18,7 +18,7 @@ router
 
 router
   .route("/invoice/:id")
-  .all(numberIdParamsValidation, errorValidation, authorizationMW.checkDoctor)
+  .all(  authorizationMW.checkDoctor)
   .get(controller.getInvoiceById)
   .patch(validatePatchInvoice, errorValidation, controller.editInvoice)
   .delete(controller.removeInvoice);

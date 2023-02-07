@@ -1,4 +1,4 @@
-const prescroptionSchema = require('../Models/prescriptionModel');
+const prescriptionSchema = require('../Models/prescriptionModel');
 const patientSchema = require('../Models/patientModel');
 const doctorSchema = require('../Models/doctorModel');
 const clinicSchema = require('../Models/clinicModel');
@@ -15,7 +15,7 @@ const {
 //get all Prescription
 exports.getPrescription = async (request, response, next) => {
     try {
-        let prescription = await filterData(prescroptionSchema, request.query);
+        let prescription = await filterData(prescriptionSchema, request.query);
         prescription = sortData(prescription, request.query);
         prescription = paginateData(prescription, request.query);
         prescription = sliceData(prescription, request.query);
@@ -36,8 +36,7 @@ exports.addPrescription = async (request, response, next) => {
     const doctor = await doctorSchema.findOne({ _id: request.body.doctor });
     if (!doctor) return response.status(400).json({ error: "Doctor not found" });
     
-    let addNewPrescription = prescroptionSchema({
-    _id: request.body.id,
+    let addNewPrescription = prescriptionSchema({
     clinicRef: request.body.clinic,
     patientRef: request.body.patient,
     doctorRef: request.body.doctor,
@@ -55,14 +54,51 @@ exports.addPrescription = async (request, response, next) => {
 // Edit a Prescription
 exports.editPrescription = async (request, response, next) => {
     try {
-        const prescription = await prescroptionSchema.findByIdAndUpdate(
-            request.params.id,
-            request.body,
-            { new: true }
-        );
-        response
-            .status(200)
-            .json({ message: "Prescription updated successfully.", prescription });
+        
+    const existingPrescription = await prescriptionSchema.findById(request.params.id);
+    if (!existingPrescription) {
+        return response.status(400).json({ message: "Prescription not found." });
+    }
+        
+    let { clinic, patient, doctor, medicine,instructions } = request.body;
+    if (clinic) {
+        const isClinic = await clinicSchema.findById(clinic);
+        if (!isClinic) {
+            return response.status(400).json({ message: "Clinic not found." });
+        }
+    } else {clinic = existingPrescription.clinicRef;}
+    
+    if (patient) {
+        const isPatient = await patientSchema.findById(patient);
+        if (!isPatient) {
+            return response.status(400).json({ message: "Patient not found." });
+        }
+    } else {patient = existingPrescription.patientRef;}
+    if (doctor) {
+        const isDoctor = await doctorSchema.findById(doctor);
+        if (!isDoctor) {
+            return response.status(400).json({ message: "Doctor not found." });
+        }
+    } else {doctor = existingPrescription.doctorRef;}
+    if(!medicine) {medicine = existingPrescription.medications;}
+    if (!instructions) {instructions = existingPrescription.instructions;}
+    
+    let tempPrescription = {
+    clinicRef: clinic,
+    patientRef: patient,
+    doctorRef: doctor,
+    medications: medicine,
+    instructions: instructions,
+    };
+
+    const updatedPrescription = await prescriptionSchema.updateOne(
+        { _id: request.params.id },
+        { $set: tempPrescription }
+    );
+    response.status(200).json({
+        message: "Prescription updated successfully.",
+        updatedPrescription
+    });
     } catch (error) {next(error);}
 };
 
@@ -70,7 +106,7 @@ exports.editPrescription = async (request, response, next) => {
 // Remove a prescription
 exports.removePrescription = async (request, response, next) => {
     try {
-        const prescription = await prescroptionSchema.findByIdAndDelete(request.params.id || request.body.id);
+        const prescription = await prescriptionSchema.findByIdAndDelete(request.params.id || request.body.id);
         if (!prescription) {
             return next(new Error("Prescription not found"));
         }
@@ -82,7 +118,7 @@ exports.removePrescription = async (request, response, next) => {
 // Get a prescription by ID
 exports.getPrescriptionById = async (request, response, next) => {
     try {
-        const prescription = await prescroptionSchema.findById(request.params.id);
+        const prescription = await prescriptionSchema.findById(request.params.id);
         if (!prescription) { return next(new Error('prescription not found')); }
         response.status(200).json({ prescription });
     } catch (error) { next(error); }

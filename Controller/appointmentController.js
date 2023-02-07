@@ -133,7 +133,6 @@ exports.patchAppointment = async (request, response, next) => {
     }
 
     if (time) {
-      // const timeRegex = /^\d{2}:\d{2}$/;
       const minutes = time.split(":")[1];
       if (minutes !== "00" && minutes !== "30") {
         return response.status(400).json({ message: "Invalid time format." });

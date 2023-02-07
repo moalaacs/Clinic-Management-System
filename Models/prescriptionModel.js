@@ -1,6 +1,23 @@
 const mongoose = require("mongoose");
 const AutoIncrement = require("mongoose-sequence")(mongoose);
 
+
+
+const medicineSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    dose: { type: String, required: true },
+    frequency: { type: String, required: true },
+    type: { type: String, required: true, enum: ['syrup', 'tablet', 'capsule']}
+    },  { _id: false }
+);
+
+
+
+
+
+
+
 const prescroptionSchema = new mongoose.Schema({
   _id: {
     type: Number,
@@ -30,12 +47,7 @@ const prescroptionSchema = new mongoose.Schema({
   //     ref: "medicine",
   //   },
   // ],
-  medications: [{
-    name: { type: String, required: true },
-    dose: { type: String, required: true },
-    frequency: { type: String, required: true },
-    duration: { type: Number, required: true }
-    }],
+  medications: [medicineSchema],
   instructions: { type: String, required: false },
   date: {type: String,required: true,  default: (new Date()).toLocaleDateString('en-GB', {
     day: 'numeric',

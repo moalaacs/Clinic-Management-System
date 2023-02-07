@@ -65,22 +65,22 @@ exports.putMedicineById = async (request, response, next) => {
 
 exports.patchMedicineById = async (request, response, next) => {
   let tempMedicine = {};
-  if (request.body.name != null) {
+  if (request.body.name) {
     tempMedicine._name = request.body.name;
   }
-  if (request.body.production != null) {
+  if (request.body.production) {
     tempMedicine._productionDate = request.body.productionDate;
   }
-  if (request.body.expiry != null) {
+  if (request.body.expiry) {
     tempMedicine._expiryDate = request.body.expiryDate;
   }
-  if (request.body.usage != null) {
+  if (request.body.usage) {
     tempMedicine._leaflet = request.body.leaflet;
   }
-  if (request.body.price != null) {
+  if (request.body.price) {
     tempMedicine._pricePerUnit = request.body.price;
   }
-  if (request.body.quantity != null) {
+  if (request.body.quantity) {
     tempMedicine._quantity = request.body.quantity;
   }
   try {
@@ -88,7 +88,7 @@ exports.patchMedicineById = async (request, response, next) => {
       { _id: request.params.id },
       { $set: tempMedicine }
     );
-    response.status(200).json("Patch Succesfully");
+    response.status(200).json("Patch Succesfully",updatedMedicine);
   } catch (error) {
     next(error);
   }

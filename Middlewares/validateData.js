@@ -305,8 +305,8 @@ let validatePrescription = [
   check("medicine.*.name").isString().withMessage("medicine name should be a string"),
   check("medicine.*.dose").isString().withMessage("medicine dose should be a string"),
   check("medicine.*.frequency").isString().withMessage("medicine frequency should be a string"),
-  check("medicine.*.duration").isNumeric().withMessage("medicine duration should be a number"),
-  // check("medicine").isArray().withMessage("Medicine is required and should be an array"),
+  check("medicine.*.type").isIn(["syrup", "tablet", "capsule", "injection"])
+  .withMessage("Medication type must be either syrup, tablet, capsule, or injection"),
   check("instructions", "Instructions should have a minimum length of 5 characters")
   .optional()
   .if((value) => value)
@@ -320,8 +320,8 @@ let validatePatchPrescription = [
   check("medicine.*.name").optional().isString().withMessage("medicine name should be a string"),
   check("medicine.*.dose").optional().isString().withMessage("medicine dose should be a string"),
   check("medicine.*.frequency").optional().isString().withMessage("medicine frequency should be a string"),
-  check("medicine.*.duration").optional().isNumeric().withMessage("medicine duration should be a number"),
-  // check("medicine").optional().isArray().withMessage("Medicine is required and should be an array"),
+  check("medicine.*.type").optional().isIn(["syrup", "tablet", "capsule", "injection"])
+  .withMessage("Medication type must be either syrup, tablet, capsule, or injection"),
   check("instructions", "Instructions should have a minimum length of 5 characters")
   .optional()
   .if((value) => value)
@@ -329,58 +329,64 @@ let validatePatchPrescription = [
 ];
 let validateInvoice = [
   check("patientId").isNumeric().withMessage("Patient Id should be a number"),
-  check("doctorId").isNumeric().withMessage("Doctor Id should be a number"),
+  // check("doctorId").isNumeric().withMessage("Doctor Id should be a number"),
   check("clinicId").isNumeric().withMessage("clinic Id should be a number"),
-  check("paymentMethod")
-    .isIn(["cash", "credit", "insurance"])
-    .withMessage("Invalid paymentMethod status"),
-  check("creationDay")
-    .matches(
-      /^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]|(?:Jan|Mar|May|Jul|Aug|Oct|Dec)))\1|(?:(?:29|30)(\/|-|\.)(?:0?[1,3-9]|1[0-2]|(?:Jan|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec))\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)(?:0?2|(?:Feb))\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9]|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep))|(?:1[0-2]|(?:Oct|Nov|Dec)))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$/
-    )
-    .withMessage("Invalid creationDay format, should be DD/MM/YYYY"),
+  // check("paymentMethod")
+  //   .isIn(["cash", "credit", "insurance"])
+  //   .withMessage("Invalid paymentMethod status"),
+  // check("creationDay")
+  //   .matches(
+  //     /^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]|(?:Jan|Mar|May|Jul|Aug|Oct|Dec)))\1|(?:(?:29|30)(\/|-|\.)(?:0?[1,3-9]|1[0-2]|(?:Jan|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec))\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)(?:0?2|(?:Feb))\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9]|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep))|(?:1[0-2]|(?:Oct|Nov|Dec)))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$/
+  //   )
+  //   .withMessage("Invalid creationDay format, should be DD/MM/YYYY"),
   check("services")
     .isArray()
     .withMessage("Services must be entered as an array"),
-  check("services.*").isNumeric().withMessage("Check services id again"),
-  check("noServices").isNumeric().withMessage("noServices should be a number"),
-  check("totalDue").isNumeric().withMessage("totalDue should be a number"),
-  check("paid").isNumeric().withMessage("paid should be a number"),
-  check("last").isNumeric().withMessage("last should be a number"),
+  check("services.*.name").isString().withMessage("services name should be a string"),
+  check("services.*.cost").isNumeric().withMessage("services cost should be a number"),
+  // check("noServices").isNumeric().withMessage("noServices should be a number"),
+  // check("totalDue").isNumeric().withMessage("totalDue should be a number"),
+  // check("paid").isNumeric().withMessage("paid should be a number"),
+  // check("last").isNumeric().withMessage("last should be a number"),
 ];
 let validatePatchInvoice = [
   check("patientId")
     .optional()
     .isNumeric()
     .withMessage("Patient Id should be a number"),
-  check("doctorId")
-    .optional()
-    .isNumeric()
-    .withMessage("Doctor Id should be a number"),
+  // check("doctorId")
+  //   .optional()
+  //   .isNumeric()
+  //   .withMessage("Doctor Id should be a number"),
   check("clinicId")
     .optional()
     .isNumeric()
     .withMessage("clinic Id should be a number"),
-  check("paymentMethod")
-    .optional()
-    .isIn(["cash", "credit", "insurance"])
-    .withMessage("Invalid paymentMethod status"),
-  check("creationDay")
-    .optional()
-    .matches(
-      /^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]|(?:Jan|Mar|May|Jul|Aug|Oct|Dec)))\1|(?:(?:29|30)(\/|-|\.)(?:0?[1,3-9]|1[0-2]|(?:Jan|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec))\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)(?:0?2|(?:Feb))\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9]|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep))|(?:1[0-2]|(?:Oct|Nov|Dec)))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$/
-    )
-    .withMessage("Invalid creationDay format, should be DD/MM/YYYY"),
-  check("noServices")
-    .optional()
-    .isNumeric()
-    .withMessage("noServices should be a number"),
-  check("totalDue")
-    .optional()
-    .isNumeric()
-    .withMessage("totalDue should be a number"),
-  check("paid").optional().isNumeric().withMessage("paid should be a number"),
-  check("last").optional().isNumeric().withMessage("last should be a number"),
+    check("services").optional()
+    .isArray()
+    .withMessage("Services must be entered as an array"),
+  check("services.*.name").isString().withMessage("services name should be a string"),
+  check("services.*.cost").isNumeric().withMessage("services cost should be a number"),
+  // check("paymentMethod")
+  //   .optional()
+  //   .isIn(["cash", "credit", "insurance"])
+  //   .withMessage("Invalid paymentMethod status"),
+  // check("creationDay")
+  //   .optional()
+  //   .matches(
+  //     /^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]|(?:Jan|Mar|May|Jul|Aug|Oct|Dec)))\1|(?:(?:29|30)(\/|-|\.)(?:0?[1,3-9]|1[0-2]|(?:Jan|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec))\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)(?:0?2|(?:Feb))\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9]|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep))|(?:1[0-2]|(?:Oct|Nov|Dec)))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$/
+  //   )
+  //   .withMessage("Invalid creationDay format, should be DD/MM/YYYY"),
+  // check("noServices")
+  //   .optional()
+  //   .isNumeric()
+  //   .withMessage("noServices should be a number"),
+  // check("totalDue")
+  //   .optional()
+  //   .isNumeric()
+  //   .withMessage("totalDue should be a number"),
+  // check("paid").optional().isNumeric().withMessage("paid should be a number"),
+  // check("last").optional().isNumeric().withMessage("last should be a number"),
 ];
 module.exports = {
   validateClinic,
