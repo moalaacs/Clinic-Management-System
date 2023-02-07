@@ -3,9 +3,6 @@
 /* require bcrypt */
 const bcrypt = require("bcrypt");
 
-/* Clinic Schema */
-const clinicSchema = require("../Models/clinicModel");
-
 /* require all needed modules */
 const EmployeeSchema = require("./../Models/employeeModel");
 const clinicSchema = require("../Models/clinicModel");

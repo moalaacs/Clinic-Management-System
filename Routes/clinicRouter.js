@@ -24,7 +24,7 @@ router
     validatorMiddleware
   )
   .get(controller.getClinicById)
-  .patch(validatePatchClinic, validatorMiddleware, controller.patchClinic)
+  .patch(validatePatchClinic, validatorMiddleware, controller.patchClinicById)
   .delete(controller.removeClinicById);
 
 module.exports = router;

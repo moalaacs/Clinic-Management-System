@@ -1,6 +1,3 @@
-/* Doctor Schema */
-const doctorSchema = require("../Models/doctorModel");
-
 /* require bcrypt */
 const bcrypt = require("bcrypt");
 
