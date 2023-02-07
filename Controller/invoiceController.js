@@ -23,7 +23,12 @@ const {
 exports.getInvoices = async (request, response, next) => {
   try {
     let query = reqNamesToSchemaNames(request.query);
-    let invoice = await filterData(invoiceSchema, query);
+    let invoice = await filterData(invoiceSchema, query
+      ,[
+        { path: 'patient_Id', options: { strictPopulate: false } },
+        { path: 'clinic_Id', options: { strictPopulate: false } },
+      ]
+      );
     invoice = sortData(invoice, query);
     invoice = paginateData(invoice, request.query);
     invoice = sliceData(invoice, request.query);
@@ -278,9 +283,9 @@ const reqNamesToSchemaNames = (query) => {
   const fieldsToReplace = {
     id:'_id',
     clinicId: 'clinic_Id',
-      patientId: 'patient_Id',
-      total: 'total',
-      services: 'services',
+    patientId: 'patient_Id',
+    total: 'total',
+    services: 'services',
   };
 
   const replacedQuery = {};

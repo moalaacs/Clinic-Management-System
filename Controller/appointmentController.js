@@ -195,7 +195,11 @@ exports.removeAppointmentById = async (request, response, next) => {
 exports.getAllAppointments = async (request, response, next) => {
   try {
     let query = reqNamesToSchemaNames(request.query);
-    let appointments = await filterData(appointmentSchema, query);
+    let appointments = await filterData(appointmentSchema, query,[
+      { path: '_doctorId', options: { strictPopulate: false } },
+      { path: '_patientId', options: { strictPopulate: false } },
+      { path: '_clinicId', options: { strictPopulate: false } },
+    ]);
     appointments = sortData(appointments, query);
     appointments = paginateData(appointments, request.query);
     appointments = sliceData(appointments, request.query);

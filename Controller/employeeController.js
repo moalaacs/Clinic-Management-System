@@ -21,7 +21,9 @@ const {
 exports.getAllEmployees = async (request, response, next) => {
   try {
     let query = reqNamesToSchemaNames(request.query);
-    let Employees = await filterData(EmployeeSchema, query);
+    let Employees = await filterData(EmployeeSchema, query,[
+      { path: '_clinic', options: { strictPopulate: false } },
+    ]);
     Employees = sortData(Employees, query);
     Employees = paginateData(Employees, request.query);
     Employees = sliceData(Employees, request.query);
