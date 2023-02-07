@@ -1,7 +1,7 @@
 const express = require("express");
 const controller = require("../Controller/clinicController");
 const validatorMiddleware = require("../Middlewares/errorValidation");
-const authorizationMW = require("../Middlewares/authenticationMW");
+const authorizationMW = require("../Middlewares/authorizationMW");
 const {
   numberIdParamsValidation,
   validateClinic,

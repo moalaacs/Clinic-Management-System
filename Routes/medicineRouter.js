@@ -6,7 +6,7 @@ const {
   numberIdParamsValidation,
   medicinePatchValidation,
 } = require("../Middlewares/validateData");
-const authorizationMW = require("../Middlewares/authenticationMW");
+const authorizationMW = require("../Middlewares/authorizationMW");
 const router = express.Router();
 
 router

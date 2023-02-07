@@ -18,7 +18,7 @@ const medicineSchema = new mongoose.Schema(
 
 
 
-const prescroptionSchema = new mongoose.Schema({
+const prescriptionSchema = new mongoose.Schema({
   _id: {
     type: Number,
   },
@@ -56,8 +56,8 @@ const prescroptionSchema = new mongoose.Schema({
 });
 
 prescroptionSchema.plugin(AutoIncrement, {
-  id: "prescroption_seq",
+  id: "prescription_seq",
   inc_field: "_id",
   start_seq: 20000,
 });
-module.exports = mongoose.model("prescroption", prescroptionSchema);
+module.exports = mongoose.model("prescription", prescriptionSchema);
