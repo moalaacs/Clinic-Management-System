@@ -13,11 +13,6 @@ const medicineSchema = new mongoose.Schema(
 );
 
 
-
-
-
-
-
 const prescriptionSchema = new mongoose.Schema({
   _id: {
     type: Number,
