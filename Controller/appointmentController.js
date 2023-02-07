@@ -196,10 +196,10 @@ exports.removeAppointmentById = async (request, response, next) => {
 exports.getAllAppointments = async (request, response, next) => {
   try {
     let query = reqNamesToSchemaNames(request.query);
-    let appointments = await filterData(appointmentSchema, query,[
-      { path: '_doctorId', options: { strictPopulate: false } },
-      { path: '_patientId', options: { strictPopulate: false } },
-      { path: '_clinicId', options: { strictPopulate: false } },
+    let appointments = await filterData(appointmentSchema, query, [
+      { path: "_doctorId", options: { strictPopulate: false } },
+      { path: "_patientId", options: { strictPopulate: false } },
+      { path: "_clinicId", options: { strictPopulate: false } },
     ]);
     appointments = sortData(appointments, query);
     appointments = paginateData(appointments, request.query);
@@ -258,14 +258,27 @@ exports.dailyAppointmentsReports = (request, response, next) => {
     .catch((error) => next(error));
 };
 
+// Patient Appointments
+exports.patientAppointmentsReports = (request, response, next) => {
+  appointmentSchema
+    .find({ patientID: request.params.id })
+    .populate({ path: "_patientId", select: { _id: 0 } })
+    .populate({ path: "_doctorId", select: { _id: 0 } })
+    .populate({ path: "_clinicId", select: { _id: 0 } })
+    .then((data) => {
+      request.status(200).json(data);
+    })
+    .catch((error) => next(error));
+};
+
 const reqNamesToSchemaNames = (query) => {
   const fieldsToReplace = {
-    id:'_id',
-    date:'_date',
-    time:'_time',
-    doctorId:'_doctorId',
-    patientId:'_patientId',
-    clinicId:'_clinicId',
+    id: "_id",
+    date: "_date",
+    time: "_time",
+    doctorId: "_doctorId",
+    patientId: "_patientId",
+    clinicId: "_clinicId",
   };
 
   const replacedQuery = {};
@@ -280,5 +293,4 @@ const reqNamesToSchemaNames = (query) => {
     replacedQuery[newKey] = query[key];
   }
   return replacedQuery;
-}
-
+};
