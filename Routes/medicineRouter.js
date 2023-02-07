@@ -12,7 +12,7 @@ const router = express.Router();
 router
   .route("/medicine")
   .get(controller.getAllMedicine)
-  .post(medicineValidation, validatorMiddleware, controller.addMedicine);
+  .post(controller.uploadImage, medicineValidation, validatorMiddleware, controller.addMedicine);
 
 router
   .route("/medicine/:id")
