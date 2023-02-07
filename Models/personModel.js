@@ -65,12 +65,12 @@ const personSchema = new mongoose.Schema(
         });
       }
     },
-    // _age: {
-    //   type: Number,
-    //   required: true,
-    //   min: [18, "Age must be at least 18"],
-    //   max: [60, "Age must be at most 60"],
-    // },
+    _age: {
+      type: Number,
+      required: true,
+      minValue: 18,
+      maxValue: 60,
+    },
     _gender: { type: String, required: true },
     _contactNumber: {
       type: String,
