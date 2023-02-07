@@ -22,8 +22,9 @@ const {
 //get all invoices
 exports.getInvoices = async (request, response, next) => {
   try {
-    let invoice = await filterData(invoiceSchema, request.query);
-    invoice = sortData(invoice, request.query);
+    let query = reqNamesToSchemaNames(request.query);
+    let invoice = await filterData(invoiceSchema, query);
+    invoice = sortData(invoice, query);
     invoice = paginateData(invoice, request.query);
     invoice = sliceData(invoice, request.query);
     response.status(200).json(invoice);
@@ -269,3 +270,29 @@ exports.getInvoiceById = async (request, response, next) => {
   } catch (error) {next(error);}
 };
 
+
+
+
+
+const reqNamesToSchemaNames = (query) => {
+  const fieldsToReplace = {
+    id:'_id',
+    clinicId: 'clinic_Id',
+      patientId: 'patient_Id',
+      total: 'total',
+      services: 'services',
+  };
+
+  const replacedQuery = {};
+  for (const key in query) {
+    let newKey = key;
+    for (const replaceKey in fieldsToReplace) {
+      if (key.includes(replaceKey)) {
+        newKey = key.replace(replaceKey, fieldsToReplace[replaceKey]);
+        break;
+      }
+    }
+    replacedQuery[newKey] = query[key];
+  }
+  return replacedQuery;
+}

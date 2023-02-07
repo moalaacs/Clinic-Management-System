@@ -15,8 +15,9 @@ const {
 //get all Prescription
 exports.getPrescription = async (request, response, next) => {
     try {
-        let prescription = await filterData(prescriptionSchema, request.query);
-        prescription = sortData(prescription, request.query);
+        let query = reqNamesToSchemaNames(request.query);
+        let prescription = await filterData(prescriptionSchema, query);
+        prescription = sortData(prescription, query);
         prescription = paginateData(prescription, request.query);
         prescription = sliceData(prescription, request.query);
         response.status(200).json(prescription);
@@ -123,3 +124,29 @@ exports.getPrescriptionById = async (request, response, next) => {
         response.status(200).json({ prescription });
     } catch (error) { next(error); }
 };
+
+
+
+const reqNamesToSchemaNames = (query) => {
+    const fieldsToReplace = {
+        id:'_id',
+        clinic: 'clinicRef',
+        patient: 'patientRef',
+        doctor: 'doctorRef',
+        medicine: 'medications',
+        instructions: 'instructions',
+    };
+
+    const replacedQuery = {};
+    for (const key in query) {
+        let newKey = key;
+        for (const replaceKey in fieldsToReplace) {
+            if (key.includes(replaceKey)) {
+            newKey = key.replace(replaceKey, fieldsToReplace[replaceKey]);
+            break;
+            }
+        }
+        replacedQuery[newKey] = query[key];
+       }
+    return replacedQuery;
+}

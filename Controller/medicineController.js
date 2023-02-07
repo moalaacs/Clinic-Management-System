@@ -37,8 +37,9 @@ const {
 
 exports.getAllMedicine = async (request, response, next) => {
   try {
-    let medicine = await filterData(medicineSchema, request.query);
-    medicine = sortData(medicine, request.query);
+    let query = reqNamesToSchemaNames(request.query);
+    let medicine = await filterData(medicineSchema, query);
+    medicine = sortData(medicine, query);
     medicine = paginateData(medicine, request.query);
     medicine = sliceData(medicine, request.query);
     response.status(200).json(medicine);
@@ -139,3 +140,31 @@ exports.getMedicineById = async (request, response, next) => {
     next(error);
   }
 };
+
+
+
+const reqNamesToSchemaNames = (query) => {
+  const fieldsToReplace = {
+    id:'_id',
+    name: '_name',
+    production: '_productionDate',
+    expiry: '_expiryDate',
+    usage: '_leaflet',
+    price: '_pricePerUnit',
+    quantity: '_quantity',
+      
+  };
+
+  const replacedQuery = {};
+  for (const key in query) {
+    let newKey = key;
+    for (const replaceKey in fieldsToReplace) {
+      if (key.includes(replaceKey)) {
+        newKey = key.replace(replaceKey, fieldsToReplace[replaceKey]);
+        break;
+      }
+    }
+    replacedQuery[newKey] = query[key];
+  }
+  return replacedQuery;
+}

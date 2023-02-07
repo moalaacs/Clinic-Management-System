@@ -4,7 +4,6 @@ const errorValidation = require("../Middlewares/errorValidation");
 const {
   validateInvoice,
   validatePatchInvoice,
-  numberIdParamsValidation,
 } = require("../Middlewares/validateData");
 const authorizationMW = require("../Middlewares/authenticationMW");
 
@@ -18,7 +17,7 @@ router
 
 router
   .route("/invoice/:id")
-  .all(  authorizationMW.checkDoctor)
+  .all(authorizationMW.checkDoctor)
   .get(controller.getInvoiceById)
   .patch(validatePatchInvoice, errorValidation, controller.editInvoice)
   .delete(controller.removeInvoice);

@@ -17,8 +17,9 @@ const {
 //get all patients
 exports.getAllPatients = async (request, response, next) => {
   try {
-    let patients = await filterData(patientSchema, request.query);
-    patients = sortData(patients, request.query);
+    let query = reqNamesToSchemaNames(request.query);
+    let patients = await filterData(patientSchema, query);
+    patients = sortData(patients, query);
     patients = paginateData(patients, request.query);
     patients = sliceData(patients, request.query);
 
@@ -50,7 +51,6 @@ exports.addPatient = async (request, response, next) => {
       _password: hash,
       _image: request.body.profileImage,
       _medicalHistory: request.body.medicalHistory,
-      password: hash,
     });
     await patient.save();
     response
@@ -74,7 +74,6 @@ exports.putPatientById = async (request, response, next) => {
     _password: hash,
     _image: request.body.profileImage,
     _medicalHistory: request.body.medicalHistory,
-    password: hash,
   };
   try {
     const updatedPatient = await patientSchema.updateOne(
@@ -147,7 +146,7 @@ exports.patchPatientById = async (request, response, next) => {
     );
     response
       .status(200)
-      .json({ message: "Patient updated successfully.", tempPatient });
+      .json({ message: "Patient updated successfully.",updatedPatient, tempPatient });
   } catch (error) {
     next(error);
   }
@@ -182,3 +181,35 @@ exports.getPatientById = async (request, response, next) => {
     next(error);
   }
 };
+
+
+
+
+
+const reqNamesToSchemaNames = (query) => {
+  const fieldsToReplace = {
+    id:'_id',
+    firstname: '_fname',
+    lastname: '_lname',
+    age: '_age',
+    gender: '_gender',
+    phone: '_contactNumber',
+    email: '_email',
+    address: '_address',
+    profileImage: '_image',
+    medicalHistory: '_medicalHistory'
+  };
+
+  const replacedQuery = {};
+  for (const key in query) {
+    let newKey = key;
+    for (const replaceKey in fieldsToReplace) {
+      if (key.includes(replaceKey)) {
+        newKey = key.replace(replaceKey, fieldsToReplace[replaceKey]);
+        break;
+      }
+    }
+    replacedQuery[newKey] = query[key];
+  }
+  return replacedQuery;
+}

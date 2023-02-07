@@ -194,8 +194,9 @@ exports.removeAppointmentById = async (request, response, next) => {
 // Get all appointments
 exports.getAllAppointments = async (request, response, next) => {
   try {
-    let appointments = await filterData(appointmentSchema, request.query);
-    appointments = sortData(appointments, request.query);
+    let query = reqNamesToSchemaNames(request.query);
+    let appointments = await filterData(appointmentSchema, query);
+    appointments = sortData(appointments, query);
     appointments = paginateData(appointments, request.query);
     appointments = sliceData(appointments, request.query);
 
@@ -217,3 +218,29 @@ exports.getAppointmentById = async (request, response, next) => {
     next(error);
   }
 };
+
+
+
+const reqNamesToSchemaNames = (query) => {
+  const fieldsToReplace = {
+    id:'_id',
+    date:'_date',
+    time:'_time',
+    doctorId:'_doctorId',
+    patientId:'_patientId',
+    clinicId:'_clinicId',
+  };
+
+  const replacedQuery = {};
+  for (const key in query) {
+    let newKey = key;
+    for (const replaceKey in fieldsToReplace) {
+      if (key.includes(replaceKey)) {
+        newKey = key.replace(replaceKey, fieldsToReplace[replaceKey]);
+        break;
+      }
+    }
+    replacedQuery[newKey] = query[key];
+  }
+  return replacedQuery;
+}

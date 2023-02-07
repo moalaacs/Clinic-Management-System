@@ -20,8 +20,9 @@ const {
 //get all Employees
 exports.getAllEmployees = async (request, response, next) => {
   try {
-    let Employees = await filterData(EmployeeSchema, request.query);
-    Employees = sortData(Employees, request.query);
+    let query = reqNamesToSchemaNames(request.query);
+    let Employees = await filterData(EmployeeSchema, query);
+    Employees = sortData(Employees, query);
     Employees = paginateData(Employees, request.query);
     Employees = sliceData(Employees, request.query);
 
@@ -59,7 +60,6 @@ exports.addEmployee = async (request, response, next) => {
       _address: request.body.address,
       _password: hash,
       _image: request.body.profileImage,
-      password: hash,
       _clinic: request.body.clinic,
       _monthlyRate: request.body.salary,
       _workingHours: request.body.workingHours,
@@ -89,7 +89,6 @@ exports.putEmployee = async (request, response, next) => {
           _address: request.body.address,
           _password: hash,
           _image: request.body.profileImage,
-          password: hash,
           _clinics: request.body.clinic,
           _monthlyRate: request.body.salary,
           _workingHours: request.body.workingHours,
@@ -200,3 +199,35 @@ exports.removeEmployeeById = async (request, response, next) => {
     next(error);
   }
 };
+
+
+
+const reqNamesToSchemaNames = (query) => {
+  const fieldsToReplace = {
+    id:'_id',
+    firstname: '_fname',
+    lastname: '_lname',
+    age: '_age',
+    gender: '_gender',
+    phone: '_contactNumber',
+    email: '_email',
+    address: '_address',
+    profileImage: '_image',
+    clinic: '_clinic',
+    salary: '_monthlyRate',
+    workingHours: '_workingHours',
+  };
+
+  const replacedQuery = {};
+  for (const key in query) {
+    let newKey = key;
+    for (const replaceKey in fieldsToReplace) {
+      if (key.includes(replaceKey)) {
+        newKey = key.replace(replaceKey, fieldsToReplace[replaceKey]);
+        break;
+      }
+    }
+    replacedQuery[newKey] = query[key];
+  }
+  return replacedQuery;
+}

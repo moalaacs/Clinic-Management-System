@@ -19,8 +19,9 @@ const {
 
 exports.getAllDoctors = async (request, response, next) => {
   try {
-    let doctors = await filterData(doctorSchema, request.query);
-    doctors = sortData(doctors, request.query);
+    let query = reqNamesToSchemaNames(request.query);
+    let doctors = await filterData(doctorSchema, query);
+    doctors = sortData(doctors, query);
     doctors = paginateData(doctors, request.query);
     doctors = sliceData(doctors, request.query);
     response.status(200).json({ doctors });
@@ -191,3 +192,33 @@ exports.removeDoctorById = async (request, response, next) => {
     next(error);
   }
 };
+
+
+const reqNamesToSchemaNames = (query) => {
+  const fieldsToReplace = {
+    id:'_id',
+    firstname: '_fname',
+    lastname: '_lname',
+    age: '_age',
+    gender: '_gender',
+    phone: '_contactNumber',
+    email: '_email',
+    address: '_address',
+    profileImage: '_image',
+    speciality: '_specilization',
+    clinic: '_clinics',
+  };
+
+  const replacedQuery = {};
+  for (const key in query) {
+    let newKey = key;
+    for (const replaceKey in fieldsToReplace) {
+      if (key.includes(replaceKey)) {
+        newKey = key.replace(replaceKey, fieldsToReplace[replaceKey]);
+        break;
+      }
+    }
+    replacedQuery[newKey] = query[key];
+  }
+  return replacedQuery;
+}
