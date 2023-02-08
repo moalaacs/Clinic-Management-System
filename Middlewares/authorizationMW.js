@@ -54,14 +54,14 @@ module.exports.checkDoctor = (request, response, next) => {
   }
 };
 
-module.exports.access = (...permission) => {
+module.exports.access = (...roles) => {
   return (request, response, next) => {
-    if (!permission.includes(request.userData.role)) {
-    } else if (
-      permission.includes(request.userData.role) &&
-      request.params.id !== request.userData.role
-    )
-      next();
+    if (!roles.includes(request.userData.role)) {
+      const error = new Error("You have no access to this resource");
+      error.status = 403;
+      next(error);
+    }
+    next();
   };
 };
 
