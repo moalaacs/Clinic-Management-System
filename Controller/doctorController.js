@@ -261,9 +261,6 @@ exports.patchDoctorById = async (request, response, next) => {
       const hash = await bcrypt.hash(request.body.password, 10);
       tempDoctor._password = hash;
     }
-    if (request.body.image) {
-      tempDoctor._image = request.body.profileImage;
-    }
     if (request.body.address) {
       if (
         request.body.address.street ||
@@ -294,6 +291,9 @@ exports.patchDoctorById = async (request, response, next) => {
         age--;
       }
       tempDoctor._age = age;
+    }
+    if (request.file) {
+      tempDoctor._image = request.file.path;
     }
     await doctorSchema.updateOne(
       { _id: request.params.id },

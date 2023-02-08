@@ -87,7 +87,7 @@ const personSchema = new mongoose.Schema(
     },
     _address: addressSchema,
     _password: { type: String, required: true },
-    _image: { type: String, required: true },
+    _image: { type: String, required: true, default: "images\\default.jpeg" },
   },
   { _id: false }
 );

@@ -92,7 +92,7 @@ exports.addEmployee = async (request, response, next) => {
     if (now.getMonth() < request.body.dateOfBirth.split("/")[1]) {
       age--;
     }
-    const employee = new EmployeeSchema({
+    let sentObject = {
       _fname: request.body.firstname,
       _lname: request.body.lastname,
       _dateOfBirth: request.body.dateOfBirth,
@@ -102,11 +102,14 @@ exports.addEmployee = async (request, response, next) => {
       _email: request.body.email,
       _address: request.body.address,
       _password: hash,
-      _image: request.body.profileImage,
       _clinic: request.body.clinic,
       _monthlyRate: request.body.salary,
       _workingHours: request.body.workingHours,
-    });
+    };
+    if (request.file) {
+      sentObject._image = request.file.path;
+    }
+    const employee = new EmployeeSchema();
     let savedEmployee = await employee.save();
     const newUser = new users({
       _id: savedEmployee._id,
@@ -151,24 +154,27 @@ exports.putEmployee = async (request, response, next) => {
     if (now.getMonth() < request.body.dateOfBirth.split("/")[1]) {
       age--;
     }
+    let sentObject = {
+      _fname: request.body.firstname,
+      _lname: request.body.lastname,
+      _dateOfBirth: request.body.dateOfBirth,
+      _age: age,
+      _gender: request.body.gender,
+      _contactNumber: request.body.phone,
+      _email: request.body.email,
+      _address: request.body.address,
+      _password: hash,
+      _clinic: request.body.clinic,
+      _monthlyRate: request.body.salary,
+      _workingHours: request.body.workingHours,
+    };
+    if (request.file) {
+      sentObject._image = request.file.path;
+    }
     const updatedEmployee = await EmployeeSchema.updateOne(
       { _id: request.params.id },
       {
-        $set: {
-          _fname: request.body.firstname,
-          _lname: request.body.lastname,
-          _dateOfBirth: request.body.dateOfBirth,
-          _age: age,
-          _gender: request.body.gender,
-          _contactNumber: request.body.phone,
-          _email: request.body.email,
-          _address: request.body.address,
-          _password: hash,
-          _image: request.body.profileImage,
-          _clinics: request.body.clinic,
-          _monthlyRate: request.body.salary,
-          _workingHours: request.body.workingHours,
-        },
+        $set: sentObject,
       }
     );
     await users.updateOne(
@@ -219,14 +225,11 @@ exports.patchEmployee = async (request, response, next) => {
         { _id: request.params.id },
         { $set: { _email: request.body.email } }
       );
-      tempDoctor._email = request.body.email;
+      tempEmployee._email = request.body.email;
     }
     if (request.body.password) {
       const hash = await bcrypt.hash(request.body.password, 10);
       tempEmployee._password = hash;
-    }
-    if (request.body.image) {
-      tempEmployee._image = request.body.profileImage;
     }
     if (request.body.address) {
       if (
@@ -261,6 +264,9 @@ exports.patchEmployee = async (request, response, next) => {
     }
     if (request.body.salary) {
       tempEmployee._monthlyRate = request.body.salary;
+    }
+    if (request.file) {
+      tempEmployee._image = request.file.path;
     }
     if (request.body.workingHours) {
       tempEmployee._workingHours = request.body.workingHours;

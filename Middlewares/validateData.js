@@ -95,7 +95,6 @@ let validatePatchClinic = [
     .withMessage("Clinic's speciality isn't available"),
 ];
 let validatePerson = [
-  check("_id").optional().isNumeric().withMessage("Id should be a number"),
   check("firstname")
     .matches(/^[a-zA-Z ]+$/)
     .withMessage("Name should be a string and contain only letters and spaces")
@@ -141,7 +140,6 @@ let validatePerson = [
     .withMessage("zip code should be a number")
     .isLength({ min: 5, max: 5 })
     .withMessage("length of zip code should be 5 characters"),
-  check("profileImage").isString().withMessage("image should be string"),
 ];
 let validatePatchPerson = [
   check("_id").optional().isNumeric().withMessage("Id should be a number"),
@@ -243,6 +241,7 @@ let doctorValidation = [
 let doctorPatchValidation = [
   validatePatchPerson,
   check("speciality")
+    .optional()
     .isString()
     .withMessage("Speciality must be string")
     .isIn([

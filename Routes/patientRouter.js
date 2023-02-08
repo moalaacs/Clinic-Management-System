@@ -14,7 +14,12 @@ router
   .route("/patient")
   .all(authorizationMW.checkAdmin)
   .get(controller.getAllPatients)
-  .post(validatePatient, validatorMiddleware, controller.addPatient);
+  .post(
+    validatePatient,
+    validatorMiddleware,
+    controller.uploadPhoto,
+    controller.addPatient
+  );
 
 router
   .route("/patient/:id")
@@ -25,9 +30,9 @@ router
   )
   .get(controller.getPatientById)
   .patch(
-    controller.uploadPhoto,
     validatePatchPatient,
     validatorMiddleware,
+    controller.uploadPhoto,
     controller.patchPatientById
   );
 

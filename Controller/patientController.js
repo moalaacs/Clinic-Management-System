@@ -78,7 +78,7 @@ exports.addPatient = async (request, response, next) => {
     if (now.getMonth() < request.body.dateOfBirth.split("/")[1]) {
       age--;
     }
-    const savedPatient = new patientSchema({
+    let sentObject = {
       _fname: request.body.firstname,
       _lname: request.body.lastname,
       _dateOfBirth: request.body.dateOfBirth,
@@ -88,9 +88,12 @@ exports.addPatient = async (request, response, next) => {
       _email: request.body.email,
       _address: request.body.address,
       _password: hash,
-      _image: request.body.profileImage,
       _medicalHistory: request.body.medicalHistory,
-    });
+    };
+    if (request.file) {
+      sentObject._image = request.file.path;
+    }
+    const savedPatient = new patientSchema(sentObject);
     await savedPatient.save();
     const newUser = new users({
       _id: savedPatient._id,
@@ -131,22 +134,25 @@ exports.putPatientById = async (request, response, next) => {
     if (now.getMonth() < request.body.dateOfBirth.split("/")[1]) {
       age--;
     }
+    let sentObject = {
+      _fname: request.body.firstname,
+      _lname: request.body.lastname,
+      _dateOfBirth: request.body.dateOfBirth,
+      _age: age,
+      _gender: request.body.gender,
+      _contactNumber: request.body.phone,
+      _email: request.body.email,
+      _address: request.body.address,
+      _password: hash,
+      _medicalHistory: request.body.medicalHistory,
+    };
+    if (request.file) {
+      sentObject._image = request.file.path;
+    }
     const updatedPatient = await patientSchema.updateOne(
       { _id: request.params.id },
       {
-        $set: {
-          _fname: request.body.firstname,
-          _lname: request.body.lastname,
-          _dateOfBirth: request.body.dateOfBirth,
-          _age: age,
-          _gender: request.body.gender,
-          _contactNumber: request.body.phone,
-          _email: request.body.email,
-          _address: request.body.address,
-          _password: hash,
-          _image: request.body.profileImage,
-          _medicalHistory: request.body.medicalHistory,
-        },
+        $set: sentObject,
       }
     );
     response
@@ -180,7 +186,7 @@ exports.patchPatientById = async (request, response, next) => {
         { _id: request.params.id },
         { $set: { _contactNumber: request.body.phone } }
       );
-      tempDoctor._contactNumber = request.body.phone;
+      tempPatient._contactNumber = request.body.phone;
     }
     if (request.body.medicalHistory) {
       tempPatient._medicalHistory = request.body.medicalHistory;
@@ -196,14 +202,14 @@ exports.patchPatientById = async (request, response, next) => {
         { _id: request.params.id },
         { $set: { _email: request.body.email } }
       );
-      tempDoctor._email = request.body.email;
+      tempPatient._email = request.body.email;
     }
     if (request.body.password) {
       const hash = await bcrypt.hash(request.body.password, 10);
       tempPatient._password = hash;
     }
-    if (request.body.image) {
-      tempPatient._image = request.body.profileImage;
+    if (request.file) {
+      tempPatient._image = request.file.path;
     }
     if (request.body.address) {
       if (
