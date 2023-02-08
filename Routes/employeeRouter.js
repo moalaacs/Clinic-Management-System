@@ -25,6 +25,7 @@ router
   )
   .get(controller.getEmployeeById)
   .patch(
+    controller.uploadPhoto,
     employeePatchValidation,
     validatorMiddleware,
     controller.patchEmployee

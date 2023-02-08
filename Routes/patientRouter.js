@@ -25,6 +25,7 @@ router
   )
   .get(controller.getPatientById)
   .patch(
+    controller.uploadPhoto,
     validatePatchPatient,
     validatorMiddleware,
     controller.patchPatientById
