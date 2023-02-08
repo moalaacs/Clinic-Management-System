@@ -14,7 +14,7 @@ const patientSchema = new mongoose.Schema(
 patientSchema.plugin(AutoIncrement, {
   id: "patient_seq",
   inc_field: "_id",
-  start_seq: 1000,
+  start_seq: 10000,
 });
 
 /*** mapping schema bind collection  ***/

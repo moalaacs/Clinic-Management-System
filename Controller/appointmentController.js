@@ -33,6 +33,11 @@ exports.addAppointment = async (request, response, next) => {
     if (!doctor) {
       return response.status(400).json({ message: "Doctor not found." });
     }
+    if (doctor._clinic !== clinicId) {
+      return response.status(400).json({
+        message: `Doctor ${doctorId} does not work at clinic ${clinicId}.`,
+      });
+    }
     const patient = await patientModel.findById(patientId);
     if (!patient) {
       return response.status(400).json({ message: "Patient not found." });
@@ -110,6 +115,12 @@ exports.patchAppointment = async (request, response, next) => {
       const doctor = await doctorModel.findById(doctorId);
       if (!doctor) {
         return response.status(400).json({ message: "Doctor not found." });
+      }
+
+      if (doctor._clinic !== existingAppointment._clinicId) {
+        return response.status(400).json({
+          message: `Doctor ${doctorId} does not work at clinic ${existingAppointment._clinicId}.`,
+        });
       }
     } else {
       doctorId = existingAppointment._doctorId;
