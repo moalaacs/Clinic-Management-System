@@ -1,42 +1,8 @@
 const express = require("express");
-const {check} = require("express-validator");
 const controller = require("../Controller/authController");
-
-
-
+const { validateLogin } = require("../Middlewares/validateData");
 const router = express.Router();
 
-router.route("/login")
-.post(
-  check("username").isString().withMessage("Please enter a valid userName"),
-  check("password").isLength({ min: 8 }).withMessage("Password must be at least 8 characters")
-  ,controller.login)
+router.route("/login").post(validateLogin, controller.login);
 
-
-module.exports=router;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+module.exports = router;
