@@ -1,13 +1,15 @@
 /* require bcrypt */
 const bcrypt = require("bcrypt");
+
 /* require multer */
 const multer = require("multer");
+
 /* require all needed modules */
 const doctorSchema = require("../Models/doctorModel");
 const clinicSchema = require("../Models/clinicModel");
 const users = require("../Models/usersModel");
 
-/* upload images */
+/* upload image */
 const multerStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "images")
