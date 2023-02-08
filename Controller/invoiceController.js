@@ -132,12 +132,10 @@ exports.addInvoice = async (request, response, next) => {
       );
     };
     await invoicePdf();
-    response
-      .status(200)
-      .json({
-        status: "Invoice Added and Saved to File",
-        invoice: addedInvoice,
-      });
+    response.status(200).json({
+      status: "Invoice Added and Saved to File",
+      invoice: addedInvoice,
+    });
   } catch (error) {
     next(error);
   }
@@ -304,6 +302,51 @@ exports.getInvoiceById = async (request, response, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+// All Appointments Reports
+exports.allInvoicesReports = (request, response, next) => {
+  invoiceSchema
+    .find()
+    .populate({ path: "_appointmentId", select: { _id: 0 } })
+    .populate({ path: "_doctorId", select: { _id: 0 } })
+    .populate({ path: "_clinicId", select: { _id: 0 } })
+    .populate({ path: "_patientId", select: { _id: 0 } })
+    .then((data) => {
+      response.status(200).json(data);
+    })
+    .catch((error) => next(error));
+};
+
+// Daily Appointments Reports
+exports.dailyInvoicesReports = (request, response, next) => {
+  let date = new date();
+  date.setHours(0,0,0,0);
+  invoiceSchema
+    .find()
+    .where("date").gt(date)
+    .populate({ path: "_appointmentId", select: { _id: 0 } })
+    .populate({ path: "_doctorId", select: { _id: 0 } })
+    .populate({ path: "_clinicId", select: { _id: 0 } })
+    .populate({ path: "_patientId", select: { _id: 0 } })
+    .then((data) => {
+      response.status(200).json(data);
+    })
+    .catch((error) => next(error));
+};
+
+// Patient Appointments Reports
+exports.patientInvoicesReports = (request, response, next) => {
+  invoiceSchema
+    .find()
+    .populate({ path: "_appointmentId", select: { _id: 0 } })
+    .populate({ path: "_doctorId", select: { _id: 0 } })
+    .populate({ path: "_clinicId", select: { _id: 0 } })
+    .populate({ path: "_patientId", select: { _id: 0 } })
+    .then((data) => {
+      response.status(200).json(data);
+    })
+    .catch((error) => next(error));
 };
 
 const reqNamesToSchemaNames = (query) => {

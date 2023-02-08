@@ -15,6 +15,18 @@ router
   .get(controller.getInvoices)
   .post(validateInvoice, errorValidation, controller.addInvoice);
 
+  router
+  .route("/invoiceReports/all")
+  .get(authorizationMW.checkAdmin, controller.allInvoicesReports);
+
+  router
+  .route("/invoiceReports/daily")
+  .get(authorizationMW.checkAdmin, controller.dailyInvoicesReports);
+
+  router
+  .route("/invoiceReports/patient")
+  .get(authorizationMW.checkAdmin, controller.patientInvoicesReports);
+
 router
   .route("/invoice/:id")
   .all(authorizationMW.checkDoctor)

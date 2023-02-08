@@ -245,7 +245,7 @@ exports.dailyAppointmentsReports = (request, response, next) => {
   let nextDay = new Date(date.getTime() + day);
   appointmentSchema
     .find()
-    // .where("date".gt(date).lt(nextDay))
+    .where("date".gt(date).lt(nextDay))
     .populate({ path: "_patientId", select: { _id: 0 } })
     .populate({
       path: "_doctorId",
