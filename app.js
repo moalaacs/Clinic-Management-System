@@ -44,9 +44,6 @@ mongoose
 // a- logger middleware
 app.use(morgan("dev"));
 
-// upload // 
-app.use('/upload', express.static('upload'));
-
 // b- body parser middleware
 app.use(express.json());
 
