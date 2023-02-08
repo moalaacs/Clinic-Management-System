@@ -115,6 +115,7 @@ exports.addDoctor = async (request, response, next) => {
       _image: request.body.profileImage,
       _specilization: request.body.speciality,
       _clinic: specialityClinicId._id,
+      _schedule: request.body.schedule,
     });
     let savedDoctor = await doctor.save();
     const newUser = new users({

@@ -34,13 +34,17 @@ exports.getInvoices = async (request, response, next) => {
   }
 };
 
+
+
 const generateInvoiceId = () => {
   const date = new Date();
-  const invoiceId = `${(date.getMonth() + 1)
-    .toString()
-    .padStart(2, "0")}-${Math.floor(Math.random() * 1000000)}`;
+  const year = date.getFullYear().toString().substr(-2);
+  const day = date.getDate().toString().padStart(2, "0");
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const random = Math.floor(Math.random() * 10000).toString().padStart(4, "0");
+  const invoiceId = `${year}-${day}${month}-${random}`;
   return invoiceId;
-};
+  };
 
 // Add a new invoice
 exports.addInvoice = async (request, response, next) => {
@@ -55,16 +59,49 @@ exports.addInvoice = async (request, response, next) => {
     if (!patient)
       return response.status(400).json({ error: "Patient not found" });
     let services = request.body.services;
-    let total = 0;
-    services.forEach((service) => {
-      total += service.cost;
-    });
+    let totalCost = 0;
+    let invoiceServices = [];
+
+    for (let i = 0; i < services.length; i++) {
+      let clinicService = clinic._services.find((service) => service.name === services[i].name);
+      if (!clinicService) return response.status(400).json({ error: `Service ${services[i].name} not found in clinic ${request.body.clinicId}` });
+      totalCost += clinicService.cost + services[i].additionalCost;
+      let invoiceServicesobject = {"name": clinicService.name, "cost": clinicService.cost+services[i].additionalCost};
+      invoiceServices.push(invoiceServicesobject);
+    }
+    let paymentMethod = "cash";
+    if(request.body.paymentMethod){
+    paymentMethod = request.body.paymentMethod;
+    if (paymentMethod!== "cash" && paymentMethod!== "credit card" && paymentMethod!== "insurance") {
+      return response.status(400).json({ error: "Payment method not accepted" });
+    }
+  }
+  let paid =0;
+  let totalDue = totalCost;
+  let invoiceStatus = "unpaid";
+  if (request.body.paid){
+    paid = request.body.paid;
+    if (paid > totalCost) {
+      return response.status(400).json({ error: "Paid amount is greater than total cost" });
+    }
+    if (paid === totalCost) {
+      invoiceStatus = "paid";
+    }
+    invoiceStatus = "partial";
+    totalDue = totalCost - paid;
+    totalCost = toalalCost - totalDue;
+  }
+
     let addedInvoice = invoiceSchema({
       _id: generateInvoiceId(),
       patient_Id: request.body.patientId,
       clinic_Id: request.body.clinicId,
       services: services,
-      total: total,
+      total: totalCost,
+      paymentMethod: paymentMethod,
+      paid: paid,
+      totalDue: totalDue,
+      status: invoiceStatus,
     });
 
     await addedInvoice.save();
@@ -72,16 +109,15 @@ exports.addInvoice = async (request, response, next) => {
     const dueDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
     let data = {
-      //"documentTitle": "RECEIPT", //Defaults to INVOICE
       currency: "USD",
-      taxNotation: "vat", //or gst
+      taxNotation: "vat", 
       marginTop: 25,
       marginRight: 25,
       marginLeft: 25,
       marginBottom: 25,
       settings: { locale: "en-US", currency: "USD" },
       sender: {
-        company: `Alwafaa-${clinic._id}`,
+        company: `Alwafaa-${clinic._specilization}-${clinic._id}`,
         address: clinic._address.street,
         zip: clinic._address.zipCode,
         city: clinic._address.city,
@@ -94,22 +130,22 @@ exports.addInvoice = async (request, response, next) => {
         city: patient._address.city,
         country: patient._address.country,
       },
-
+      paymentMethod: request.body.paymentMethod || "",
+      paid: request.body.paid || "",
+      totalDue: request.body.totalDue || "",
+      status: request.body.status || "",
       images: {
         logo: "https://seeklogo.com/images/H/hospital-clinic-plus-logo-7916383C7A-seeklogo.com.png",
       },
 
       information: {
-        // Invoice number
         number: addedInvoice._id,
-        // Invoice data
         date: `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`,
-        // Invoice due date
         "due-date": `${dueDate.getDate()}/${
           dueDate.getMonth() + 1
         }/${dueDate.getFullYear()}`,
       },
-      products: addedInvoice.services.map((service) => ({
+      products: invoiceServices.map((service) => ({
         quantity: "1",
         description: service.name,
         "tax-rate": 14,

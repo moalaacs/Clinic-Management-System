@@ -47,8 +47,7 @@ const appointmentSchema = new mongoose.Schema({
     required: true,
     default: "Pending",
     enum: ["Pending", "Accepted", "Declined", "Completed"],
-  },
-  _clinicId: { type: Number, ref: "clinic" },
+  }
 });
 
 module.exports = mongoose.model("appointment", appointmentSchema);

@@ -109,7 +109,7 @@ exports.addEmployee = async (request, response, next) => {
     if (request.file) {
       sentObject._image = request.file.path;
     }
-    const employee = new EmployeeSchema();
+    const employee = new EmployeeSchema(sentObject);
     let savedEmployee = await employee.save();
     const newUser = new users({
       _id: savedEmployee._id,

@@ -93,7 +93,7 @@ let validatePatchClinic = [
       "Surgical",
     ])
     .withMessage("Clinic's speciality isn't available"),
-];
+  ];
 let validatePerson = [
   check("firstname")
     .matches(/^[a-zA-Z ]+$/)
@@ -107,9 +107,9 @@ let validatePerson = [
     .withMessage("length of name should be greater than 3 characters"),
   check("dateOfBirth")
     .matches(
-      /^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]|(?:Jan|Mar|May|Jul|Aug|Oct|Dec)))\1|(?:(?:29|30)(\/|-|\.)(?:0?[1,3-9]|1[0-2]|(?:Jan|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec))\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)(?:0?2|(?:Feb))\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9]|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep))|(?:1[0-2]|(?:Oct|Nov|Dec)))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$/
-    )
-    .withMessage("Invalid date format, should be DD/MM/YYYY"),
+    /^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]|(?:Jan|Mar|May|Jul|Aug|Oct|Dec)))\1|(?:(?:29|30)(\/|-|\.)(?:0?[1,3-9]|1[0-2]|(?:Jan|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec))\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)(?:0?2|(?:Feb))\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9]|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep))|(?:1[0-2]|(?:Oct|Nov|Dec)))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$/
+  )
+  .withMessage("Invalid date format, should be DD/MM/YYYY"),
   check("gender")
     .isIn(["male", "female"])
     .withMessage("gender must be either male or female"),
@@ -140,6 +140,7 @@ let validatePerson = [
     .withMessage("zip code should be a number")
     .isLength({ min: 5, max: 5 })
     .withMessage("length of zip code should be 5 characters"),
+  check("profileImage").isString().withMessage("image should be string"),
 ];
 let validatePatchPerson = [
   check("_id").optional().isNumeric().withMessage("Id should be a number"),
@@ -158,9 +159,9 @@ let validatePatchPerson = [
   check("dateOfBirth")
     .optional()
     .matches(
-      /^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]|(?:Jan|Mar|May|Jul|Aug|Oct|Dec)))\1|(?:(?:29|30)(\/|-|\.)(?:0?[1,3-9]|1[0-2]|(?:Jan|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec))\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)(?:0?2|(?:Feb))\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9]|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep))|(?:1[0-2]|(?:Oct|Nov|Dec)))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$/
-    )
-    .withMessage("Invalid date format, should be DD/MM/YYYY"),
+    /^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]|(?:Jan|Mar|May|Jul|Aug|Oct|Dec)))\1|(?:(?:29|30)(\/|-|\.)(?:0?[1,3-9]|1[0-2]|(?:Jan|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec))\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)(?:0?2|(?:Feb))\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9]|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep))|(?:1[0-2]|(?:Oct|Nov|Dec)))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$/
+  )
+  .withMessage("Invalid date format, should be DD/MM/YYYY"),
   check("gender")
     .optional()
     .isIn(["male", "female"])
@@ -380,8 +381,8 @@ let validatePrescription = [
     "instructions",
     "Instructions should have a minimum length of 5 characters"
   )
-    .optional()
-    .if((value) => value)
+  .optional()
+  .if((value) => value)
     .isLength({ min: 5 }),
 ];
 let validatePatchPrescription = [
@@ -423,8 +424,8 @@ let validatePatchPrescription = [
     "instructions",
     "Instructions should have a minimum length of 5 characters"
   )
-    .optional()
-    .if((value) => value)
+  .optional()
+  .if((value) => value)
     .isLength({ min: 5 }),
 ];
 let validateInvoice = [
@@ -436,9 +437,30 @@ let validateInvoice = [
   check("services.*.name")
     .isString()
     .withMessage("services name should be a string"),
-  check("services.*.cost")
+  check("services.*.additionalCosts")
+    .optional()
     .isNumeric()
     .withMessage("services cost should be a number"),
+    check("services.*.notes")
+    .optional()
+    .isString()
+    .withMessage("services notes should be a string"),
+    check("paymentMethod")
+    .optional()
+    .isIn(["cash", "credit", "insurance"])
+    .withMessage("Invalid paymentMethod"),
+  check("status")
+    .optional()
+    .isIn(["paid", "unpaid", "partial"])
+    .withMessage("Invalid invoice status"),
+  check("amountPaid")
+    .optional()
+    .isNumeric()
+    .withMessage("amountPaid should be a number"),
+  check("amountDue")
+    .optional()
+    .isNumeric()
+    .withMessage("amountDue should be a number"),
 ];
 let validatePatchInvoice = [
   check("patientId")
@@ -456,13 +478,30 @@ let validatePatchInvoice = [
   check("services.*.name")
     .isString()
     .withMessage("services name should be a string"),
-  check("services.*.cost")
+    check("services.*.additionalCosts")
+    .optional()
     .isNumeric()
     .withMessage("services cost should be a number"),
-  // check("paymentMethod")
-  //   .optional()
-  //   .isIn(["cash", "credit", "insurance"])
-  //   .withMessage("Invalid paymentMethod status"),
+    check("services.*.notes")
+    .optional()
+    .isString()
+    .withMessage("services notes should be a string"),
+  check("paymentMethod")
+    .optional()
+    .isIn(["cash", "credit", "insurance"])
+    .withMessage("Invalid paymentMethod"),
+  check("status")
+    .optional()
+    .isIn(["paid", "unpaid", "partial"])
+    .withMessage("Invalid invoice status"),
+  check("amountPaid")
+    .optional()
+    .isNumeric()
+    .withMessage("amountPaid should be a number"),
+  check("amountDue")
+    .optional()
+    .isNumeric()
+    .withMessage("amountDue should be a number"),
 ];
 module.exports = {
   validateClinic,
