@@ -18,7 +18,7 @@ const multerStorage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const extension = file.mimetype.split("/")[1];
-    cb(null, `person-${Date.now()}.${extension}`);
+    cb(null, `employee-${Date.now()}.${extension}`);
   }
 });
 const multerFilter = (req, file, cb) => {
