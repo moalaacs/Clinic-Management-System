@@ -50,7 +50,7 @@ exports.addClinic = async (request, response, next) => {
       _email: request.body.email,
       _password: "admin",
       _role: "admin",
-      _id: savedClinic._id,
+      _idInSchema: savedClinic._id,
       _contactNumber: request.body.phone,
       _forClinic: savedClinic._id,
     });
@@ -166,14 +166,13 @@ exports.removeClinicById = async (request, response, next) => {
         },
       }
     );
-    await users
-      .deleteMany({
-        _email: { $in: arrayOfExistingEmailsForEmployees },
-      })
-      .updateMany(
-        { _email: { $in: arrayOfExistingEmailsForDoctors } },
-        { $set: { _role: "formerDoctor" } }
-      );
+    await users.deleteMany({
+      _email: { $in: arrayOfExistingEmailsForEmployees },
+    });
+    await users.updateMany(
+      { _email: { $in: arrayOfExistingEmailsForDoctors } },
+      { $set: { _role: "formerDoctor" } }
+    );
 
     response
       .status(201)

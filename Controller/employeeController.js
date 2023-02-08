@@ -66,7 +66,7 @@ exports.getAllEmployees = async (request, response, next) => {
 // Add a new Employee
 exports.addEmployee = async (request, response, next) => {
   try {
-    let clinicExists = await clinicSchema.find({ _id: request.body.clinic });
+    let clinicExists = await clinicSchema.findOne({ _id: request.body.clinic });
     if (!clinicExists)
       return response
         .status(400)
@@ -77,7 +77,6 @@ exports.addEmployee = async (request, response, next) => {
         { _contactNumber: request.body.phone },
       ],
     });
-    console.log(testEmailandPhone);
     if (testEmailandPhone) {
       if (testEmailandPhone._email == request.body.email) {
         return response.status(400).json({ message: `Email Already in use` });
@@ -113,7 +112,7 @@ exports.addEmployee = async (request, response, next) => {
     const employee = new employeeSchema(sentObject);
     let savedEmployee = await employee.save();
     const newUser = new users({
-      _id: savedEmployee._id,
+      _idInSchema: savedEmployee._id,
       _role: "employee",
       _email: request.body.email,
       _contactNumber: request.body.phone,

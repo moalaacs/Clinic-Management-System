@@ -20,7 +20,7 @@ exports.login = async (request, response, next) => {
               {
                 role: "admin",
                 email,
-                id: foundUser._id,
+                id: foundUser._idInSchema,
                 forClinic: foundUser._forClinic,
               },
               process.env.SECRET_KEY,
@@ -32,7 +32,7 @@ exports.login = async (request, response, next) => {
           }
           case "doctor": {
             token = jwt.sign(
-              { role: "doctor", email, id: foundUser._id },
+              { role: "doctor", email, id: foundUser._idInSchema },
               process.env.SECRET_KEY,
               { expiresIn: "1h" }
             );
@@ -42,7 +42,7 @@ exports.login = async (request, response, next) => {
           }
           case "employee": {
             token = jwt.sign(
-              { role: "employee", email, id: foundUser._id },
+              { role: "employee", email, id: foundUser._idInSchema },
               process.env.SECRET_KEY,
               { expiresIn: "1h" }
             );
@@ -52,7 +52,7 @@ exports.login = async (request, response, next) => {
           }
           case "patient": {
             token = jwt.sign(
-              { role: "patient", email, id: foundUser._id },
+              { role: "patient", email, id: foundUser._idInSchema },
               process.env.SECRET_KEY,
               { expiresIn: "1h" }
             );
@@ -60,7 +60,12 @@ exports.login = async (request, response, next) => {
               .status(200)
               .json({ message: "Patient login successful", token });
           }
+          // default: {
+          //   return next(new Error("You were dismissed from the system"));
+          // }
         }
+      } else {
+        return response.status(200).json({ message: "Invalid Password" });
       }
     } else {
       return next(new Error("Invalid Credentials"));

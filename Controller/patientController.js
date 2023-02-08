@@ -96,7 +96,7 @@ exports.addPatient = async (request, response, next) => {
     const savedPatient = new patientSchema(sentObject);
     await savedPatient.save();
     const newUser = new users({
-      _id: savedPatient._id,
+      _idInSchema: savedPatient._id,
       _role: "patient",
       _email: request.body.email,
       _contactNumber: request.body.phone,
