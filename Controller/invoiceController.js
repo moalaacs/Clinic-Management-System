@@ -22,8 +22,8 @@ exports.getInvoices = async (request, response, next) => {
   try {
     let query = reqNamesToSchemaNames(request.query);
     let invoice = await filterData(invoiceSchema, query, [
-      { path: "patient_Id", options: { strictPopulate: false } },
-      { path: "clinic_Id", options: { strictPopulate: false } },
+      { path: "patient_Id", options: { strictPopulate: false }, select:{_email:1, _fname:1, _lname:1} },
+      { path: "clinic_Id", options: { strictPopulate: false } ,select: {  _specilization:1 } },
     ]);
     invoice = sortData(invoice, query);
     invoice = paginateData(invoice, request.query);

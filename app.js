@@ -48,6 +48,7 @@ app.use(morgan("dev"));
 // b- body parser middleware
 app.use(express.json());
 
+
 // c- Routes (End points)  middleware
 
 /*Authenticate user */
@@ -76,4 +77,3 @@ app.use((error, request, response, next) => {
   response.status(errorStatus).json(error.message);
 });
 
-//by Mohamed Ibrahim
