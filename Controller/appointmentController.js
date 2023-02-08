@@ -266,7 +266,7 @@ exports.patientAppointmentsReports = (request, response, next) => {
     .populate({ path: "_doctorId", select: { _id: 0 } })
     .populate({ path: "_clinicId", select: { _id: 0 } })
     .then((data) => {
-      request.status(200).json(data);
+      response.status(200).json(data);
     })
     .catch((error) => next(error));
 };
@@ -279,7 +279,7 @@ exports.doctorAppointmentsReports = (request, response, next) => {
     .populate({ path: "_doctorId", select: { _id: 0 } })
     .populate({ path: "_clinicId", select: { _id: 0 } })
     .then((data) => {
-      request.status(200).json(data);
+      response.status(200).json(data);
     })
     .catch((error) => next(error));
 };
