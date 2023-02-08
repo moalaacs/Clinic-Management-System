@@ -259,7 +259,6 @@ let doctorValidation = [
   check("schedule.end")
     .matches(/^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/)
     .withMessage("Invalid End time format, should be in the form 00:00"),
-  ,
 ];
 let doctorPatchValidation = [
   validatePatchPerson,
