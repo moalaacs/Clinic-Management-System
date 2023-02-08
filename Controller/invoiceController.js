@@ -65,8 +65,9 @@ exports.addInvoice = async (request, response, next) => {
     for (let i = 0; i < services.length; i++) {
       let clinicService = clinic._services.find((service) => service.name === services[i].name);
       if (!clinicService) return response.status(400).json({ error: `Service ${services[i].name} not found in clinic ${request.body.clinicId}` });
-      total += clinicService.cost + services[i].additionalCost;
-      let invoiceServicesobject = {"name": clinicService.name, "cost": clinicService.cost+services[i].additionalCost};
+
+      totalCost += clinicService.cost + services[i].additionalCosts;
+      let invoiceServicesobject = {"name": clinicService.name, "cost": clinicService.cost+services[i].additionalCosts};
       invoiceServices.push(invoiceServicesobject);
     }
     let paymentMethod = "cash";
@@ -104,7 +105,7 @@ exports.addInvoice = async (request, response, next) => {
       totalDue: totalDue,
       status: invoiceStatus,
     });
-
+    console.log(addedInvoice);
     await addedInvoice.save();
 
     patient.invoices.push({
@@ -141,10 +142,6 @@ exports.addInvoice = async (request, response, next) => {
         city: patient._address.city,
         country: patient._address.country,
       },
-      // paymentMethod: request.body.paymentMethod || "",
-      // paid: request.body.paid || "",
-      // totalDue: request.body.totalDue || "",
-      // status: request.body.status || "",
       images: {
         logo: "https://seeklogo.com/images/H/hospital-clinic-plus-logo-7916383C7A-seeklogo.com.png",
       },
@@ -217,6 +214,7 @@ exports.editInvoice = async (request, response, next) => {
       }
     } else {
       clinicId = existingInvoice.clinic_Id;
+      clinic = await clinicSchema.findById(clinicId);
     }
 
     if (patientId) {
@@ -227,21 +225,18 @@ exports.editInvoice = async (request, response, next) => {
     } else {
       patientId = existingInvoice.patient_Id;
     }
-
-    if (services) {
-      let invoiceServices = []; 
-      total = 0; 
-      for (let i = 0; i < services.length; i++) {
-        let clinicService = clinic._services.find((service) => service.name === services[i].name);
-        if (!clinicService) return response.status(400).json({ error: `Service ${services[i].name} not found in clinic ${request.body.clinicId}` });
-        total += clinicService.cost + services[i].additionalCost;
-        let invoiceServicesobject = {"name": clinicService.name, "cost": clinicService.cost+services[i].additionalCost};
-        invoiceServices.push(invoiceServicesobject);
-      }
-    } else {
+    let invoiceServices = [];
+    if (!services) {
       services = existingInvoice.services;
-    }
-
+    } 
+    for (let i = 0; i < services.length; i++) {
+      let clinicService = clinic._services.find((service) => service.name === services[i].name);
+      if (!clinicService) return response.status(400).json({ error: `Service ${services[i].name} not found in clinic ${request.body.clinicId}` });
+      let invoiceServicesobject = {"name": clinicService.name, "cost": clinicService.cost+services[i].additionalCosts};
+      invoiceServices.push(invoiceServicesobject);
+    } 
+    
+    console.log(invoiceServices);
     if (request.body.paid) {
       paid = request.body.paid;
       if (paid > total) {
@@ -252,7 +247,7 @@ exports.editInvoice = async (request, response, next) => {
         totalDue = 0;
       }else{
       invoiceStatus = "partial";
-      totalDue = totalCost - paid;
+      totalDue = total - paid;
       }
     }
     
@@ -286,10 +281,9 @@ exports.editInvoice = async (request, response, next) => {
       clinic = await clinicSchema.findById(clinicId);
     }
 
-    fs.unlinkSync(`invoices/${existingInvoice._id}.pdf`);
-
     const date = new Date();
     const dueDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    fs.unlinkSync(`invoices/${existingInvoice._id}.pdf`);
 
     let data = {
       currency: "USD",
@@ -325,7 +319,7 @@ exports.editInvoice = async (request, response, next) => {
           dueDate.getMonth() + 1
         }/${dueDate.getFullYear()}`,
       },
-      products: tempInvoice.services.map((service) => ({
+      products: invoiceServices.map((service) => ({
         quantity: "1",
         description: service.name,
         "tax-rate": 14,
@@ -348,6 +342,7 @@ exports.editInvoice = async (request, response, next) => {
       );
     };
     await invoicePdf();
+
     response
       .status(200)
       .json({ message: "invoice updated successfully.", updatedInvoice });
@@ -365,8 +360,12 @@ exports.removeInvoice = async (request, response, next) => {
     if (!invoice) {
       return next(new Error("invoice not found"));
     }
-    console.log(invoice._id);
     fs.unlinkSync(`invoices/${invoice._id}.pdf`);
+    const patient = await patientSchema.findOne({ _id: invoice.patient_Id });
+    console.log(invoice._id);
+    patient.invoices = patient.invoices.filter(
+      (i) => i.invoice_id !== invoice._id);
+    await patient.save();
     response
       .status(201)
       .json({ message: "Invoice removed successfully.", invoice });
