@@ -18,7 +18,7 @@ router
   .all(numberIdParamsValidation, validatorMiddleware)
   .get(controller.getDoctorById)
   .put(doctorValidation, validatorMiddleware, controller.putDoctorById)
-  .patch(doctorPatchValidation, validatorMiddleware, controller.patchDoctorById)
+  .patch(controller.uploadPhoto, doctorPatchValidation, validatorMiddleware, controller.patchDoctorById)
   .delete(controller.removeDoctorById);
 
 module.exports = router;

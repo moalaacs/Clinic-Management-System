@@ -1,10 +1,35 @@
 /* require bcrypt */
 const bcrypt = require("bcrypt");
-
+/* require multer */
+const multer = require("multer");
 /* require all needed modules */
 const doctorSchema = require("../Models/doctorModel");
 const clinicSchema = require("../Models/clinicModel");
 const users = require("../Models/usersModel");
+
+/* upload images */
+const multerStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "images")
+  },
+  filename: (req, file, cb) => {
+    const extension = file.mimetype.split("/")[1];
+    cb(null, `person-${Date.now()}.${extension}`);
+  }
+});
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith("image")) {
+    cb(null, true)
+  } else {
+    cb(null, false)
+  }
+}
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter
+});
+exports.uploadPhoto = upload.single('photo');
+
 /* require helper functions (filter,sort,slice,paginate) */
 const {
   filterData,
