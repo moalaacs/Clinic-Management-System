@@ -1,36 +1,10 @@
 /* require bcrypt */
 const bcrypt = require("bcrypt");
 
-/* require multer */
-const multer = require("multer");
-
 /* require all needed modules */
 const doctorSchema = require("../Models/doctorModel");
 const clinicSchema = require("../Models/clinicModel");
 const users = require("../Models/usersModel");
-
-/* upload image */
-const multerStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "images");
-  },
-  filename: (req, file, cb) => {
-    const extension = file.mimetype.split("/")[1];
-    cb(null, `doctor-${Date.now()}.${extension}`);
-  },
-});
-const multerFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith("image")) {
-    cb(null, true);
-  } else {
-    cb(null, false);
-  }
-};
-const upload = multer({
-  storage: multerStorage,
-  fileFilter: multerFilter,
-});
-exports.uploadPhoto = upload.single("photo");
 
 /* require helper functions (filter,sort,slice,paginate) */
 const {
@@ -69,7 +43,7 @@ exports.addDoctor = async (request, response, next) => {
   try {
     const existingClinics = await clinicSchema.find(
       {},
-      { _id: 1, _specilization: 1 }
+      { _id: 1, _specilization: 1, _weeklySchedule: 1 }
     );
     let specialityClinicId = mapSpecilityToSpecilization(
       request.body.speciality
@@ -81,6 +55,29 @@ exports.addDoctor = async (request, response, next) => {
       return response.status(400).json({
         message: `Sorry, We don't have a department for ${request.body.speciality} yet`,
       });
+    //CHECK SCHEDULE
+    // if (specialityClinicId._weeklySchedule.length) {
+    //   request.body.schedule.forEach((schedule) => {
+    //     let testSchedule = specialityClinicId._weeklySchedule.find(
+    //       (clinicSchedule) => {
+    //         return (
+    //           clinicSchedule.day == schedule.day &&
+    //           !isBetweenTwoDate(
+    //             schedule.start,
+    //             schedule.end,
+    //             clinicSchedule.start,
+    //             clinicSchedule.end
+    //           )
+    //         );
+    //       }
+    //     );
+    //     if (testSchedule)
+    //       return response.status(201).json({
+    //         message: `Clinic has schedule already at ${schedule.day} between ${schedule.start} to ${schedule.end} `,
+    //       });
+    //   });
+    // }
+
     let testEmailandPhone = await users.findOne({
       $or: [
         { _email: request.body.email },
@@ -118,6 +115,15 @@ exports.addDoctor = async (request, response, next) => {
       _schedule: request.body.schedule,
     });
     let savedDoctor = await doctor.save();
+
+    let DoctorIdIntoSchedule = request.body.schedule.map((element) => {
+      return { doctorId: savedDoctor._id, ...element };
+    });
+
+    await clinicSchema.updateOne(
+      { _id: specialityClinicId._id },
+      { $push: { _weeklySchedule: DoctorIdIntoSchedule } }
+    );
     const newUser = new users({
       _idInSchema: savedDoctor._id,
       _role: "doctor",

@@ -25,6 +25,49 @@ const serviceSchema = new mongoose.Schema(
   },
   { _id: false }
 );
+const scheduleSchema = new mongoose.Schema(
+  {
+    day: {
+      type: String,
+      required: true,
+      enum: [
+        "Saturday",
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+      ],
+    },
+    start: {
+      type: String,
+      required: true,
+      validate: {
+        validator: function (value) {
+          return /^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/.test(value);
+        },
+        message: "Invalid start date format, should be DD/MM/YYYY",
+      },
+    },
+    end: {
+      type: String,
+      required: true,
+      validate: {
+        validator: function (value) {
+          return /^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/.test(value);
+        },
+        message: "Invalid end date format, should be DD/MM/YYYY",
+      },
+    },
+    doctorId: {
+      type: Number,
+      ref: "doctor",
+      required: true,
+    },
+  },
+  { _id: false }
+);
 /* crete schema for clinics collection */
 const clinicSchema = new mongoose.Schema({
   _id: { type: Number },
@@ -56,13 +99,7 @@ const clinicSchema = new mongoose.Schema({
     ],
   },
   _services: [{ type: serviceSchema }],
-  _weeklySchedule: [
-    {
-      day: { type: Number, required: true, min: 0, max: 6 }, //Sunday = 0, Monday = 1
-      startDate: { type: Number, min: 8, max: 24, required: true },
-      endDate: { type: Number, min: 8, max: 24, required: true },
-    },
-  ],
+  _weeklySchedule: [scheduleSchema],
 });
 
 /* auto increment for _id field */

@@ -7,14 +7,15 @@ const {
   numberIdParamsValidation,
 } = require("../Middlewares/validateData");
 const router = express.Router();
+const { upload } = require("../Middlewares/multer");
 
 router
   .route("/doctor")
   .get(controller.getAllDoctors)
   .post(
+    upload.single("photo"),
     doctorValidation,
     validatorMiddleware,
-    controller.uploadPhoto,
     controller.addDoctor
   );
 
@@ -23,15 +24,15 @@ router
   .all(numberIdParamsValidation, validatorMiddleware)
   .get(controller.getDoctorById)
   .put(
+    upload.single("photo"),
     doctorValidation,
     validatorMiddleware,
-    controller.uploadPhoto,
     controller.putDoctorById
   )
   .patch(
+    upload.single("photo"),
     doctorPatchValidation,
     validatorMiddleware,
-    controller.uploadPhoto,
     controller.patchDoctorById
   )
   .delete(controller.removeDoctorById);

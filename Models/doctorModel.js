@@ -3,6 +3,46 @@ const AutoIncrement = require("mongoose-sequence")(mongoose);
 const personSchema = require("./personModel");
 
 /*** crete schema for doctors collection ***/
+
+const scheduleSchema = new mongoose.Schema(
+  {
+    day: {
+      type: String,
+      required: true,
+      enum: [
+        "Saturday",
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+      ],
+    },
+    start: {
+      type: String,
+      required: true,
+      validate: {
+        validator: function (value) {
+          return /^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/.test(value);
+        },
+        message: "Invalid start date format, should be DD/MM/YYYY",
+      },
+    },
+    end: {
+      type: String,
+      required: true,
+      validate: {
+        validator: function (value) {
+          return /^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/.test(value);
+        },
+        message: "Invalid end date format, should be DD/MM/YYYY",
+      },
+    },
+  },
+  { _id: false }
+);
+
 const doctorSchema = new mongoose.Schema(
   Object.assign({}, personSchema.obj, {
     _id: { type: Number },
@@ -21,13 +61,7 @@ const doctorSchema = new mongoose.Schema(
         "Surgeon",
       ],
     },
-    _schedule: [
-      {
-        day: { type: Number, required: true, min: 0, max: 6 }, //Sunday = 0, Monday = 1
-        startDate: { type: Number, min: 8, max: 24, required: true },
-        endDate: { type: Number, min: 8, max: 24, required: true },
-      },
-    ],
+    _schedule: [scheduleSchema],
     _clinic: {
       type: Number,
       required: true,

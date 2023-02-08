@@ -7,7 +7,7 @@ const {
   numberIdParamsValidation,
 } = require("../Middlewares/validateData");
 const authorizationMW = require("../Middlewares/authorizationMW");
-
+const { upload } = require("../Middlewares/multer");
 const router = express.Router();
 
 router
@@ -15,9 +15,9 @@ router
   .all(authorizationMW.checkAdmin)
   .get(controller.getAllPatients)
   .post(
+    upload.single("photo"),
     validatePatient,
     validatorMiddleware,
-    controller.uploadPhoto,
     controller.addPatient
   );
 
@@ -30,9 +30,9 @@ router
   )
   .get(controller.getPatientById)
   .patch(
+    upload.single("photo"),
     validatePatchPatient,
     validatorMiddleware,
-    controller.uploadPhoto,
     controller.patchPatientById
   );
 

@@ -7,6 +7,7 @@ const {
   numberIdParamsValidation,
 } = require("../Middlewares/validateData");
 const authorizationMW = require("../Middlewares/authorizationMW");
+const { upload } = require("../Middlewares/multer");
 
 const router = express.Router();
 
@@ -14,7 +15,12 @@ router
   .route("/employee")
   .all(authorizationMW.checkAdmin)
   .get(controller.getAllEmployees)
-  .post(employeeValidation, validatorMiddleware, controller.addEmployee);
+  .post(
+    upload.single("photo"),
+    employeeValidation,
+    validatorMiddleware,
+    controller.addEmployee
+  );
 
 router
   .route("/employee/:id")
@@ -25,7 +31,7 @@ router
   )
   .get(controller.getEmployeeById)
   .patch(
-    controller.uploadPhoto,
+    upload.single("photo"),
     employeePatchValidation,
     validatorMiddleware,
     controller.patchEmployee
@@ -39,7 +45,12 @@ router
     validatorMiddleware
   )
   .get(controller.getEmployeeById)
-  .patch(employeePatchValidation, validatorMiddleware, controller.patchEmployee)
+  .patch(
+    upload.single("photo"),
+    employeePatchValidation,
+    validatorMiddleware,
+    controller.patchEmployee
+  )
   .delete(controller.removeEmployeeById);
 
 module.exports = router;

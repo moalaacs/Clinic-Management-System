@@ -498,39 +498,6 @@ const mapSpecilityToSpecilization = (specility) => {
   }
 };
 
-const dayNameToDayNumber = (day) => {
-  switch (day) {
-    case "Saturday":
-    case "saturday": {
-      return 6;
-    }
-    case "Sunday":
-    case "sunday": {
-      return 0;
-    }
-    case "Monday":
-    case "monday": {
-      return 1;
-    }
-    case "Tuesday":
-    case "tuesday": {
-      return 2;
-    }
-    case "Wednesday":
-    case "wednesday": {
-      return 3;
-    }
-    case "Thursday":
-    case "thursday": {
-      return 4;
-    }
-    case "Friday":
-    case "friday": {
-      return 5;
-    }
-  }
-};
-
 module.exports = {
   filterData,
   paginateData,
@@ -538,5 +505,4 @@ module.exports = {
   sliceData,
   fillClinicServices,
   mapSpecilityToSpecilization,
-  dayNameToDayNumber,
 };

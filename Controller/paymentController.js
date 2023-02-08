@@ -34,10 +34,10 @@ exports.addPayment = async (request, response, next) => {
       stripe.customers
         .create({
           metadata: {
-            card_number: card_number,
-            exp_month: exp_month,
-            exp_year: exp_year,
-            cvc: cvc,
+            card_number,
+            exp_month,
+            exp_year,
+            cvc,
           },
           email: request.body.patientEmail,
           source: token.id,
