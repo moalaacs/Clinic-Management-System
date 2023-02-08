@@ -65,7 +65,7 @@ exports.addInvoice = async (request, response, next) => {
     for (let i = 0; i < services.length; i++) {
       let clinicService = clinic._services.find((service) => service.name === services[i].name);
       if (!clinicService) return response.status(400).json({ error: `Service ${services[i].name} not found in clinic ${request.body.clinicId}` });
-      totalCost += clinicService.cost + services[i].additionalCost;
+      total += clinicService.cost + services[i].additionalCost;
       let invoiceServicesobject = {"name": clinicService.name, "cost": clinicService.cost+services[i].additionalCost};
       invoiceServices.push(invoiceServicesobject);
     }
@@ -84,12 +84,13 @@ exports.addInvoice = async (request, response, next) => {
     if (paid > totalCost) {
       return response.status(400).json({ error: "Paid amount is greater than total cost" });
     }
-    if (paid === totalCost) {
+    else if (paid === totalCost) {
       invoiceStatus = "paid";
-    }
+      totalDue = 0;
+    }else{
     invoiceStatus = "partial";
     totalDue = totalCost - paid;
-    totalCost = toalalCost - totalDue;
+    }
   }
 
     let addedInvoice = invoiceSchema({
@@ -130,10 +131,10 @@ exports.addInvoice = async (request, response, next) => {
         city: patient._address.city,
         country: patient._address.country,
       },
-      paymentMethod: request.body.paymentMethod || "",
-      paid: request.body.paid || "",
-      totalDue: request.body.totalDue || "",
-      status: request.body.status || "",
+      // paymentMethod: request.body.paymentMethod || "",
+      // paid: request.body.paid || "",
+      // totalDue: request.body.totalDue || "",
+      // status: request.body.status || "",
       images: {
         logo: "https://seeklogo.com/images/H/hospital-clinic-plus-logo-7916383C7A-seeklogo.com.png",
       },
@@ -186,8 +187,18 @@ exports.editInvoice = async (request, response, next) => {
       return response.status(400).json({ message: "Invoice not found." });
     }
 
+    let paymentMethod = existingInvoice.paymentMethod;
+    if(request.body.paymentMethod){
+    paymentMethod = request.body.paymentMethod;
+    if (paymentMethod!== "cash" && paymentMethod!== "credit card" && paymentMethod!== "insurance") {
+      return response.status(400).json({ error: "Payment method not accepted" });
+    }
+
     let { clinicId, patientId, services } = request.body;
     let total = existingInvoice.total;
+    let paid = existingInvoice.paid;
+    let totalDue = existingInvoice.totalDue;
+    let invoiceStatus = existingInvoice.status;
 
     if (clinicId) {
       clinic = await clinicSchema.findById(clinicId);
@@ -208,19 +219,46 @@ exports.editInvoice = async (request, response, next) => {
     }
 
     if (services) {
-      total = 0;
-      services.forEach((service) => {
-        total += service.cost;
-      });
+      let invoiceServices = []; 
+      total = 0; 
+      for (let i = 0; i < services.length; i++) {
+        let clinicService = clinic._services.find((service) => service.name === services[i].name);
+        if (!clinicService) return response.status(400).json({ error: `Service ${services[i].name} not found in clinic ${request.body.clinicId}` });
+        total += clinicService.cost + services[i].additionalCost;
+        let invoiceServicesobject = {"name": clinicService.name, "cost": clinicService.cost+services[i].additionalCost};
+        invoiceServices.push(invoiceServicesobject);
+      }
     } else {
       services = existingInvoice.services;
     }
+
+    if (request.body.paid) {
+      paid = request.body.paid;
+      if (paid > total) {
+        return response.status(400).json({ error: "Paid amount is greater than total" });
+      }
+      else if (paid === total) {
+        invoiceStatus = "paid";
+        totalDue = 0;
+      }else{
+      invoiceStatus = "partial";
+      totalDue = totalCost - paid;
+      }
+    }
+
+    
+    
+  }
 
     let tempInvoice = {
       clinic_Id: clinicId,
       patient_Id: patientId,
       services: services,
       total: total,
+      paymentMethod: paymentMethod,
+      paid: paid,
+      totalDue: totalDue,
+      status: invoiceStatus,
     };
 
     const updatedInvoice = await invoiceSchema.updateOne(
@@ -240,16 +278,15 @@ exports.editInvoice = async (request, response, next) => {
     const dueDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
     let data = {
-      //"documentTitle": "RECEIPT", //Defaults to INVOICE
       currency: "USD",
-      taxNotation: "vat", //or gst
+      taxNotation: "vat", 
       marginTop: 25,
       marginRight: 25,
       marginLeft: 25,
       marginBottom: 25,
       settings: { locale: "en-US", currency: "USD" },
       sender: {
-        company: `Alwafaa-${clinic._id}`,
+        company: `Alwafaa-${clinic._specilization}-${clinic._id}`,
         address: clinic._address.street,
         zip: clinic._address.zipCode,
         city: clinic._address.city,
@@ -268,11 +305,8 @@ exports.editInvoice = async (request, response, next) => {
       },
 
       information: {
-        // Invoice number
         number: existingInvoice._id,
-        // Invoice data
         date: `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`,
-        // Invoice due date
         "due-date": `${dueDate.getDate()}/${
           dueDate.getMonth() + 1
         }/${dueDate.getFullYear()}`,
