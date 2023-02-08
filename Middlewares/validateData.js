@@ -550,6 +550,32 @@ let validateLogin = [
     .isLength({ min: 8 })
     .withMessage("Password must be at least 8 characters"),
 ];
+
+let validatePayment = [
+  check('amount')
+    .not().isEmpty()
+    .withMessage("Amount is required")
+    .isNumeric()
+    .withMessage("Amount must be a number"),
+  check('card_number')
+    .not().isEmpty()
+    .withMessage("Card number is required"),
+  check('exp_month')
+    .not().isEmpty()
+    .withMessage("Expiration month is required")
+    .isNumeric()
+    .withMessage("Expiration month must be a number"),
+  check('exp_year')
+    .not().isEmpty()
+    .withMessage("Expiration year is required")
+    .isNumeric()
+    .withMessage("Expiration year must be a number"),
+  check('cvc')
+    .not().isEmpty()
+    .withMessage("CVC is required")
+    .isNumeric()
+    .withMessage("CVC must be a number"),
+];
 module.exports = {
   validateClinic,
   validatePatchClinic,
@@ -569,4 +595,5 @@ module.exports = {
   validateInvoice,
   validatePatchInvoice,
   validateLogin,
+  validatePayment
 };
