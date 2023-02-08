@@ -53,7 +53,7 @@ exports.addInvoice = async (request, response, next) => {
     if (!clinic)
       return response.status(400).json({ error: "Clinic not found" });
 
-    const patient = await patientSchema.findOne({
+    let patient = await patientSchema.findOne({
       _id: request.body.patientId,
     });
     if (!patient)
@@ -106,6 +106,16 @@ exports.addInvoice = async (request, response, next) => {
     });
 
     await addedInvoice.save();
+
+    patient.invoices.push({
+      invoice_id: addedInvoice._id,
+      total: addedInvoice.total,
+      totalDue: addedInvoice.totalDue,
+      status: addedInvoice.status,
+    });
+    await patient.save();
+
+
     const date = new Date();
     const dueDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
@@ -193,7 +203,7 @@ exports.editInvoice = async (request, response, next) => {
     if (paymentMethod!== "cash" && paymentMethod!== "credit card" && paymentMethod!== "insurance") {
       return response.status(400).json({ error: "Payment method not accepted" });
     }
-
+  }
     let { clinicId, patientId, services } = request.body;
     let total = existingInvoice.total;
     let paid = existingInvoice.paid;
@@ -245,10 +255,7 @@ exports.editInvoice = async (request, response, next) => {
       totalDue = totalCost - paid;
       }
     }
-
     
-    
-  }
 
     let tempInvoice = {
       clinic_Id: clinicId,
@@ -265,11 +272,18 @@ exports.editInvoice = async (request, response, next) => {
       { _id: request.params.id },
       { $set: tempInvoice }
     );
+
+    if(!patient){
+      patient = await patientSchema.findOne({ _id: patientId });
+    }
+    const updatedInvoiceIndex = patient.invoices.findIndex((invoice) => invoice.invoice_id === existingInvoice._id);
+    patient.invoices[updatedInvoiceIndex].total = existingInvoice.total;
+    patient.invoices[updatedInvoiceIndex].totalDue = existingInvoice.totalDue;
+    patient.invoices[updatedInvoiceIndex].status = existingInvoice.status;
+    await patient.save();
+
     if (!clinic) {
       clinic = await clinicSchema.findById(clinicId);
-    }
-    if (!patient) {
-      patient = await patientSchema.findById(patientId);
     }
 
     fs.unlinkSync(`invoices/${existingInvoice._id}.pdf`);

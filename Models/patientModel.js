@@ -7,6 +7,13 @@ const patientSchema = new mongoose.Schema(
   Object.assign({}, personSchema.obj, {
     _medicalHistory: { type: String },
     _id: { type: Number },
+    invoices: [{
+      invoice_id: { type: String },
+      total: { type: Number },
+      totalDue: { type: Number },
+      status: { type: String },
+    }],
+    // totalDue: { type: Number }
   })
 );
 

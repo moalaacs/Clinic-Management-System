@@ -9,23 +9,17 @@ const paymentSchema = require("./../Models/paymentModel");
 // Add a new payment
 exports.addPayment = async (request, response, next) => {
   const invoice_id = request.params.id;
-  if (!invoice_id) {
-    return response.status(400).send({ error: "Invoice id is required" });
-  }
-
-  let amount = request.body.amount;
-
+  
   let invoice = await invoiceSchema.findOne({ _id: invoice_id });
   if (!invoice) {
     return response.status(404).send({ error: "Invoice not found" });
   }
-
-  let patientEmail = await patientSchema.findOne({ _id: invoice.patient_Id }, {_email:1, _id:0});
-
+  let amount = request.body.amount;
   if (amount > invoice.totalDue) {
     return response.status(400).send("Amount paid exceeds total due");
   }
-
+  
+  let patientData = await patientSchema.findOne({ _id: invoice.patient_Id });
   const card_number = request.body.card_number;
   const exp_month = request.body.exp_month;
   const exp_year = request.body.exp_year;
@@ -48,19 +42,19 @@ exports.addPayment = async (request, response, next) => {
         exp_year: exp_year,
         cvc: cvc,
       },
-      email: patientEmail._email,
+      email: patientData._email,
       source: token.id,
-      name: "Gautam Sharma",
+      name: `${patientData._firstName} ${patientData._lastName}`,
       address: {
-        line1: "TC 9/4 Old MES colony",
-        postal_code: "110092",
-        city: "Mansoura",
-        state: "Delhi",
-        country: "Egypt",
+        line1:  patientData._address.street,
+        postal_code: patientData._address.zipCode,
+        city: patientData._address.city,
+        state: patientData._address.city,
+        country: patientData._address.country,
       },
     });
     await stripe.charges.create({
-      amount: amount,
+      amount: amount*100,
       description: "clinic service",
       currency: "USD",
       customer: customer.id,
@@ -68,7 +62,14 @@ exports.addPayment = async (request, response, next) => {
     invoice.paid += amount;
     invoice.totalDue = invoice.total - invoice.paid;
     invoice.status = invoice.paid === invoice.total ? "paid" : "partial";
-    await invoice.save();
+    invoice.paymentMethod = "credit";
+    await invoice.save(); 
+
+    const invoiceIndex = patient.invoices.findIndex(i => i.invoice_id === invoice_id);
+    patientData.invoices[invoiceIndex].totalDue = invoice.totalDue;
+    patientData.invoices[invoiceIndex].status = invoice.status;
+    await patientData.save();
+
     let newPayment = paymentSchema({
       invoice_id: invoice_id,
       amount: amount,
@@ -76,7 +77,7 @@ exports.addPayment = async (request, response, next) => {
       exp_month: exp_month,
       exp_year: exp_year,
       cvc: cvc,
-      email: patientEmail,
+      email: patientData._email,
     });
 
     await newPayment.save();
