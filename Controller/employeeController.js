@@ -14,25 +14,25 @@ const users = require("../Models/usersModel");
 /* upload image */
 const multerStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "images")
+    cb(null, "images");
   },
   filename: (req, file, cb) => {
     const extension = file.mimetype.split("/")[1];
     cb(null, `employee-${Date.now()}.${extension}`);
-  }
+  },
 });
 const multerFilter = (req, file, cb) => {
   if (file.mimetype.startsWith("image")) {
-    cb(null, true)
+    cb(null, true);
   } else {
-    cb(null, false)
+    cb(null, false);
   }
-}
+};
 const upload = multer({
   storage: multerStorage,
-  fileFilter: multerFilter
+  fileFilter: multerFilter,
 });
-exports.uploadPhoto = upload.single('photo');
+exports.uploadPhoto = upload.single("photo");
 
 /* require helper functions (filter,sort,slice,paginate) */
 const {
@@ -47,7 +47,11 @@ exports.getAllEmployees = async (request, response, next) => {
   try {
     let query = reqNamesToSchemaNames(request.query);
     let Employees = await filterData(EmployeeSchema, query, [
-      { path: "_clinic", options: { strictPopulate: false } },
+      {
+        path: "_clinic",
+        options: { strictPopulate: false },
+        select: { _id: 0, _specilization: 1, _address: 1 },
+      },
     ]);
     Employees = sortData(Employees, query);
     Employees = paginateData(Employees, request.query);
@@ -62,13 +66,11 @@ exports.getAllEmployees = async (request, response, next) => {
 // Add a new Employee
 exports.addEmployee = async (request, response, next) => {
   try {
-    const sentClinics = request.body.clinic;
-    const existingClinics = await clinicSchema.find({
-      _id: { $in: sentClinics },
-    });
-    if (sentClinics.length != existingClinics.length) {
-      return response.status(400).json({ message: "Check clinics id" });
-    }
+    let clinicExists = await clinicSchema.find({ _id: request.body.clinic });
+    if (!clinicExists)
+      return response
+        .status(400)
+        .json({ message: `Clinic ${request.body.clinic} not found` });
     let testEmailandPhone = await users.findOne({
       $or: [
         { _email: request.body.email },
@@ -125,13 +127,11 @@ exports.addEmployee = async (request, response, next) => {
 // Edit a Employee
 exports.putEmployee = async (request, response, next) => {
   try {
-    const sentClinics = request.body.clinic;
-    const existingClinics = await clinicSchema.find({
-      _id: { $in: sentClinics },
-    });
-    if (sentClinics.length != existingClinics.length) {
-      return response.status(400).json({ message: "Check clinics id" });
-    }
+    let clinicExists = await clinicSchema.find({ _id: request.body.clinic });
+    if (!clinicExists)
+      return response
+        .status(400)
+        .json({ message: `Clinic ${request.body.clinic} not found` });
     let testEmailandPhone = await users.findOne({
       $or: [
         { _email: request.body.email },
@@ -201,13 +201,11 @@ exports.patchEmployee = async (request, response, next) => {
       tempEmployee._contactNumber = request.body.phone;
     }
     if (request.body.clinic) {
-      const sentClinics = request.body.clinic;
-      const existingClinics = await clinicSchema.find({
-        _id: { $in: sentClinics },
-      });
-      if (sentClinics.length != existingClinics.length) {
-        return response.status(400).json({ message: "Check clinics id" });
-      }
+      let clinicExists = await clinicSchema.find({ _id: request.body.clinic });
+      if (!clinicExists)
+        return response
+          .status(400)
+          .json({ message: `Clinic ${request.body.clinic} not found` });
       tempEmployee._clinics = request.body.clinic;
     }
     if (request.body.email) {
@@ -303,7 +301,11 @@ exports.patchEmployee = async (request, response, next) => {
 // Get a employee by ID
 exports.getEmployeeById = async (request, response, next) => {
   try {
-    const employee = await EmployeeSchema.findById(request.params.id);
+    const employee = await EmployeeSchema.findById(request.params.id).populate({
+      path: "_clinic",
+      options: { strictPopulate: false },
+      select: { _id: 0, _specilization: 1, _address: 1 },
+    });
     if (!employee) {
       return next(new Error("Employee not found"));
     }

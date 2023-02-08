@@ -12,25 +12,25 @@ const users = require("../Models/usersModel");
 /* upload image */
 const multerStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "images")
+    cb(null, "images");
   },
   filename: (req, file, cb) => {
     const extension = file.mimetype.split("/")[1];
     cb(null, `doctor-${Date.now()}.${extension}`);
-  }
+  },
 });
 const multerFilter = (req, file, cb) => {
   if (file.mimetype.startsWith("image")) {
-    cb(null, true)
+    cb(null, true);
   } else {
-    cb(null, false)
+    cb(null, false);
   }
-}
+};
 const upload = multer({
   storage: multerStorage,
-  fileFilter: multerFilter
+  fileFilter: multerFilter,
 });
-exports.uploadPhoto = upload.single('photo');
+exports.uploadPhoto = upload.single("photo");
 
 /* require helper functions (filter,sort,slice,paginate) */
 const {
@@ -45,9 +45,16 @@ exports.getAllDoctors = async (request, response, next) => {
   try {
     let query = reqNamesToSchemaNames(request.query);
     let doctors = await filterData(doctorSchema, query, [
-      { path: "_schedule.clinicId", options: { strictPopulate: false } },
-      { path: "_clinics", options: { strictPopulate: false } },
-      { path: "_clinics", options: { strictPopulate: false } },
+      {
+        path: "_schedule.clinicId",
+        options: { strictPopulate: false },
+        select: { _specilization: 1, _address: 1, _id: 0 },
+      },
+      {
+        path: "_clinic",
+        options: { strictPopulate: false },
+        select: { _specilization: 1, _address: 1, _id: 0 },
+      },
     ]);
     doctors = sortData(doctors, query);
     doctors = paginateData(doctors, request.query);
@@ -323,7 +330,18 @@ exports.patchDoctorById = async (request, response, next) => {
 
 exports.getDoctorById = async (request, response, next) => {
   try {
-    let doctor = await doctorSchema.find({ _id: request.params.id });
+    let doctor = await doctorSchema
+      .find({ _id: request.params.id })
+      .populate({
+        path: "_schedule.clinicId",
+        options: { strictPopulate: false },
+        select: { _specilization: 1, _address: 1, _id: 0 },
+      })
+      .populate({
+        path: "_clinic",
+        options: { strictPopulate: false },
+        select: { _specilization: 1, _address: 1, _id: 0 },
+      });
     if (!doctor) {
       return next(new Error("doctor not found"));
     }

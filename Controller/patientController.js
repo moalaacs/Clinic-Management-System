@@ -11,25 +11,25 @@ const users = require("../Models/usersModel");
 /* upload image */
 const multerStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "images")
+    cb(null, "images");
   },
   filename: (req, file, cb) => {
     const extension = file.mimetype.split("/")[1];
     cb(null, `patient-${Date.now()}.${extension}`);
-  }
+  },
 });
 const multerFilter = (req, file, cb) => {
   if (file.mimetype.startsWith("image")) {
-    cb(null, true)
+    cb(null, true);
   } else {
-    cb(null, false)
+    cb(null, false);
   }
-}
+};
 const upload = multer({
   storage: multerStorage,
-  fileFilter: multerFilter
+  fileFilter: multerFilter,
 });
-exports.uploadPhoto = upload.single('photo');
+exports.uploadPhoto = upload.single("photo");
 
 /* require helper functions (filter,sort,slice,paginate) */
 const {
@@ -78,7 +78,7 @@ exports.addPatient = async (request, response, next) => {
     if (now.getMonth() < request.body.dateOfBirth.split("/")[1]) {
       age--;
     }
-    const patient = new patientSchema({
+    const savedPatient = new patientSchema({
       _fname: request.body.firstname,
       _lname: request.body.lastname,
       _dateOfBirth: request.body.dateOfBirth,
@@ -91,7 +91,7 @@ exports.addPatient = async (request, response, next) => {
       _image: request.body.profileImage,
       _medicalHistory: request.body.medicalHistory,
     });
-    await patient.save();
+    await savedPatient.save();
     const newUser = new users({
       _id: savedPatient._id,
       _role: "patient",
@@ -102,7 +102,7 @@ exports.addPatient = async (request, response, next) => {
     await newUser.save();
     response
       .status(201)
-      .json({ message: "Patient created successfully.", patient });
+      .json({ message: "Patient created successfully.", savedPatient });
   } catch (error) {
     next(error);
   }
