@@ -50,7 +50,7 @@ exports.addClinic = async (request, response, next) => {
       _email: request.body.email,
       _password: "admin",
       _role: "admin",
-      _id: savedClinic._id,
+      _idInSchema: savedClinic._id,
       _contactNumber: request.body.phone,
       _forClinic: savedClinic._id,
     });
@@ -143,11 +143,20 @@ exports.removeClinicById = async (request, response, next) => {
     if (!clinic) {
       return next(new Error("Clinic not found"));
     }
-    let existingEmails = await employeeSchema.find(
+    let existingEmailsForEmployees = await employeeSchema.find(
       { _clinic: request.params.id },
       { _email: 1, _id: 0 }
     );
-    let ArrayOfExistingEmails = existingEmails.map((element) => element._email);
+    let arrayOfExistingEmailsForEmployees = existingEmailsForEmployees.map(
+      (element) => element._email
+    );
+    let existingEmailsForDoctors = await doctorSchema.find(
+      { _clinic: request.params.id },
+      { _email: 1, _id: 0 }
+    );
+    let arrayOfExistingEmailsForDoctors = existingEmailsForDoctors.map(
+      (element) => element._email
+    );
     await employeeSchema.deleteMany({ _clinic: request.params.id });
     await doctorSchema.updateMany(
       { _clinics: request.params.id },
@@ -157,7 +166,14 @@ exports.removeClinicById = async (request, response, next) => {
         },
       }
     );
-    await users.deleteMany({ _email: { $in: ArrayOfExistingEmails } });
+    await users.deleteMany({
+      _email: { $in: arrayOfExistingEmailsForEmployees },
+    });
+    await users.updateMany(
+      { _email: { $in: arrayOfExistingEmailsForDoctors } },
+      { $set: { _role: "formerDoctor" } }
+    );
+
     response
       .status(201)
       .json({ message: "Clinic removed successfully.", clinic });

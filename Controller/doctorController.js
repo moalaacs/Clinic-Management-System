@@ -119,7 +119,7 @@ exports.addDoctor = async (request, response, next) => {
     });
     let savedDoctor = await doctor.save();
     const newUser = new users({
-      _id: savedDoctor._id,
+      _idInSchema: savedDoctor._id,
       _role: "doctor",
       _email: request.body.email,
       _contactNumber: request.body.phone,

@@ -10,7 +10,7 @@ const phoneNumberValidator = [
 ];
 /*** crete schema for users collection ***/
 const userSchema = new mongoose.Schema({
-  _id: { type: Number },
+  _idInSchema: Number,
   _role: {
     type: String,
     enum: ["admin", "patient", "doctor", "employee"],

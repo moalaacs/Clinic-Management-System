@@ -7,7 +7,7 @@ const bcrypt = require("bcrypt");
 const multer = require("multer");
 
 /* require all needed modules */
-const EmployeeSchema = require("./../Models/employeeModel");
+const employeeSchema = require("./../Models/employeeModel");
 const clinicSchema = require("../Models/clinicModel");
 const users = require("../Models/usersModel");
 
@@ -46,7 +46,7 @@ const {
 exports.getAllEmployees = async (request, response, next) => {
   try {
     let query = reqNamesToSchemaNames(request.query);
-    let Employees = await filterData(EmployeeSchema, query, [
+    let Employees = await filterData(employeeSchema, query, [
       {
         path: "_clinic",
         options: { strictPopulate: false },
@@ -66,7 +66,7 @@ exports.getAllEmployees = async (request, response, next) => {
 // Add a new Employee
 exports.addEmployee = async (request, response, next) => {
   try {
-    let clinicExists = await clinicSchema.find({ _id: request.body.clinic });
+    let clinicExists = await clinicSchema.findOne({ _id: request.body.clinic });
     if (!clinicExists)
       return response
         .status(400)
@@ -80,7 +80,7 @@ exports.addEmployee = async (request, response, next) => {
     if (testEmailandPhone) {
       if (testEmailandPhone._email == request.body.email) {
         return response.status(400).json({ message: `Email Already in use` });
-      } else if (testEmailandPhone._contactNumber == request.body.phone) {
+      } else {
         return response
           .status(400)
           .json({ message: `Phone number Already in use` });
@@ -109,10 +109,10 @@ exports.addEmployee = async (request, response, next) => {
     if (request.file) {
       sentObject._image = request.file.path;
     }
-    const employee = new EmployeeSchema(sentObject);
+    const employee = new employeeSchema(sentObject);
     let savedEmployee = await employee.save();
     const newUser = new users({
-      _id: savedEmployee._id,
+      _idInSchema: savedEmployee._id,
       _role: "employee",
       _email: request.body.email,
       _contactNumber: request.body.phone,
@@ -171,7 +171,7 @@ exports.putEmployee = async (request, response, next) => {
     if (request.file) {
       sentObject._image = request.file.path;
     }
-    const updatedEmployee = await EmployeeSchema.updateOne(
+    const updatedEmployee = await employeeSchema.updateOne(
       { _id: request.params.id },
       {
         $set: sentObject,
@@ -271,7 +271,7 @@ exports.patchEmployee = async (request, response, next) => {
     if (request.body.workingHours) {
       tempEmployee._workingHours = request.body.workingHours;
     }
-    await EmployeeSchema.updateOne(
+    await employeeSchema.updateOne(
       { _id: request.params.id },
       { $set: tempEmployee }
     );
@@ -307,7 +307,7 @@ exports.patchEmployee = async (request, response, next) => {
 // Get a employee by ID
 exports.getEmployeeById = async (request, response, next) => {
   try {
-    const employee = await EmployeeSchema.findById(request.params.id).populate({
+    const employee = await employeeSchema.findById(request.params.id).populate({
       path: "_clinic",
       options: { strictPopulate: false },
       select: { _id: 0, _specilization: 1, _address: 1 },
@@ -324,7 +324,7 @@ exports.getEmployeeById = async (request, response, next) => {
 // Remove a Employee
 exports.removeEmployeeById = async (request, response, next) => {
   try {
-    const employee = await EmployeeSchema.findByIdAndDelete(
+    const employee = await employeeSchema.findByIdAndDelete(
       request.params.id || request.body.id
     );
     if (!employee) {
