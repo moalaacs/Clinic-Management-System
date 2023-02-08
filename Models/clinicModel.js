@@ -56,6 +56,13 @@ const clinicSchema = new mongoose.Schema({
     ],
   },
   _services: [{ type: serviceSchema }],
+  _weeklySchedule: [
+    {
+      day: { type: Number, required: true, min: 0, max: 6 }, //Sunday = 0, Monday = 1
+      startDate: { type: Number, min: 8, max: 24, required: true },
+      endDate: { type: Number, min: 8, max: 24, required: true },
+    },
+  ],
 });
 
 /* auto increment for _id field */

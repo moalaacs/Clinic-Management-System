@@ -224,8 +224,6 @@ let validatePatchPatient = [
 let doctorValidation = [
   validatePerson,
   check("speciality")
-    .isString()
-    .withMessage("Speciality must be string")
     .isIn([
       "Pediatrician",
       "Gynecologist",
@@ -238,6 +236,31 @@ let doctorValidation = [
       "Surgeon",
     ])
     .withMessage("Doctor's speciality isn't provided"),
+  check("schedule.day")
+    .isIn([
+      "Saturday",
+      "saturday",
+      "Sunday",
+      "sunday",
+      "Monday",
+      "monday",
+      "Tuesday",
+      "tuesday",
+      "Wednesday",
+      "wednesday",
+      "Thursday",
+      "thursday",
+      "Friday",
+      "friday",
+    ])
+    .withMessage("Invalid day, Should be ( Saturday,Sunday,... )"),
+  check("schedule.start")
+    .matches(/^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/)
+    .withMessage("Invalid Start time format, should be in the form 00:00"),
+  check("schedule.end")
+    .matches(/^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/)
+    .withMessage("Invalid End time format, should be in the form 00:00"),
+  ,
 ];
 let doctorPatchValidation = [
   validatePatchPerson,
@@ -257,6 +280,33 @@ let doctorPatchValidation = [
       "Surgeon",
     ])
     .withMessage("Doctor's speciality isn't available"),
+  check("schedule.day")
+    .optional()
+    .isIn([
+      "Saturday",
+      "saturday",
+      "Sunday",
+      "sunday",
+      "Monday",
+      "monday",
+      "Tuesday",
+      "tuesday",
+      "Wednesday",
+      "wednesday",
+      "Thursday",
+      "thursday",
+      "Friday",
+      "friday",
+    ])
+    .withMessage("Invalid day, Should be ( Saturday,Sunday,... )"),
+  check("schedule.start")
+    .optional()
+    .matches(/^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/)
+    .withMessage("Invalid Start time format, should be in the form 00:00"),
+  check("schedule.end")
+    .optional()
+    .matches(/^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/)
+    .withMessage("Invalid End time format, should be in the form 00:00"),
 ];
 let numberIdParamsValidation = [
   param("id").isInt().withMessage("ID must be number"),
@@ -503,6 +553,14 @@ let validatePatchInvoice = [
     .isNumeric()
     .withMessage("amountDue should be a number"),
 ];
+let validateLogin = [
+  check("email")
+    .isEmail()
+    .withMessage("email should be in form example@example.com"),
+  check("password")
+    .isLength({ min: 8 })
+    .withMessage("Password must be at least 8 characters"),
+];
 module.exports = {
   validateClinic,
   validatePatchClinic,
@@ -521,4 +579,5 @@ module.exports = {
   validatePatchPrescription,
   validateInvoice,
   validatePatchInvoice,
+  validateLogin,
 };

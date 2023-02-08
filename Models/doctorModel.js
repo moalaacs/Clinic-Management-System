@@ -23,16 +23,9 @@ const doctorSchema = new mongoose.Schema(
     },
     _schedule: [
       {
-        clinicId: {
-          type: Number,
-          required: true,
-          ref: "clinic",
-        },
-        timeline: {
-          day: { type: Number, required: true, min: 0, max: 6 }, //Sunday = 0, Monday = 1
-          startDate: { type: Number, min: 8, max: 24, required: true },
-          endDate: { type: Number, min: 8, max: 24, required: true },
-        },
+        day: { type: Number, required: true, min: 0, max: 6 }, //Sunday = 0, Monday = 1
+        startDate: { type: Number, min: 8, max: 24, required: true },
+        endDate: { type: Number, min: 8, max: 24, required: true },
       },
     ],
     _clinic: {

@@ -12,7 +12,7 @@ const router = express.Router();
 
 router
   .route("/clinic")
-  .all(authorizationMW.authorize("admin"))
+  .all(authorizationMW.access("admin"))
   .get(controller.getAllClinics)
   .post(validateClinic, validatorMiddleware, controller.addClinic);
 
