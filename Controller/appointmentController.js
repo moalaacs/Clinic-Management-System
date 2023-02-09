@@ -79,14 +79,17 @@ exports.addAppointment = async (request, response, next) => {
         .status(400)
         .json({ message: `Doctor has no schedule at ${dayInWeek} , ${time}` });
 
-    const appointmentDate = new Date(`${date} ${time}:00`);
+    let newDate = date.split("/");
+    newDate = `${newDate[1]}/${newDate[0]}/${newDate[2]}`;
+
+    const appointmentDate = new Date(`${newDate} ${time}:00`);
     if (appointmentDate < new Date()) {
       return response
         .status(400)
         .json({ message: "Appointment date must be in the future." });
     }
 
-    const _id = new Date(date).getTime();
+    const _id = new Date(newDate).getTime();
 
     const existingAppointment = await appointmentSchema.findOne({
       doctorId,
@@ -172,7 +175,10 @@ exports.patchAppointment = async (request, response, next) => {
       time = existingAppointment._time;
     }
 
-    const appointmentDate = new Date(`${date} ${time}:00`);
+    let newDate = date.split("/");
+    newDate = `${newDate[1]}/${newDate[0]}/${newDate[2]}`;
+
+    const appointmentDate = new Date(`${newDate} ${time}:00`);
     if (appointmentDate < new Date()) {
       return response
         .status(400)

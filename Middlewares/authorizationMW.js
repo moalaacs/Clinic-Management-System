@@ -1,4 +1,3 @@
-const { ChainCondition } = require("express-validator/src/context-items");
 const jwt = require("jsonwebtoken");
 
 module.exports = (request, response, next) => {
