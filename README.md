@@ -10,6 +10,7 @@
 * [Routes](#routes)
 
 
+
 ## Description
 
 CMS is a web-based application for managing multiple clinic’s data along with
@@ -20,6 +21,7 @@ schedule based on the clinic location and also allows the patient to make the
 payment through Cash, Credit Card, Insurance Card etc. Part Payment can also be
 handled. User can generate receipts for Insurance Company and also for the
 patient. 
+
 
 ## Requirements
 
@@ -39,10 +41,12 @@ patient.
 - stripe
 - validatorjs
 
+
 ## Resources
 
 - https://expressjs.com/
 - https://www.mongodb.com/
+
 
 ## Tools
 
@@ -50,6 +54,7 @@ patient.
 - https://www.mongodb.com/products/compass
 - https://robomongo.org/
 - https://www.postman.com/
+
 
 ## Quick Start
 
@@ -70,6 +75,8 @@ $ mongod
 ```console
 $ npm start
 ```
+
+
 ## Routes
 
 | Routes       |
