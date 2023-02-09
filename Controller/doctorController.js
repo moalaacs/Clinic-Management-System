@@ -38,49 +38,40 @@ exports.addDoctor = async (request, response, next) => {
     let doctorSpecilatyToClinicSpecilization = mapSpecilityToSpecilization(
       request.body.speciality
     );
-    const existingClinics = await clinicSchema.find(
-      { _specilization: doctorSpecilatyToClinicSpecilization },
-      { _id: 1, _specilization: 1, _weeklySchedule: 1, _doctors: 1 }
-    );
-    if (existingClinics.length == 0)
-      return response.status(400).json({
-        message: `Sorry, We don't have a department for ${request.body.speciality} yet`,
-      });
-    let acceptedClinic;
-    for (let i = 0; i < existingClinics.length; i++) {
-      if (existingClinics[i]._doctors.length < 10) {
-        acceptedClinic = existingClinics[i];
-        break;
-      }
-    }
-    if (!acceptedClinic) {
-      return response.status(400).json({
-        message: `Sorry, No available clinic for this doctor to be added`,
-      });
-    }
-    let testNameOfDoctor = await doctorSchema.find({
-      _fname: request.body.firstname,
-      _lname: request.body.lastname,
+    const existingClinic = await clinicSchema.findOne({
+      _specilization: doctorSpecilatyToClinicSpecilization,
+      _doctors: { $size: { $lt: 10 } }
     });
-    if (testNameOfDoctor != 0) {
-      return response.status(400).json({
-        message: `There already a doctor with such name`,
+      if (!existingClinic) {
+        return response.status(400).json({
+          message: `Sorry, No available clinic for this doctor to be added`,
+        });
+      }
+
+      const existingDoctorWithSameName = await doctorSchema.findOne({
+        _fname: request.body.firstname,
+        _lname: request.body.lastname
       });
-    }
-    let testEmailandPhone = await users.findOne({
+  
+      if (existingDoctorWithSameName) {
+        return response.status(400).json({
+          message: `There already a doctor with such name`,
+        });
+      }
+
+      const existingUser = await users.findOne({
       $or: [
         { _email: request.body.email },
         { _contactNumber: request.body.phone },
       ],
     });
-    if (testEmailandPhone) {
-      if (testEmailandPhone._email == request.body.email) {
-        return response.status(400).json({ message: `Email Already in use` });
-      } else if (testEmailandPhone._contactNumber == request.body.phone) {
-        return response
-          .status(400)
-          .json({ message: `Phone number Already in use` });
-      }
+
+    if (existingUser) {
+      return response.status(400).json({
+        message: existingUser._email === request.body.email
+          ? `Email Already in use`
+          : `Phone number Already in use`,
+      });
     }
     const hash = await bcrypt.hash(request.body.password, 10);
     let now = new Date();
@@ -154,21 +145,22 @@ exports.putDoctorById = async (request, response, next) => {
         message: `There already a doctor with such name`,
       });
 
-    let testEmailandPhone = await users.findOne({
-      $or: [
-        { _email: request.body.email },
-        { _contactNumber: request.body.phone },
-      ],
-    });
-    if (testEmailandPhone) {
-      if (testEmailandPhone._email == request.body.email) {
-        return response.status(400).json({ message: `Email Already in use` });
-      } else if (testEmailandPhone._contactNumber == request.body.phone) {
-        return response
-          .status(400)
-          .json({ message: `Phone number Already in use` });
+      const existingUser = await users.findOne({
+        $or: [
+          { _email: request.body.email },
+          { _contactNumber: request.body.phone },
+        ],
+      });
+  
+      if (existingUser) {
+        return response.status(400).json({
+          message: existingUser._email === request.body.email
+            ? `Email Already in use`
+            : `Phone number Already in use`,
+        });
       }
-    }
+      
+  
     let doctorSpecilatyToClinicSpecilization = mapSpecilityToSpecilization(
       request.body.speciality
     );
@@ -180,8 +172,9 @@ exports.putDoctorById = async (request, response, next) => {
       return response.status(400).json({
         message: `Sorry, We don't have a department for ${request.body.speciality} yet`,
       });
+
     let acceptedClinic;
-    for (var i = 0; i < existingClinics.length; i++) {
+    for (let i = 0; i < existingClinics.length; i++) {
       if (existingClinics[i]._doctors.length < 10) {
         acceptedClinic = existingClinics[i];
         break;
@@ -317,88 +310,49 @@ exports.patchDoctorById = async (request, response, next) => {
     if (request.body.schedule) {
       tempDoctor._schedule = request.body.schedule;
     }
-    //check firstname / lastname
-    if (request.body.firstname && request.body.lastname) {
-      let tryFirstandLastName = await doctorSchema.findOne({
-        _fname: request.body.firstname,
-        _lname: request.body.lastname,
-      });
-      if (tryFirstandLastName)
-        return response.status(400).json({
-          message: `There already a doctor with such name`,
-        });
-    } else if (request.body.firstname) {
-      let tryFirstName = await doctorSchema.find({
-        _fname: request.body.firstname,
-      });
-      if (tryFirstName.length > 0)
-        return response.status(400).json({
-          message: `There already a doctor with such name`,
-        });
-    } else if (request.body.lastname) {
-      let tryLastName = await doctorSchema.find({
-        _lname: request.body.lastname,
-      });
-      if (tryLastName.length > 0)
-        return response.status(400).json({
-          message: `There already a doctor with such name`,
-        });
-    }
-    //_____UPDATES_____//
-    //check duplicate email/phone & update usermodel => last
-    if (request.body.phone && request.body.email) {
-      let testEmailandPhone = await users.findOne({
-        $or: [
-          { _email: request.body.email },
-          { _contactNumber: request.body.phone },
-        ],
-      });
-      if (testEmailandPhone) {
-        if (testEmailandPhone._email == request.body.email) {
-          return response.status(400).json({ message: `Email Already in use` });
-        } else if (testEmailandPhone._contactNumber == request.body.phone) {
-          return response
-            .status(400)
-            .json({ message: `Phone number Already in use` });
-        }
-      } else {
-        await users.updateOne(
-          { _idInSchema: request.params.id },
-          {
-            $set: {
-              _email: request.body.email,
-              _contactNumber: request.body.phone,
-            },
-          }
-        );
-      }
-    } else if (request.body.phone) {
-      let testPhone = await users.findOne({
+   //check firstname / lastname
+if (request.body.firstname || request.body.lastname) {
+  let checkName = {};
+  if (request.body.firstname) {
+    checkName._fname = request.body.firstname;
+  }
+  if (request.body.lastname) {
+    checkName._lname = request.body.lastname;
+  }
+  let tryName = await doctorSchema.findOne(checkName);
+  if (tryName) {
+    return response.status(400).json({
+      message: `There already a doctor with such name`,
+    });
+  }
+}
+
+
+    let updateData = {};
+    if (request.body.phone) {
+      const existingUserWithPhone = await users.findOne({
         _contactNumber: request.body.phone,
       });
-      if (testPhone) {
+      if (existingUserWithPhone && existingUserWithPhone._idInSchema != user._idInSchema) {
         return response
           .status(400)
-          .json({ message: `Phone number Already in use` });
-      } else {
-        await users.updateOne(
-          { _idInSchema: request.params.id },
-          { $set: { _contactNumber: request.body.phone } }
-        );
+          .json({ message: `Phone number already in use` });
       }
-    } else if (request.body.email) {
-      let testEmail = await users.findOne({
+      updateData._contactNumber = request.body.phone;
+    }
+    if (request.body.email) {
+      const existingUserWithEmail = await users.findOne({
         _email: request.body.email,
       });
-      if (testEmail) {
-        return response.status(400).json({ message: `Email Already in use` });
-      } else {
-        await users.updateOne(
-          { _idInSchema: request.params.id },
-          { $set: { _email: request.body.email } }
-        );
+      if (existingUserWithEmail && existingUserWithEmail._idInSchema != user._idInSchema) {
+        return response.status(400).json({ message: `Email already in use` });
       }
+      updateData._email = request.body.email;
     }
+  
+    await users.updateOne({ _idInSchema: request.params.id }, { $set: updateData });
+    response.status(200).json({ message: "User updated successfully" });
+
     //update schedule
     if (request.body.schedule) {
       let DoctorIdIntoSchedule = request.body.schedule.map((element) => {
