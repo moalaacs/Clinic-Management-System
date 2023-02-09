@@ -1,21 +1,36 @@
 # Clinic-Management-System
 
-_Person Schema_
-Date of birth instead of age in models
-Age Should be Calculated
+## Table of Contents
 
----
+* [Description](#description)
+* [Resources](#resources)
+* [Requirements](#requirements)
 
-_Doctor Schema_
-Specillity must be Enum
-Specility Post in clinic services
+## Description
 
----
+CMS is a web-based application for managing multiple clinic’s data along with
+providing common access clinic’s doctors and receptionists.
+Clinic required a system to manage all the back-office team activities for their
+patient’s appointment & their follow-ups. It provides doctors with their daily
+schedule based on the clinic location and also allows the patient to make the
+payment through Cash, Credit Card, Insurance Card etc. Part Payment can also be
+handled. User can generate receipts for Insurance Company and also for the
+patient. 
 
-_Responses , Errors_
-Same form in all controllers
+## Requirements
 
----
-
-_AuthFunction ( admin , patient )_
-check admin or patient
+- bcrypt
+- dotenv
+- easyinvoice
+- express
+- express-validator
+- fs
+- jsonwebtoken
+- mongoose
+- mongoose-sequence
+- mongoose-validator
+- morgan
+- multer
+- nodemailer
+- stripe
+- validatorjs
