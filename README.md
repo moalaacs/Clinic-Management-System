@@ -5,6 +5,9 @@
 * [Description](#description)
 * [Resources](#resources)
 * [Requirements](#requirements)
+* [Tools](#tools)
+* [Quick Start](#quick start)
+
 
 ## Description
 
@@ -34,3 +37,29 @@ patient.
 - nodemailer
 - stripe
 - validatorjs
+
+## Resources
+
+- https://expressjs.com/
+- https://www.mongodb.com/
+
+## Tools
+
+- https://code.visualstudio.com/
+- https://www.mongodb.com/products/compass
+- https://robomongo.org/
+- https://www.postman.com/
+
+## Quick Start
+
+  Install dependencies:
+
+```console
+$ npm install
+```
+
+  Start the server:
+
+```console
+$ npm start
+```
