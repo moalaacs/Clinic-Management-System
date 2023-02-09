@@ -56,7 +56,6 @@ exports.addClinic = async (request, response, next) => {
     next(error);
   }
 };
-
 // Edit a clinic
 exports.patchClinicById = async (request, response, next) => {
   try {
@@ -117,7 +116,7 @@ exports.patchClinicById = async (request, response, next) => {
       }
     );
     await users.updateOne(
-      { _id: request.params.id },
+      { _idInSchema: request.params.id },
       {
         $set: tempUser,
       }
@@ -129,7 +128,6 @@ exports.patchClinicById = async (request, response, next) => {
     next(error);
   }
 };
-
 // Remove a clinic
 exports.removeClinicById = async (request, response, next) => {
   try {
@@ -175,7 +173,7 @@ exports.removeClinicById = async (request, response, next) => {
     next(error);
   }
 };
-
+// Get all clinics
 exports.getAllClinics = async (request, response, next) => {
   try {
     let query = reqNamesToSchemaNames(request.query);
@@ -188,7 +186,6 @@ exports.getAllClinics = async (request, response, next) => {
     next(error);
   }
 };
-
 // Get a clinic by ID
 exports.getClinicById = async (request, response, next) => {
   try {

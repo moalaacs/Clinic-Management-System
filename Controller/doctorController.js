@@ -15,6 +15,7 @@ const {
   mapSpecilityToSpecilization,
 } = require("../helper/helperfns");
 
+// Create a new doctor
 exports.getAllDoctors = async (request, response, next) => {
   try {
     let query = reqNamesToSchemaNames(request.query);
@@ -31,34 +32,20 @@ exports.getAllDoctors = async (request, response, next) => {
     response.status(200).json({ doctors });
   } catch (error) {next(error);}
 };
-
+// Edit a doctor
 exports.addDoctor = async (request, response, next) => {
   try {
-
-    let specialityClinicId = mapSpecilityToSpecilization(
+    let doctorSpecilatyToClinicSpecilization = mapSpecilityToSpecilization(
       request.body.speciality
     );
     const existingClinics = await clinicSchema.find(
-      { _specilization: specialityClinicId },
+      { _specilization: doctorSpecilatyToClinicSpecilization },
       { _id: 1, _specilization: 1, _weeklySchedule: 1, _doctors: 1 }
     );
-
     if (existingClinics.length == 0)
       return response.status(400).json({
         message: `Sorry, We don't have a department for ${request.body.speciality} yet`,
       });
-
-    let testNameOfDoctor = await doctorSchema.find({
-      _fname: request.body.firstname,
-      _lname: request.body.lastname,
-    });
-
-    if (testNameOfDoctor != 0) {
-      return response.status(400).json({
-        message: `There already a doctor with such name`,
-      });
-    }
-
     let acceptedClinic;
     for (let i = 0; i < existingClinics.length; i++) {
       if (existingClinics[i]._doctors.length < 10) {
@@ -71,7 +58,15 @@ exports.addDoctor = async (request, response, next) => {
         message: `Sorry, No available clinic for this doctor to be added`,
       });
     }
-
+    let testNameOfDoctor = await doctorSchema.find({
+      _fname: request.body.firstname,
+      _lname: request.body.lastname,
+    });
+    if (testNameOfDoctor != 0) {
+      return response.status(400).json({
+        message: `There already a doctor with such name`,
+      });
+    }
     let testEmailandPhone = await users.findOne({
       $or: [
         { _email: request.body.email },
@@ -93,7 +88,6 @@ exports.addDoctor = async (request, response, next) => {
     if (now.getMonth() < request.body.dateOfBirth.split("/")[1]) {
       age--;
     }
-
     let sentObject = {
       _fname: request.body.firstname,
       _lname: request.body.lastname,
@@ -104,7 +98,6 @@ exports.addDoctor = async (request, response, next) => {
       _email: request.body.email,
       _address: request.body.address,
       _password: hash,
-      _image: request.body.profileImage,
       _specilization: request.body.speciality,
       _clinic: acceptedClinic._id,
       _schedule: request.body.schedule,
@@ -145,23 +138,22 @@ exports.addDoctor = async (request, response, next) => {
     next(error);
   }
 };
-
+// Full Edit a doctor
 exports.putDoctorById = async (request, response, next) => {
   try {
-    const existingClinics = await clinicSchema.find(
-      {},
-      { _id: 1, _specilization: 1 }
-    );
-    let specialityClinicId = mapSpecilityToSpecilization(
-      request.body.speciality
-    );
-    specialityClinicId = existingClinics.find(
-      (element) => element._specilization == specialityClinicId
-    );
-    if (!specialityClinicId)
+    let foundDoctor = await doctorSchema.findOne({ _id: request.params.id });
+    if (!foundDoctor)
+      response.status(200).json({ message: "Doctor not found" });
+
+    let tryFirstandLastName = await doctorSchema.findOne({
+      _fname: request.body.firstname,
+      _lname: request.body.lastname,
+    });
+    if (tryFirstandLastName)
       return response.status(400).json({
-        message: `Sorry, We don't have a department for ${request.body.speciality} yet`,
+        message: `There already a doctor with such name`,
       });
+
     let testEmailandPhone = await users.findOne({
       $or: [
         { _email: request.body.email },
@@ -177,96 +169,106 @@ exports.putDoctorById = async (request, response, next) => {
           .json({ message: `Phone number Already in use` });
       }
     }
+    let doctorSpecilatyToClinicSpecilization = mapSpecilityToSpecilization(
+      request.body.speciality
+    );
+    const existingClinics = await clinicSchema.find(
+      { _specilization: doctorSpecilatyToClinicSpecilization },
+      { _id: 1, _specilization: 1, _weeklySchedule: 1, _doctors: 1 }
+    );
+    if (existingClinics.length == 0)
+      return response.status(400).json({
+        message: `Sorry, We don't have a department for ${request.body.speciality} yet`,
+      });
+    let acceptedClinic;
+    for (var i = 0; i < existingClinics.length; i++) {
+      if (existingClinics[i]._doctors.length < 10) {
+        acceptedClinic = existingClinics[i];
+        break;
+      }
+    }
+    if (!acceptedClinic) {
+      return response.status(400).json({
+        message: `Sorry, No available clinic for this doctor to be added`,
+      });
+    }
+
     const hash = await bcrypt.hash(request.body.password, 10);
     let now = new Date();
     let age = now.getFullYear() - request.body.dateOfBirth.split("/")[2];
     if (now.getMonth() < request.body.dateOfBirth.split("/")[1]) {
       age--;
     }
-    const updatedDoctor = await doctorSchema.updateOne(
+    let sentObject = {
+      _fname: request.body.firstname,
+      _lname: request.body.lastname,
+      _dateOfBirth: request.body.dateOfBirth,
+      _age: age,
+      _gender: request.body.gender,
+      _contactNumber: request.body.phone,
+      _email: request.body.email,
+      _address: request.body.address,
+      _password: hash,
+      _specilization: request.body.speciality,
+      _clinic: acceptedClinic._id,
+      _schedule: request.body.schedule,
+    };
+    if (request.file) {
+      sentObject._image = request.file.path;
+    }
+
+    await doctorSchema.updateOne(
       { _id: request.params.id },
       {
-        $set: {
-          _fname: request.body.firstname,
-          _lname: request.body.lastname,
-          _dateOfBirth: request.body.dateOfBirth,
-          _age: age,
-          _gender: request.body.gender,
-          _contactNumber: request.body.phone,
-          _email: request.body.email,
-          _address: request.body.address,
-          _password: hash,
-          _image: request.body.profileImage,
-          _specilization: request.body.speciality,
-          _clinic: specialityClinicId._id,
+        $set: sentObject,
+      }
+    );
+
+    let DoctorIdIntoSchedule = request.body.schedule.map((element) => {
+      return { doctorId: +request.params.id, ...element };
+    });
+    await clinicSchema.updateOne(
+      { _doctors: request.params.id },
+      {
+        $pull: {
+          _weeklySchedule: { doctorId: request.params.id },
         },
       }
     );
+    await clinicSchema.updateOne(
+      { _doctors: request.params.id },
+      { $push: { _weeklySchedule: DoctorIdIntoSchedule } }
+    );
+
+    await users.updateOne(
+      { _idInSchema: request.params.id },
+      {
+        $set: {
+          _email: request.body.email,
+          _contactNumber: request.body.phone,
+        },
+      }
+    );
+
     response
       .status(200)
-      .json({ status: "Doctor updated successfully", updatedDoctor });
+      .json({ status: "Doctor updated successfully", sentObject });
   } catch (error) {
     next(error);
   }
 };
-
+// Get all doctors
 exports.patchDoctorById = async (request, response, next) => {
   try {
+    let foundDoctor = await doctorSchema.findOne({ _id: request.params.id });
+    if (!foundDoctor)
+      return response.status(200).json({ message: "Doctor not found." });
     let tempDoctor = {};
     if (request.body.firstname) {
       tempDoctor._fname = request.body.firstname;
     }
     if (request.body.lastname) {
       tempDoctor._lname = request.body.lastname;
-    }
-    if (request.body.speciality) {
-      const existingClinics = await clinicSchema.find(
-        {},
-        { _id: 1, _specilization: 1 }
-      );
-      let specialityClinicId = mapSpecilityToSpecilization(
-        request.body.speciality
-      );
-      specialityClinicId = existingClinics.find(
-        (element) => element._specilization == specialityClinicId
-      );
-      if (!specialityClinicId)
-        return response.status(400).json({
-          message: `Sorry, We don't have a department for ${request.body.speciality} yet`,
-        });
-      tempDoctor._specilization = request.body.speciality;
-      tempDoctor._clinic = specialityClinicId._id;
-    }
-    if (request.body.phone) {
-      let testPhone = await users.findOne({
-        _contactNumber: request.body.phone,
-      });
-      if (testPhone) {
-        return response
-          .status(400)
-          .json({ message: `Phone number Already in use` });
-      }
-      await users.updateOne(
-        { _id: request.params.id },
-        { $set: { _contactNumber: request.body.phone } }
-      );
-      tempDoctor._contactNumber = request.body.phone;
-    }
-    if (request.body.schedule) {
-      tempDoctor.schedule = request.body.schedule;
-    }
-    if (request.body.email) {
-      let testEmail = await users.findOne({
-        _email: request.body.email,
-      });
-      if (testEmail) {
-        return response.status(400).json({ message: `Email Already in use` });
-      }
-      await users.updateOne(
-        { _id: request.params.id },
-        { $set: { _email: request.body.email } }
-      );
-      tempDoctor._email = request.body.email;
     }
     if (request.body.password) {
       const hash = await bcrypt.hash(request.body.password, 10);
@@ -280,13 +282,13 @@ exports.patchDoctorById = async (request, response, next) => {
         request.body.address.zipCode
       ) {
         if (request.body.address.street)
-          tempClinic["_address.street"] = request.body.address.street;
+          tempDoctor["_address.street"] = request.body.address.street;
         if (request.body.address.city)
-          tempClinic["_address.city"] = request.body.address.city;
+          tempDoctor["_address.city"] = request.body.address.city;
         if (request.body.address.country)
-          tempClinic["_address.country"] = request.body.address.country;
+          tempDoctor["_address.country"] = request.body.address.country;
         if (request.body.address.zipCode)
-          tempClinic["_address.zipCode"] = request.body.address.zipCode;
+          tempDoctor["_address.zipCode"] = request.body.address.zipCode;
       } else {
         return response.status(200).json({ message: `Address can't be empty` });
       }
@@ -306,31 +308,120 @@ exports.patchDoctorById = async (request, response, next) => {
     if (request.file) {
       tempDoctor._image = request.file.path;
     }
-    await doctorSchema.updateOne(
-      { _id: request.params.id },
-      { $set: tempDoctor }
-    );
-    if (request.body.email && request.body.phone) {
-      await users.updateOne(
-        { _id: request.params.id },
+    if (request.body.phone) {
+      tempDoctor._contactNumber = request.body.phone;
+    }
+    if (request.body.email) {
+      tempDoctor._email = request.body.email;
+    }
+    if (request.body.schedule) {
+      tempDoctor._schedule = request.body.schedule;
+    }
+    //check firstname / lastname
+    if (request.body.firstname && request.body.lastname) {
+      let tryFirstandLastName = await doctorSchema.findOne({
+        _fname: request.body.firstname,
+        _lname: request.body.lastname,
+      });
+      if (tryFirstandLastName)
+        return response.status(400).json({
+          message: `There already a doctor with such name`,
+        });
+    } else if (request.body.firstname) {
+      let tryFirstName = await doctorSchema.find({
+        _fname: request.body.firstname,
+      });
+      if (tryFirstName.length > 0)
+        return response.status(400).json({
+          message: `There already a doctor with such name`,
+        });
+    } else if (request.body.lastname) {
+      let tryLastName = await doctorSchema.find({
+        _lname: request.body.lastname,
+      });
+      if (tryLastName.length > 0)
+        return response.status(400).json({
+          message: `There already a doctor with such name`,
+        });
+    }
+    //_____UPDATES_____//
+    //check duplicate email/phone & update usermodel => last
+    if (request.body.phone && request.body.email) {
+      let testEmailandPhone = await users.findOne({
+        $or: [
+          { _email: request.body.email },
+          { _contactNumber: request.body.phone },
+        ],
+      });
+      if (testEmailandPhone) {
+        if (testEmailandPhone._email == request.body.email) {
+          return response.status(400).json({ message: `Email Already in use` });
+        } else if (testEmailandPhone._contactNumber == request.body.phone) {
+          return response
+            .status(400)
+            .json({ message: `Phone number Already in use` });
+        }
+      } else {
+        await users.updateOne(
+          { _idInSchema: request.params.id },
+          {
+            $set: {
+              _email: request.body.email,
+              _contactNumber: request.body.phone,
+            },
+          }
+        );
+      }
+    } else if (request.body.phone) {
+      let testPhone = await users.findOne({
+        _contactNumber: request.body.phone,
+      });
+      if (testPhone) {
+        return response
+          .status(400)
+          .json({ message: `Phone number Already in use` });
+      } else {
+        await users.updateOne(
+          { _idInSchema: request.params.id },
+          { $set: { _contactNumber: request.body.phone } }
+        );
+      }
+    } else if (request.body.email) {
+      let testEmail = await users.findOne({
+        _email: request.body.email,
+      });
+      if (testEmail) {
+        return response.status(400).json({ message: `Email Already in use` });
+      } else {
+        await users.updateOne(
+          { _idInSchema: request.params.id },
+          { $set: { _email: request.body.email } }
+        );
+      }
+    }
+    //update schedule
+    if (request.body.schedule) {
+      let DoctorIdIntoSchedule = request.body.schedule.map((element) => {
+        return { doctorId: +request.params.id, ...element };
+      });
+      await clinicSchema.updateOne(
+        { _doctors: request.params.id },
         {
-          $set: {
-            _email: request.body.email,
-            _contactNumber: request.body.phone,
+          $pull: {
+            _weeklySchedule: { doctorId: request.params.id },
           },
         }
       );
-    } else if (request.body.email) {
-      await users.updateOne(
-        { _id: request.params.id },
-        { $set: { _email: request.body.email } }
+      await clinicSchema.updateOne(
+        { _doctors: request.params.id },
+        { $push: { _weeklySchedule: DoctorIdIntoSchedule } }
       );
-    } else if (request.body.phone) {
-      await users.updateOne(
+      await doctorSchema.updateOne(
         { _id: request.params.id },
-        { $set: { _contactNumber: request.body.phone } }
+        { $set: tempDoctor }
       );
     }
+
     response
       .status(200)
       .json({ message: "Doctor updated successfully.", tempDoctor });
@@ -338,7 +429,7 @@ exports.patchDoctorById = async (request, response, next) => {
     next(error);
   }
 };
-
+// Get a doctor by ID
 exports.getDoctorById = async (request, response, next) => {
   try {
     let doctor = await doctorSchema.find({ _id: request.params.id }).populate({
@@ -354,12 +445,23 @@ exports.getDoctorById = async (request, response, next) => {
     next(error);
   }
 };
-
+// Remove a doctor
 exports.removeDoctorById = async (request, response, next) => {
   try {
-    const doctor = await doctorSchema.deleteOne({ _id: request.params.id });
+    const doctor = await doctorSchema.findOneAndDelete({
+      _id: request.params.id,
+    });
     if (!doctor) return response.status(200).json("Doctor not found");
-    await users.deleteOne({ _id: request.params.id });
+    await users.deleteOne({ _idInSchema: request.params.id });
+    await clinicSchema.updateOne(
+      { _id: doctor._clinic },
+      {
+        $pull: {
+          _doctors: request.params.id,
+          _weeklySchedule: { doctorId: request.params.id },
+        },
+      }
+    );
     response
       .status(200)
       .json({ message: "Doctor removed successfully.", doctor });
