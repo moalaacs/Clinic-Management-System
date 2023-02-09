@@ -1,10 +1,7 @@
-const SECRET_KEY =
-  "sk_test_51MYGCZC1E4uAr6SEQB22W2K5oa9XK5PRcjylCvcPIhVwcQaGEwqefT7QfjBGvEy8XBMAiNoFS8F1xQaKwhz3VLEc00DAJkUp0n";
-const stripe = require("stripe")(SECRET_KEY);
+const stripe = require("stripe")(process.env.SECRET_KEY_STRIPE);
 const invoiceSchema = require("./../Models/invoiceModel");
 const patientSchema = require("./../Models/patientModel");
 const paymentSchema = require("./../Models/paymentModel");
-/*  for test==> 4242 4242 4242 4242   */
 
 // Add a new payment
 exports.addPayment = async (request, response, next) => {

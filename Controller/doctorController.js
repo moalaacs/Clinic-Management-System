@@ -29,13 +29,12 @@ exports.getAllDoctors = async (request, response, next) => {
     doctors = paginateData(doctors, request.query);
     doctors = sliceData(doctors, request.query);
     response.status(200).json({ doctors });
-  } catch (error) {
-    next(error);
-  }
+  } catch (error) {next(error);}
 };
 
 exports.addDoctor = async (request, response, next) => {
   try {
+
     let specialityClinicId = mapSpecilityToSpecilization(
       request.body.speciality
     );
@@ -61,7 +60,7 @@ exports.addDoctor = async (request, response, next) => {
     }
 
     let acceptedClinic;
-    for (var i = 0; i < existingClinics.length; i++) {
+    for (let i = 0; i < existingClinics.length; i++) {
       if (existingClinics[i]._doctors.length < 10) {
         acceptedClinic = existingClinics[i];
         break;
@@ -94,7 +93,8 @@ exports.addDoctor = async (request, response, next) => {
     if (now.getMonth() < request.body.dateOfBirth.split("/")[1]) {
       age--;
     }
-    const doctor = new doctorSchema({
+
+    let sentObject = {
       _fname: request.body.firstname,
       _lname: request.body.lastname,
       _dateOfBirth: request.body.dateOfBirth,
@@ -108,8 +108,11 @@ exports.addDoctor = async (request, response, next) => {
       _specilization: request.body.speciality,
       _clinic: acceptedClinic._id,
       _schedule: request.body.schedule,
-    });
-
+    };
+    if (request.file) {
+      sentObject._image = request.file.path;
+    }
+    const doctor = new doctorSchema(sentObject);
     let savedDoctor = await doctor.save();
 
     let DoctorIdIntoSchedule = request.body.schedule.map((element) => {
@@ -249,11 +252,9 @@ exports.patchDoctorById = async (request, response, next) => {
       );
       tempDoctor._contactNumber = request.body.phone;
     }
-    //
     if (request.body.schedule) {
       tempDoctor.schedule = request.body.schedule;
     }
-    //
     if (request.body.email) {
       let testEmail = await users.findOne({
         _email: request.body.email,
