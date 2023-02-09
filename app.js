@@ -32,19 +32,22 @@ async function connectToServer() {
   try {
     await mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
-      useUnifiedTopology: true
+      useUnifiedTopology: true,
     });
     connected = true;
   } catch (error) {
-    console.log("Error connecting to cloud database, trying to connect to local database", error);
+    console.log(`Error connecting to cloud database , ${error.message}`);
+    console.log("Trying to connect to local database...");
     try {
       await mongoose.connect(process.env.MONGODB_LOCAL, {
         useNewUrlParser: true,
-        useUnifiedTopology: true
+        useUnifiedTopology: true,
       });
       connected = true;
-    } catch (error) {
-      console.log("Error connecting to cloud/local database", error);
+    } catch (error2) {
+      console.log(
+        `Error connecting to cloud/local database , ${error2.message}`
+      );
       connected = false;
     }
   }
