@@ -14,11 +14,7 @@ router
   .route("/appointment")
   .all(authorizationMW.accessClinicResources("receptionist"))
   .get(controller.getAllAppointments)
-  .post(
-    validateAppointment,
-    validatorMiddleware,
-    controller.addAppointment
-  );
+  .post(validateAppointment, validatorMiddleware, controller.addAppointment);
 
 router
   .route("/appointmentReports/all")
@@ -29,11 +25,11 @@ router
   .get(authorizationMW.access(), controller.dailyAppointmentsReports);
 
 router
-  .route("/appointmentReports/patient")
+  .route("/appointmentReports/patient/:id")
   .get(authorizationMW.access(), controller.patientAppointmentsReports);
 
 router
-  .route("/appointmentReports/doctor")
+  .route("/appointmentReports/doctor/:id")
   .get(authorizationMW.access(), controller.doctorAppointmentsReports);
 
 router

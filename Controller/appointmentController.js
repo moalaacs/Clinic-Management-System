@@ -42,6 +42,15 @@ exports.addAppointment = async (request, response, next) => {
     if (!patient) {
       return response.status(400).json({ message: "Patient not found." });
     }
+    let testExistingAppointment = await appointment.findOne({
+      _patientId: patientId,
+      _doctorId: doctorId,
+      _date: date,
+    });
+    if (testExistingAppointment)
+      return response
+        .status(400)
+        .json({ message: `You've already booked an appointment today` });
 
     const minutes = time.split(":")[1];
     if (minutes !== "00" && minutes !== "30") {
@@ -249,9 +258,9 @@ exports.getAppointmentById = async (request, response, next) => {
 exports.allAppointmentsReports = (request, response, next) => {
   appointmentSchema
     .find()
-    .populate({ path: "_patientId", select: { _id: 0 } })
-    .populate({ path: "_doctorId", select: { _id: 0 } })
-    .populate({ path: "_clinicId", select: { _id: 0 } })
+    .populate({ path: "_patientId", select: { _id: 0, _fname: 1, _lname: 1 } })
+    .populate({ path: "_doctorId", select: { _id: 0, _fname: 1, _lname: 1 } })
+    .populate({ path: "_clinicId", select: { _id: 0, _specilization: 1 } })
     .then((data) => {
       response.status(200).json(data);
     })
@@ -265,14 +274,10 @@ exports.dailyAppointmentsReports = (request, response, next) => {
   let day = 60 * 60 * 24 * 1000;
   let nextDay = new Date(date.getTime() + day);
   appointmentSchema
-    .find()
-    .where("date".gt(date).lt(nextDay))
-    .populate({ path: "_patientId", select: { _id: 0 } })
-    .populate({
-      path: "_doctorId",
-      select: { _id: 0, appointmentNo: 0, workingHours: 0 },
-    })
-    .populate({ path: "_clinicId", select: { _id: 0 } })
+    .find({ date: { $gt: date, $lt: nextDay } })
+    .populate({ path: "_patientId", select: { _id: 0, _fname: 1, _lname: 1 } })
+    .populate({ path: "_doctorId", select: { _id: 0, _fname: 1, _lname: 1 } })
+    .populate({ path: "_clinicId", select: { _id: 0, _specilization: 1 } })
     .then((data) => {
       response.status(200).json(data);
     })
@@ -283,9 +288,9 @@ exports.dailyAppointmentsReports = (request, response, next) => {
 exports.patientAppointmentsReports = (request, response, next) => {
   appointmentSchema
     .find({ _patientId: request.params.id })
-    .populate({ path: "_patientId", select: { _id: 0 } })
-    .populate({ path: "_doctorId", select: { _id: 0 } })
-    .populate({ path: "_clinicId", select: { _id: 0 } })
+    .populate({ path: "_patientId", select: { _id: 0, _fname: 1, _lname: 1 } })
+    .populate({ path: "_doctorId", select: { _id: 0, _fname: 1, _lname: 1 } })
+    .populate({ path: "_clinicId", select: { _id: 0, _specilization: 1 } })
     .then((data) => {
       response.status(200).json(data);
     })
@@ -296,9 +301,9 @@ exports.patientAppointmentsReports = (request, response, next) => {
 exports.doctorAppointmentsReports = (request, response, next) => {
   appointmentSchema
     .find({ _doctorId: request.params.id })
-    .populate({ path: "_patientId", select: { _id: 0 } })
-    .populate({ path: "_doctorId", select: { _id: 0 } })
-    .populate({ path: "_clinicId", select: { _id: 0 } })
+    .populate({ path: "_patientId", select: { _id: 0, _fname: 1, _lname: 1 } })
+    .populate({ path: "_doctorId", select: { _id: 0, _fname: 1, _lname: 1 } })
+    .populate({ path: "_clinicId", select: { _id: 0, _specilization: 1 } })
     .then((data) => {
       response.status(200).json(data);
     })
