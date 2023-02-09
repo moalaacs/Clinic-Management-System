@@ -1,5 +1,6 @@
 /* require all needed modules */
 const clinicSchema = require("../Models/clinicModel");
+const bcrypt = require("bcrypt");
 const {
   filterData,
   sortData,
