@@ -7,7 +7,7 @@ const {
   numberIdParamsValidation,
 } = require("../Middlewares/validateData");
 const authorizationMW = require("../Middlewares/authorizationMW");
-const { upload } = require("../Middlewares/multer");
+const { upload } = require("../Middlewares/multere");
 
 const router = express.Router();
 
