@@ -319,7 +319,7 @@ let medicineValidation = [
     .isString()
     .withMessage("Production Date should be a string"),
   check("expiry").isString().withMessage("Expiry Date should be a string"),
-  check("usage").isString().withMessage("Medicine usage should be a string"),
+  check("leaflet").isString().withMessage("Medicine leaflet should be a string"),
   check("price").isInt().withMessage("Medicine Price should be a Number"),
   check("quantity").isInt().withMessage("Medicine Price should be a Number"),
 ];
@@ -333,10 +333,10 @@ let medicinePatchValidation = [
     .optional()
     .isString()
     .withMessage("Expiry Date should be a string"),
-  check("usage")
+  check("leaflet")
     .optional()
     .isString()
-    .withMessage("Medicine usage should be a string"),
+    .withMessage("Medicine leaflet should be a string"),
   check("price")
     .optional()
     .isInt()
