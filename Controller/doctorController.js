@@ -30,7 +30,9 @@ exports.getAllDoctors = async (request, response, next) => {
     doctors = paginateData(doctors, request.query);
     doctors = sliceData(doctors, request.query);
     response.status(200).json({ doctors });
-  } catch (error) {next(error);}
+  } catch (error) {
+    next(error);
+  }
 };
 // Edit a doctor
 exports.addDoctor = async (request, response, next) => {
