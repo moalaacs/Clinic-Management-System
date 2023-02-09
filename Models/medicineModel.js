@@ -17,7 +17,12 @@ const nameValidator = [
 /*** crete schema for patients collection ***/
 const medicineSchema = new mongoose.Schema({
   _id: Number,
-  _name: { type: String, required: true, validate: nameValidator },
+  _name: {
+    type: String,
+    required: true,
+    validate: nameValidator,
+    unique: true,
+  },
   _productionDate: { type: String, required: true },
   _expiryDate: { type: String, required: true },
   _leaflet: { type: String, required: true },

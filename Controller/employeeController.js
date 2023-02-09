@@ -215,13 +215,13 @@ exports.patchEmployee = async (request, response, next) => {
         request.body.address.zipCode
       ) {
         if (request.body.address.street)
-          tempClinic["_address.street"] = request.body.address.street;
+          tempEmployee["_address.street"] = request.body.address.street;
         if (request.body.address.city)
-          tempClinic["_address.city"] = request.body.address.city;
+          tempEmployee["_address.city"] = request.body.address.city;
         if (request.body.address.country)
-          tempClinic["_address.country"] = request.body.address.country;
+          tempEmployee["_address.country"] = request.body.address.country;
         if (request.body.address.zipCode)
-          tempClinic["_address.zipCode"] = request.body.address.zipCode;
+          tempEmployee["_address.zipCode"] = request.body.address.zipCode;
       } else {
         return response.status(200).json({ message: `Address can't be empty` });
       }
