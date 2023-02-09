@@ -35,8 +35,8 @@ async function connectToServer() {
       useUnifiedTopology: true
     });
     connected = true;
-  } catch (err) {
-    console.log("Error connecting to cloud database, trying to connect to local database");
+  } catch (error) {
+    console.log("Error connecting to cloud database, trying to connect to local database", error);
     try {
       await mongoose.connect(process.env.MONGODB_LOCAL, {
         useNewUrlParser: true,
