@@ -31,7 +31,6 @@ exports.addMedicine = async (request, response, next) => {
     _leaflet: request.body.usage,
     _pricePerUnit: request.body.price,
     _quantity: request.body.quantity,
-    _image: request.body.image,
   });
   try {
     let resultData = await addedDoctor.save();
