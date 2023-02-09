@@ -386,7 +386,7 @@ exports.getInvoiceById = async (request, response, next) => {
   }
 };
 
-// All Appointments Reports
+// All Invoice Reports
 exports.allInvoicesReports = (request, response, next) => {
   invoiceSchema
     .find()
@@ -400,13 +400,14 @@ exports.allInvoicesReports = (request, response, next) => {
     .catch((error) => next(error));
 };
 
-// Daily Appointments Reports
+// Daily Invoice Reports
 exports.dailyInvoicesReports = (request, response, next) => {
-  let date = new date();
-  date.setHours(0,0,0,0);
+  let date = new Date();
+  date.setHours(0, 0, 0);
+  let day = 60 * 60 * 24 * 1000;
+  let nextDay = new Date(date.getTime() + day);
   invoiceSchema
-    .find()
-    .where("date").gt(date)
+    .find({ date: { $gt: date, $lt: nextDay } })
     .populate({ path: "_appointmentId", select: { _id: 0 } })
     .populate({ path: "_doctorId", select: { _id: 0 } })
     .populate({ path: "_clinicId", select: { _id: 0 } })
@@ -417,7 +418,7 @@ exports.dailyInvoicesReports = (request, response, next) => {
     .catch((error) => next(error));
 };
 
-// Patient Appointments Reports
+// Patient Invoice Reports
 exports.patientInvoicesReports = (request, response, next) => {
   invoiceSchema
     .find()
