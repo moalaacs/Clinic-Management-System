@@ -8,8 +8,8 @@ const medicineSchema = new mongoose.Schema(
     name: { type: String, required: true },
     dose: { type: String, required: true },
     frequency: { type: String, required: true },
-    type: { type: String, required: true, enum: ['syrup', 'tablet', 'capsule']}
-    },  { _id: false }
+    type: { type: String, required: true, enum: ['syrup', 'tablet', 'capsule'] }
+  }, { _id: false }
 );
 
 
@@ -35,19 +35,15 @@ const prescriptionSchema = new mongoose.Schema({
     ref: "doctor",
   },
 
-  // medicineRef: [
-  //   {
-  //     type: Number,
-  //     required: [true, "Medicine is required"],
-  //     ref: "medicine",
-  //   },
-  // ],
   medications: [medicineSchema],
   instructions: { type: String, required: false },
-  date: {type: String,required: true,  default: (new Date()).toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'numeric',
-    year: 'numeric'})},
+  date: {
+    type: String, required: true, default: (new Date()).toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'numeric',
+      year: 'numeric'
+    })
+  },
 });
 
 prescriptionSchema.plugin(AutoIncrement, {

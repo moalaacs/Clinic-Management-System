@@ -270,7 +270,7 @@ exports.patchEmployee = async (request, response, next) => {
         { $set: { _contactNumber: request.body.phone } }
       );
     }
-    esponse
+    response
       .status(200)
       .json({ message: "Employee updated successfully.", tempEmployee });
   } catch (error) {

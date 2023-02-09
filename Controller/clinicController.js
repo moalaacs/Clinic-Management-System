@@ -31,13 +31,7 @@ exports.addClinic = async (request, response, next) => {
           .json({ message: `Phone number Already in use` });
       }
     }
-    let testClinicSpeciality = await clinicSchema.findOne({
-      _specilization: request.body.speciality,
-    });
-    if (testClinicSpeciality)
-      return response
-        .status(400)
-        .json({ message: `There is already a clinic with this speciality` });
+
     const clinic = new clinicSchema({
       _contactNumber: request.body.phone,
       _email: request.body.email,

@@ -7,7 +7,7 @@ const {
   numberIdParamsValidation,
 } = require("../Middlewares/validateData");
 const authorizationMW = require("../Middlewares/authorizationMW");
-const { upload } = require("../Middlewares/multer");
+const { upload } = require("../Middlewares/multerp");
 const router = express.Router();
 
 router
@@ -45,6 +45,7 @@ router
   )
   .get(controller.getPatientById)
   .patch(validatePatchPatient, validatorMiddleware, controller.patchPatientById)
+  .put(validatePatient, validatorMiddleware, controller.putPatientById)
   .delete(controller.removePatientById);
 
 module.exports = router;

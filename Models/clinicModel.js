@@ -84,7 +84,6 @@ const clinicSchema = new mongoose.Schema({
   _address: addressSchema,
   _specilization: {
     type: String,
-    unique: true,
     required: true,
     enum: [
       "Pediatrics",
@@ -100,6 +99,7 @@ const clinicSchema = new mongoose.Schema({
   },
   _services: [{ type: serviceSchema }],
   _weeklySchedule: [scheduleSchema],
+  _doctors: [{ type: Number, unique: true }],
 });
 
 /* auto increment for _id field */
