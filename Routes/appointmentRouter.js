@@ -14,7 +14,7 @@ router
   .route("/appointment")
   .get(authorizationMW.checkAdmin, controller.getAllAppointments)
   .post(
-    authorizationMW.access("admin", "employee"),
+    authorizationMW.access("admin", "receptionist"),
     validateAppointment,
     validatorMiddleware,
     controller.addAppointment

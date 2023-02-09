@@ -18,6 +18,23 @@ module.exports = (request, response, next) => {
   }
   next();
 };
+
+module.exports.access = (...roles) => {
+  return (request, response, next) => {
+    if (request.userData.role !== "admin" && !roles.includes(request.userData.role)) {
+      const error = new Error("You are not authorized to access this resource");
+      error.status = 403;
+      next(error);
+    } else if (request.userData.id != request.params.id) {
+      const error = new Error("You have no access to this resource");
+      error.status = 403;
+      next(error);
+    } else {
+      next();
+    }
+  };
+};
+
 module.exports.checkAdmin = (request, response, next) => {
   if (request.userData.role !== "admin") {
     const error = new Error("You are not authorized to access this resource");
@@ -54,16 +71,6 @@ module.exports.checkDoctor = (request, response, next) => {
   }
 };
 
-module.exports.access = (...roles) => {
-  return (request, response, next) => {
-    if (!roles.includes(request.userData.role)) {
-      const error = new Error("You have no access to this resource");
-      error.status = 403;
-      next(error);
-    }
-    next();
-  };
-};
 
 module.exports.checkEmployee = (request, response, next) => {
   if (

@@ -57,9 +57,6 @@ exports.login = async (request, response, next) => {
               .status(200)
               .json({ message: "Patient login successful", token });
           }
-          // default: {
-          //   return next(new Error("You were dismissed from the system"));
-          // }
         }
       } else {
         return response.status(200).json({ message: "Invalid Password" });
@@ -67,7 +64,5 @@ exports.login = async (request, response, next) => {
     } else {
       return next(new Error("Invalid Credentials"));
     }
-  } catch (error) {
-    next(error);
-  }
+  } catch (error) {next(error);}
 };

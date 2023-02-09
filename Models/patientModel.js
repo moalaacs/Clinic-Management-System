@@ -16,7 +16,6 @@ const patientSchema = new mongoose.Schema(
     _medicalHistory: { type: String },
     _id: { type: Number },
     invoices: [invoicesSchema],
-    // totalDue: { type: Number }
   })
 );
 

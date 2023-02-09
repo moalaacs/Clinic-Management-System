@@ -12,7 +12,7 @@ const router = express.Router();
 
 router
   .route("/patient")
-  .all(authorizationMW.checkAdmin)
+  .all(authorizationMW.access())
   .get(controller.getAllPatients)
   .post(
     upload.single("photo"),

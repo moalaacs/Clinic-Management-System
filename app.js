@@ -4,6 +4,7 @@ const morgan = require("morgan");
 const mongoose = require("mongoose");
 
 /**** Import Routes *****/
+const registerRouter = require("./Routes/registerRouter");
 const authenticate = require("./Routes/authRouter");
 const authorizationMW = require("./Middlewares/authorizationMW");
 const doctorRouter = require("./Routes/doctorRouter");
@@ -51,9 +52,11 @@ app.use(express.json());
 
 // c- Routes (End points)  middleware
 
-/*Authenticate user */
+/* Register patient */
+app.use(registerRouter);
+/* Authenticate user */
 app.use(authenticate);
-/*Authorization user */
+/* Authorization user */
 app.use(authorizationMW);
 
 /*Routes*/
