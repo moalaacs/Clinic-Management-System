@@ -211,10 +211,10 @@ exports.patchDoctorById = async (request, response, next) => {
   try {
     let tempDoctor = {};
     if (request.body.firstname) {
-      tempPatient._fname = request.body.firstname;
+      tempDoctor._fname = request.body.firstname;
     }
     if (request.body.lastname) {
-      tempPatient._lname = request.body.lastname;
+      tempDoctor._lname = request.body.lastname;
     }
     if (request.body.speciality) {
       const existingClinics = await clinicSchema.find(
