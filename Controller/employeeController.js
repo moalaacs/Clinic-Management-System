@@ -40,11 +40,6 @@ exports.getAllEmployees = async (request, response, next) => {
 // Add a new Employee
 exports.addEmployee = async (request, response, next) => {
   try {
-    let clinicExists = await clinicSchema.findOne({ _id: request.body.clinic });
-    if (!clinicExists)
-      return response
-        .status(400)
-        .json({ message: `Clinic ${request.body.clinic} not found` });
     let testEmailandPhone = await users.findOne({
       $or: [
         { _email: request.body.email },
@@ -104,25 +99,29 @@ exports.addEmployee = async (request, response, next) => {
 // Edit a Employee
 exports.putEmployee = async (request, response, next) => {
   try {
-    let clinicExists = await clinicSchema.find({ _id: request.body.clinic });
-    if (!clinicExists)
+    let employeeExists = await employeeSchema.findOne({
+      _id: request.body.clinic,
+    });
+    if (!employeeExists)
       return response
         .status(400)
-        .json({ message: `Clinic ${request.body.clinic} not found` });
+        .json({ message: `Employee ${request.body.id} not found` });
     let testEmailandPhone = await users.findOne({
       $or: [
         { _email: request.body.email },
         { _contactNumber: request.body.phone },
       ],
     });
-    if (testEmailandPhone._email == request.body.email) {
-      return response.status(400).json({ message: `Email Already in use` });
+    if (testEmailandPhone) {
+      if (testEmailandPhone._email == request.body.email) {
+        return response.status(400).json({ message: `Email Already in use` });
+      } else if (testEmailandPhone._contactNumber == request.body.phone) {
+        return response
+          .status(400)
+          .json({ message: `Phone number Already in use` });
+      }
     }
-    if (testEmailandPhone._contactNumber == request.body.phone) {
-      return response
-        .status(400)
-        .json({ message: `Phone number Already in use` });
-    }
+    const hash = await bcrypt.hash(request.body.password, 10);
     let now = new Date();
     let age = now.getFullYear() - request.body.dateOfBirth.split("/")[2];
     if (now.getMonth() < request.body.dateOfBirth.split("/")[1]) {
@@ -145,14 +144,8 @@ exports.putEmployee = async (request, response, next) => {
     if (request.file) {
       sentObject._image = request.file.path;
     }
-    const updatedEmployee = await employeeSchema.updateOne(
-      { _id: request.params.id },
-      {
-        $set: sentObject,
-      }
-    );
     await users.updateOne(
-      { _id: request.params.id },
+      { _idInSchema: request.params.id },
       {
         $set: {
           _email: request.body.email,
@@ -160,6 +153,13 @@ exports.putEmployee = async (request, response, next) => {
         },
       }
     );
+    const updatedEmployee = await employeeSchema.updateOne(
+      { _id: request.params.id },
+      {
+        $set: sentObject,
+      }
+    );
+
     response
       .status(200)
       .json({ message: "Employee updated successfully.", updatedEmployee });
@@ -181,8 +181,10 @@ exports.patchEmployee = async (request, response, next) => {
       tempEmployee._contactNumber = request.body.phone;
     }
     if (request.body.clinic) {
-      let clinicExists = await clinicSchema.find({ _id: request.body.clinic });
-      if (!clinicExists)
+      let employeeExists = await clinicSchema.find({
+        _id: request.body.clinic,
+      });
+      if (!employeeExists)
         return response
           .status(400)
           .json({ message: `Clinic ${request.body.clinic} not found` });
@@ -196,7 +198,7 @@ exports.patchEmployee = async (request, response, next) => {
         return response.status(400).json({ message: `Email Already in use` });
       }
       await users.updateOne(
-        { _id: request.params.id },
+        { _idInSchema: request.params.id },
         { $set: { _email: request.body.email } }
       );
       tempEmployee._email = request.body.email;
@@ -251,7 +253,7 @@ exports.patchEmployee = async (request, response, next) => {
     );
     if (request.body.email && request.body.phone) {
       await users.updateOne(
-        { _id: request.params.id },
+        { _idInSchema: request.params.id },
         {
           $set: {
             _email: request.body.email,
@@ -261,12 +263,12 @@ exports.patchEmployee = async (request, response, next) => {
       );
     } else if (request.body.email) {
       await users.updateOne(
-        { _id: request.params.id },
+        { _idInSchema: request.params.id },
         { $set: { _email: request.body.email } }
       );
     } else if (request.body.phone) {
       await users.updateOne(
-        { _id: request.params.id },
+        { _idInSchema: request.params.id },
         { $set: { _contactNumber: request.body.phone } }
       );
     }
