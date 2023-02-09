@@ -30,9 +30,7 @@ exports.getAllDoctors = async (request, response, next) => {
     doctors = paginateData(doctors, request.query);
     doctors = sliceData(doctors, request.query);
     response.status(200).json({ doctors });
-  } catch (error) {
-    next(error);
-  }
+  } catch (error) {next(error);}
 };
 // Edit a doctor
 exports.addDoctor = async (request, response, next) => {
@@ -49,7 +47,7 @@ exports.addDoctor = async (request, response, next) => {
         message: `Sorry, We don't have a department for ${request.body.speciality} yet`,
       });
     let acceptedClinic;
-    for (var i = 0; i < existingClinics.length; i++) {
+    for (let i = 0; i < existingClinics.length; i++) {
       if (existingClinics[i]._doctors.length < 10) {
         acceptedClinic = existingClinics[i];
         break;
@@ -108,7 +106,6 @@ exports.addDoctor = async (request, response, next) => {
       sentObject._image = request.file.path;
     }
     const doctor = new doctorSchema(sentObject);
-
     let savedDoctor = await doctor.save();
 
     let DoctorIdIntoSchedule = request.body.schedule.map((element) => {

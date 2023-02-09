@@ -59,7 +59,6 @@ async function connectToServer() {
     });
   }
 }
-
 connectToServer();
 
 /**** Middlewares ****/

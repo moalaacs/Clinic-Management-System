@@ -7,6 +7,8 @@ const {
 const { upload } = require("../Middlewares/multer");
 const router = express.Router();
 
+
+// to register new patient
 router
   .route("/register")
   .post(

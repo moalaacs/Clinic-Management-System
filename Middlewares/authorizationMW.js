@@ -1,6 +1,5 @@
 const { ChainCondition } = require("express-validator/src/context-items");
 const jwt = require("jsonwebtoken");
-const { get } = require("../Models/addressModel");
 
 module.exports = (request, response, next) => {
   try {
@@ -8,7 +7,7 @@ module.exports = (request, response, next) => {
     const decodedToken = jwt.verify(token, process.env.SECRET_KEY);
     request.userData = {
       id: decodedToken.id,
-      username: decodedToken.username,
+      email: decodedToken.email,
       role: decodedToken.role,
     };
   } catch (error) {

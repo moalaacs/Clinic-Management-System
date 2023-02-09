@@ -31,6 +31,7 @@ exports.getAllPatients = async (request, response, next) => {
 // Add a new patient
 exports.addPatient = async (request, response, next) => {
   try {
+    // check for duplicate mails and phone numbers
     let testEmailandPhone = await users.findOne({
       $or: [
         { _email: request.body.email },
@@ -46,6 +47,8 @@ exports.addPatient = async (request, response, next) => {
           .json({ message: `Phone number Already in use` });
       }
     }
+
+
     const hash = await bcrypt.hash(request.body.password, 10);
     let now = new Date();
     let age = now.getFullYear() - request.body.dateOfBirth.split("/")[2];
@@ -80,9 +83,7 @@ exports.addPatient = async (request, response, next) => {
     response
       .status(201)
       .json({ message: "Patient created successfully.", savedPatient });
-  } catch (error) {
-    next(error);
-  }
+  } catch (error) {next(error);}
 };
 
 // Put a patient
