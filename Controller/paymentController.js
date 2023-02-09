@@ -65,7 +65,7 @@ exports.addPayment = async (request, response, next) => {
     invoice.paymentMethod = "credit";
     await invoice.save();
 
-    const invoiceIndex = patient.invoices.findIndex(
+    const invoiceIndex = patientData.invoices.findIndex(
       (i) => i.invoice_id === invoice_id
     );
     patientData.invoices[invoiceIndex].totalDue = invoice.totalDue;
@@ -83,7 +83,6 @@ exports.addPayment = async (request, response, next) => {
     });
 
     await newPayment.save();
-
     response.send({ message: "Payment added successfully" });
   } catch (error) {
     response.status(500).send({ error: error });
