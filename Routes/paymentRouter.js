@@ -9,18 +9,6 @@ const authorizationMW = require("../Middlewares/authorizationMW");
 
 const router = express.Router();
 
-router.route("/pay/:id").post(authorizationMW.checkPatient,validatePayment, errorValidation, controller.addPayment);
-
-
-// const validateInvoiceId = async (req, res, next) => {
-//   const invoice_id = req.params.id;
-//   const invoice = await Invoice.findOne({ _id: invoice_id });
-//   if (!invoice) {
-//     return res.status(400).send({ error: "Invoice not found" });
-//   }
-//   next();
-// };
-
-
+router.route("/pay/:id").post(authorizationMW.access("patient"),validatePayment, errorValidation, controller.addPayment);
 
 module.exports = router;

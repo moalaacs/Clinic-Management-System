@@ -13,7 +13,7 @@ const router = express.Router();
 
 router
   .route("/employee")
-  .all(authorizationMW.checkAdmin)
+  .all(authorizationMW.access())
   .get(controller.getAllEmployees)
   .post(
     upload.single("photo"),
@@ -25,24 +25,9 @@ router
 router
   .route("/employee/:id")
   .all(
-    authorizationMW.checkEmployee,
     numberIdParamsValidation,
-    validatorMiddleware
-  )
-  .get(controller.getEmployeeById)
-  .patch(
-    upload.single("photo"),
-    employeePatchValidation,
     validatorMiddleware,
-    controller.patchEmployee
-  );
-
-router
-  .route("/employee/:id")
-  .all(
-    authorizationMW.checkAdmin,
-    numberIdParamsValidation,
-    validatorMiddleware
+    authorizationMW.access("employee")
   )
   .get(controller.getEmployeeById)
   .patch(
@@ -52,5 +37,6 @@ router
     controller.patchEmployee
   )
   .delete(controller.removeEmployeeById);
+
 
 module.exports = router;

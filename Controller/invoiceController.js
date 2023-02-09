@@ -236,7 +236,6 @@ exports.editInvoice = async (request, response, next) => {
       invoiceServices.push(invoiceServicesobject);
     } 
     
-    console.log(invoiceServices);
     if (request.body.paid) {
       paid = request.body.paid;
       if (paid > total) {

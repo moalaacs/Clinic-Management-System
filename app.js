@@ -4,6 +4,7 @@ const morgan = require("morgan");
 const mongoose = require("mongoose");
 
 /**** Import Routes *****/
+const registerRouter = require("./Routes/registerRouter");
 const authenticate = require("./Routes/authRouter");
 const authorizationMW = require("./Middlewares/authorizationMW");
 const doctorRouter = require("./Routes/doctorRouter");
@@ -26,38 +27,37 @@ const port = process.env.PORT || 8080;
 
 /**** Connect to DB ****/
 mongoose.set("strictQuery", true);
-mongoose
-  .connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => {
-    console.log("Connected to cloud database");
-    /**** server is now ready to serve  ****/
+async function connectToServer() {
+  let connected;
+  try {
+    await mongoose.connect(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    });
+    connected = true;
+  } catch (error) {
+    console.log("Error connecting to cloud database, trying to connect to local database", error);
+    try {
+      await mongoose.connect(process.env.MONGODB_LOCAL, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+      });
+      connected = true;
+    } catch (error) {
+      console.log("Error connecting to cloud/local database", error);
+      connected = false;
+    }
+  }
+
+  if (connected) {
+    console.log("Connected to database");
     app.listen(port, () => {
       console.log("I am listening...", port);
     });
-  })
-  .catch((err) => {
-    console.log(
-      "Error connecting to cloud database, trying to connect to local database"
-    );
-    mongoose
-      .connect(process.env.MONGODB_LOCAL, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      })
-      .then(() => {
-        console.log("Connected to local database");
-        /**** server is now ready to serve  ****/
-        app.listen(port, () => {
-          console.log("I am listening...", port);
-        });
-      })
-      .catch((error) =>
-        console.log("Error connecting to cloud/local database", error)
-      );
-  });
+  }
+}
+
+connectToServer();
 
 /**** Middlewares ****/
 
@@ -69,21 +69,24 @@ app.use(express.json());
 
 // c- Routes (End points)  middleware
 
-/*Authenticate user */
+/* Register patient */
+app.use(registerRouter);
+/* Authenticate user */
 app.use(authenticate);
-/*Authorization user */
+/* Authorization user */
 app.use(authorizationMW);
 
 /*Routes*/
 app.use(doctorRouter);
 app.use(patientRouter);
 app.use(employeeRouter);
-app.use(medicineRouter);
 app.use(clinicRouter);
+app.use(medicineRouter);
 app.use(appointmentRouter);
 app.use(prescriptionRouter);
 app.use(invoiceRouter);
 app.use(paymentRouter);
+
 // d- file not found middleware
 app.use((request, response) => {
   response.status(404).json({ data: "Page Not Found 404" });
