@@ -11,7 +11,7 @@ const router = express.Router();
 
 router
   .route("/invoice")
-  .all(authorizationMW.access())
+  .all(authorizationMW.accessClinicResources("doctor","employee"))
   .get(controller.getInvoices)
   .post(validateInvoice, errorValidation, controller.addInvoice);
 

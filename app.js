@@ -81,12 +81,13 @@ app.use(authorizationMW);
 app.use(doctorRouter);
 app.use(patientRouter);
 app.use(employeeRouter);
-app.use(medicineRouter);
 app.use(clinicRouter);
+app.use(medicineRouter);
 app.use(appointmentRouter);
 app.use(prescriptionRouter);
 app.use(invoiceRouter);
 app.use(paymentRouter);
+
 // d- file not found middleware
 app.use((request, response) => {
   response.status(404).json({ data: "Page Not Found 404" });

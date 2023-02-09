@@ -11,8 +11,4 @@ const router = express.Router();
 
 router.route("/pay/:id").post(authorizationMW.access("patient"),validatePayment, errorValidation, controller.addPayment);
 
-
-
-
-
 module.exports = router;
