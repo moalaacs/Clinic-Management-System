@@ -16,6 +16,9 @@ const appointmentRouter = require("./Routes/appointmentRouter");
 const prescriptionRouter = require("./Routes/prescriptionRouter");
 const invoiceRouter = require("./Routes/invoiceRouter");
 const paymentRouter = require("./Routes/paymentRouter");
+const {
+  checkAppointmentsDaily,
+} = require("./Middlewares/dailyAppointmentCheck");
 
 require("dotenv").config();
 
@@ -70,7 +73,7 @@ app.use(morgan("dev"));
 app.use(express.json());
 
 // c- Routes (End points)  middleware
-
+checkAppointmentsDaily();
 /* Register patient */
 app.use(registerRouter);
 /* Authenticate user */

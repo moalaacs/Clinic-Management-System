@@ -1,10 +1,14 @@
 const doctorModel = require("../Models/doctorModel");
 const appointmentModel = require("../Models/appointmentModel");
+module.exports.checkAppointmentsDaily = async () => {
+  var today = new Date().getTime();
 
-module.exports = async () => {
-  return db.appointments
-    .find()
-    .limit(1)
-    .sort({ $natural: -1 })
-    .then((data) => console.log(data));
+  await doctorModel.updateMany(
+    {},
+    { $pull: { _appointments: { $lt: +today } } }
+  );
+  await appointmentModel.updateMany(
+    { _id: { $lt: today }, _status: "Pending" },
+    { $set: { _Pending: "Late" } }
+  );
 };

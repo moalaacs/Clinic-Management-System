@@ -42,7 +42,7 @@ exports.addAppointment = async (request, response, next) => {
     if (!patient) {
       return response.status(400).json({ message: "Patient not found." });
     }
-    let testExistingAppointment = await appointment.findOne({
+    let testExistingAppointment = await appointmentSchema.findOne({
       _patientId: patientId,
       _doctorId: doctorId,
       _date: date,
@@ -86,7 +86,7 @@ exports.addAppointment = async (request, response, next) => {
         .json({ message: "Appointment date must be in the future." });
     }
 
-    const _id = new Date().getTime();
+    const _id = new Date(date).getTime();
 
     const existingAppointment = await appointmentSchema.findOne({
       doctorId,
