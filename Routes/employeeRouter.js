@@ -36,6 +36,12 @@ router
     validatorMiddleware,
     controller.patchEmployee
   )
+  .put(
+    upload.single("photo"),
+    employeeValidation,
+    validatorMiddleware,
+    controller.putEmployee
+  )
   .delete(controller.removeEmployeeById);
 
 

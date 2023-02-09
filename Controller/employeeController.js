@@ -100,12 +100,12 @@ exports.addEmployee = async (request, response, next) => {
 exports.putEmployee = async (request, response, next) => {
   try {
     let employeeExists = await employeeSchema.findOne({
-      _id: request.body.clinic,
+      _id: request.params.id,
     });
     if (!employeeExists)
       return response
         .status(400)
-        .json({ message: `Employee ${request.body.id} not found` });
+        .json({ message: `Employee ${request.params.id} not found` });
     let testEmailandPhone = await users.findOne({
       $or: [
         { _email: request.body.email },
