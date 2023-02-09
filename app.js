@@ -27,38 +27,37 @@ const port = process.env.PORT || 8080;
 
 /**** Connect to DB ****/
 mongoose.set("strictQuery", true);
-mongoose
-  .connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => {
-    console.log("Connected to cloud database");
-    /**** server is now ready to serve  ****/
+async function connectToServer() {
+  let connected;
+  try {
+    await mongoose.connect(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    });
+    connected = true;
+  } catch (err) {
+    console.log("Error connecting to cloud database, trying to connect to local database");
+    try {
+      await mongoose.connect(process.env.MONGODB_LOCAL, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+      });
+      connected = true;
+    } catch (error) {
+      console.log("Error connecting to cloud/local database", error);
+      connected = false;
+    }
+  }
+
+  if (connected) {
+    console.log("Connected to database");
     app.listen(port, () => {
       console.log("I am listening...", port);
     });
-  })
-  .catch((err) => {
-    console.log(
-      "Error connecting to cloud database, trying to connect to local database"
-    );
-    mongoose
-      .connect(process.env.MONGODB_LOCAL, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      })
-      .then(() => {
-        console.log("Connected to local database");
-        /**** server is now ready to serve  ****/
-        app.listen(port, () => {
-          console.log("I am listening...", port);
-        });
-      })
-      .catch((error) =>
-        console.log("Error connecting to cloud/local database", error)
-      );
-  });
+  }
+}
+
+connectToServer();
 
 /**** Middlewares ****/
 
