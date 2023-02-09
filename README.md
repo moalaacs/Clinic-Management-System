@@ -3,10 +3,11 @@
 ## Table of Contents
 
 * [Description](#description)
-* [Resources](#resources)
 * [Requirements](#requirements)
+* [Resources](#resources)
 * [Tools](#tools)
-* [Quick Start](#quick start)
+* [Quick Start](#quick-start)
+* [Routes](#routes)
 
 
 ## Description
@@ -58,8 +59,56 @@ patient.
 $ npm install
 ```
 
+  Start the database server:
+
+```console
+$ mongod
+```
+
   Start the server:
 
 ```console
 $ npm start
 ```
+## Routes
+
+| Routes       |
+| ------------ |
+|**Register**|
+|`/register`|
+|**Login**|
+|`/login`|
+|**Doctor**|
+|`/doctor`|
+|`/doctor/:id`|
+|**Patient**|
+|`/patient`|
+|`/patient/:id`|
+|**Employee**|
+|`/employee`|
+|`/employee/:id`|
+|**Clinic**|
+|`/clinic`|
+|`/clinic/:id`|
+|**Medicine**|
+|`/medicine`|
+|`/medicine/:id`|
+|**Appointment**|
+|`/appointment`|
+|`/appointment/:id`|
+|`/appointmentReports/all`|
+|`/appointmentReports/daily`|
+|`/appointmentReports/patient/:id`|
+|`/appointmentReports/doctor/:id`|
+|**Prescription**|
+|`/prescription`|
+|`/prescription/:id`|
+|**Invoice**|
+|`/invoice`|
+|`/invoiceReports/all`|
+|`/invoiceReports/daily`|
+|`/invoiceReports/patient`|
+|**Payment**|
+|`/pay/:id`|
+
+[List of all contributors](https://github.com/moalaacs/Clinic-Management-System/graphs/contributors)
