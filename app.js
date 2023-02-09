@@ -32,13 +32,32 @@ mongoose
     useUnifiedTopology: true,
   })
   .then(() => {
-    console.log("Connected to DB");
+    console.log("Connected to cloud database");
     /**** server is now ready to serve  ****/
     app.listen(port, () => {
       console.log("I am listening...", port);
     });
   })
-  .catch((error) => console.log("Error connecting to DB", error));
+  .catch((err) => {
+    console.log(
+      "Error connecting to cloud database, trying to connect to local database"
+    );
+    mongoose
+      .connect(process.env.MONGODB_LOCAL, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      })
+      .then(() => {
+        console.log("Connected to local database");
+        /**** server is now ready to serve  ****/
+        app.listen(port, () => {
+          console.log("I am listening...", port);
+        });
+      })
+      .catch((error) =>
+        console.log("Error connecting to cloud/local database", error)
+      );
+  });
 
 /**** Middlewares ****/
 
@@ -47,7 +66,6 @@ app.use(morgan("dev"));
 
 // b- body parser middleware
 app.use(express.json());
-
 
 // c- Routes (End points)  middleware
 
@@ -76,4 +94,3 @@ app.use((error, request, response, next) => {
   let errorStatus = error.status || 500;
   response.status(errorStatus).json(error.message);
 });
-

@@ -14,6 +14,8 @@ const {
   sortData,
   sliceData,
   paginateData,
+  dateBetween,
+  mapDateToDay,
 } = require("../helper/helperfns");
 const { request, response } = require("express");
 
@@ -21,14 +23,12 @@ const { request, response } = require("express");
 exports.addAppointment = async (request, response, next) => {
   try {
     const { doctorId, patientId, date, time, clinicId } = request.body;
-
     const clinic = await clinicModel.findById(clinicId);
     if (!clinic) {
       return response
         .status(400)
         .json({ message: `Clinic ${clinicId} not found.` });
     }
-
     let doctor = await doctorModel.findById(doctorId);
     if (!doctor) {
       return response.status(400).json({ message: "Doctor not found." });
@@ -43,14 +43,32 @@ exports.addAppointment = async (request, response, next) => {
       return response.status(400).json({ message: "Patient not found." });
     }
 
-    // const timeRegex = /^\d{2}:\d{2}$/;
-
     const minutes = time.split(":")[1];
     if (minutes !== "00" && minutes !== "30") {
       return response
         .status(400)
         .json({ message: "Invalid time format, expected HH:00 or HH:30." });
     }
+
+    let flagForSchedule = false;
+    let dayInWeek = mapDateToDay(date);
+    for (var i = 0; i < clinic._weeklySchedule.length; i++) {
+      if (
+        doctor._id == clinic._weeklySchedule[i].doctorId &&
+        dateBetween(
+          time,
+          clinic._weeklySchedule[i].start,
+          clinic._weeklySchedule[i].end
+        ) &&
+        dayInWeek == clinic._weeklySchedule[i].day
+      )
+        flagForSchedule = true;
+      break;
+    }
+    if (!flagForSchedule)
+      return response
+        .status(400)
+        .json({ message: `Doctor has no schedule at ${dayInWeek} , ${time}` });
 
     const appointmentDate = new Date(`${date} ${time}:00`);
     if (appointmentDate < new Date()) {
@@ -71,7 +89,6 @@ exports.addAppointment = async (request, response, next) => {
         .status(400)
         .json({ message: "Doctor already has an appointment at this time." });
     }
-
     const appointment = new appointmentSchema({
       _id,
       _date: date,
@@ -80,18 +97,11 @@ exports.addAppointment = async (request, response, next) => {
       _patientId: patientId,
       _clinicId: clinicId,
     });
-    await appointment.save();
-
-    const newAppointmentForDoctor = {
-      _date: date,
-      _time: time,
-      _clinicId: clinicId,
-      _patientId: patientId,
-    };
-    doctor._appointments.push(newAppointmentForDoctor);
-
-    await doctor.save();
-
+    let savedAppointment = await appointment.save();
+    await doctorModel.findOneAndUpdate(
+      { _id: doctorId },
+      { $push: { _appointments: savedAppointment._id } }
+    );
     response
       .status(201)
       .json({ message: "Appointment created successfully.", appointment });
@@ -294,7 +304,6 @@ exports.doctorAppointmentsReports = (request, response, next) => {
     })
     .catch((error) => next(error));
 };
-
 
 const reqNamesToSchemaNames = (query) => {
   const fieldsToReplace = {

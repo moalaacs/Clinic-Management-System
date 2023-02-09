@@ -498,6 +498,37 @@ const mapSpecilityToSpecilization = (specility) => {
   }
 };
 
+const dateBetween = (date1, date2, date3) => {
+  return (
+    new Date(`${new Date().toLocaleDateString()} ${date1}`) >=
+      new Date(`${new Date().toLocaleDateString()} ${date2}`) &&
+    new Date(`${new Date().toLocaleDateString()} ${date1}`) <=
+      new Date(`${new Date().toLocaleDateString()} ${date3}`)
+  );
+};
+
+const mapDateToDay = (date) => {
+  let splitData = date.split("/");
+  let dateReformated = `${splitData[1]}/${splitData[0]}/${splitData[2]}`;
+  let number = new Date(dateReformated).getDay();
+  switch (number) {
+    case 0:
+      return "Monday";
+    case 1:
+      return "Tuesday";
+    case 2:
+      return "Wednesday";
+    case 3:
+      return "Thursday";
+    case 4:
+      return "Friday";
+    case 5:
+      return "Saturday";
+    case 6:
+      return "Sunday";
+  }
+};
+
 module.exports = {
   filterData,
   paginateData,
@@ -505,4 +536,6 @@ module.exports = {
   sliceData,
   fillClinicServices,
   mapSpecilityToSpecilization,
+  dateBetween,
+  mapDateToDay,
 };

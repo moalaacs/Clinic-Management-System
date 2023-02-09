@@ -20,11 +20,6 @@ exports.getAllDoctors = async (request, response, next) => {
     let query = reqNamesToSchemaNames(request.query);
     let doctors = await filterData(doctorSchema, query, [
       {
-        path: "_schedule.clinicId",
-        options: { strictPopulate: false },
-        select: { _specilization: 1, _address: 1, _id: 0 },
-      },
-      {
         path: "_clinic",
         options: { strictPopulate: false },
         select: { _specilization: 1, _address: 1, _id: 0 },
@@ -41,42 +36,42 @@ exports.getAllDoctors = async (request, response, next) => {
 
 exports.addDoctor = async (request, response, next) => {
   try {
-    const existingClinics = await clinicSchema.find(
-      {},
-      { _id: 1, _specilization: 1, _weeklySchedule: 1 }
-    );
     let specialityClinicId = mapSpecilityToSpecilization(
       request.body.speciality
     );
-    specialityClinicId = existingClinics.find(
-      (element) => element._specilization == specialityClinicId
+    const existingClinics = await clinicSchema.find(
+      { _specilization: specialityClinicId },
+      { _id: 1, _specilization: 1, _weeklySchedule: 1, _doctors: 1 }
     );
-    if (!specialityClinicId)
+
+    if (existingClinics.length == 0)
       return response.status(400).json({
         message: `Sorry, We don't have a department for ${request.body.speciality} yet`,
       });
-    //CHECK SCHEDULE
-    // if (specialityClinicId._weeklySchedule.length) {
-    //   request.body.schedule.forEach((schedule) => {
-    //     let testSchedule = specialityClinicId._weeklySchedule.find(
-    //       (clinicSchedule) => {
-    //         return (
-    //           clinicSchedule.day == schedule.day &&
-    //           !isBetweenTwoDate(
-    //             schedule.start,
-    //             schedule.end,
-    //             clinicSchedule.start,
-    //             clinicSchedule.end
-    //           )
-    //         );
-    //       }
-    //     );
-    //     if (testSchedule)
-    //       return response.status(201).json({
-    //         message: `Clinic has schedule already at ${schedule.day} between ${schedule.start} to ${schedule.end} `,
-    //       });
-    //   });
-    // }
+
+    let testNameOfDoctor = await doctorSchema.find({
+      _fname: request.body.firstname,
+      _lname: request.body.lastname,
+    });
+
+    if (testNameOfDoctor != 0) {
+      return response.status(400).json({
+        message: `There already a doctor with such name`,
+      });
+    }
+
+    let acceptedClinic;
+    for (var i = 0; i < existingClinics.length; i++) {
+      if (existingClinics[i]._doctors.length < 10) {
+        acceptedClinic = existingClinics[i];
+        break;
+      }
+    }
+    if (!acceptedClinic) {
+      return response.status(400).json({
+        message: `Sorry, No available clinic for this doctor to be added`,
+      });
+    }
 
     let testEmailandPhone = await users.findOne({
       $or: [
@@ -111,9 +106,10 @@ exports.addDoctor = async (request, response, next) => {
       _password: hash,
       _image: request.body.profileImage,
       _specilization: request.body.speciality,
-      _clinic: specialityClinicId._id,
+      _clinic: acceptedClinic._id,
       _schedule: request.body.schedule,
     });
+
     let savedDoctor = await doctor.save();
 
     let DoctorIdIntoSchedule = request.body.schedule.map((element) => {
@@ -121,9 +117,15 @@ exports.addDoctor = async (request, response, next) => {
     });
 
     await clinicSchema.updateOne(
-      { _id: specialityClinicId._id },
-      { $push: { _weeklySchedule: DoctorIdIntoSchedule } }
+      { _id: acceptedClinic._id },
+      {
+        $push: {
+          _weeklySchedule: DoctorIdIntoSchedule,
+          _doctors: savedDoctor._id,
+        },
+      }
     );
+
     const newUser = new users({
       _idInSchema: savedDoctor._id,
       _role: "doctor",
@@ -131,6 +133,7 @@ exports.addDoctor = async (request, response, next) => {
       _contactNumber: request.body.phone,
       _password: hash,
     });
+
     await newUser.save();
     response
       .status(201)
@@ -337,18 +340,11 @@ exports.patchDoctorById = async (request, response, next) => {
 
 exports.getDoctorById = async (request, response, next) => {
   try {
-    let doctor = await doctorSchema
-      .find({ _id: request.params.id })
-      .populate({
-        path: "_schedule.clinicId",
-        options: { strictPopulate: false },
-        select: { _specilization: 1, _address: 1, _id: 0 },
-      })
-      .populate({
-        path: "_clinic",
-        options: { strictPopulate: false },
-        select: { _specilization: 1, _address: 1, _id: 0 },
-      });
+    let doctor = await doctorSchema.find({ _id: request.params.id }).populate({
+      path: "_clinic",
+      options: { strictPopulate: false },
+      select: { _specilization: 1, _address: 1, _id: 0 },
+    });
     if (!doctor) {
       return next(new Error("doctor not found"));
     }
