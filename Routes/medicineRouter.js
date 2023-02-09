@@ -11,23 +11,24 @@ const router = express.Router();
 
 router
   .route("/medicine")
+  .all(authorizationMW.accessClinicResources("employee", "doctor"))
   .get(controller.getAllMedicine)
   .post(medicineValidation, validatorMiddleware, controller.addMedicine);
 
 router
   .route("/medicine/:id")
   .all(
-    authorizationMW.checkAdmin,
     numberIdParamsValidation,
-    validatorMiddleware
+    validatorMiddleware,
+    authorizationMW.accessClinicResources("employee", "doctor")
   )
   .get(validatorMiddleware, controller.getMedicineById)
+  .put(medicineValidation, validatorMiddleware, controller.putMedicineById)
   .patch(
     medicinePatchValidation,
     validatorMiddleware,
     controller.patchMedicineById
   )
-  .put(medicineValidation, validatorMiddleware, controller.putMedicineById)
   .delete(validatorMiddleware, controller.removeMedicineById);
 
 module.exports = router;

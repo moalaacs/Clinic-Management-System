@@ -1,6 +1,7 @@
 const express = require("express");
 const controller = require("../Controller/doctorController");
 const validatorMiddleware = require("../Middlewares/errorValidation");
+const authorizationMW = require("../Middlewares/authorizationMW");
 const {
   doctorValidation,
   doctorPatchValidation,
@@ -11,6 +12,7 @@ const { upload } = require("../Middlewares/multer");
 
 router
   .route("/doctor")
+  .all(authorizationMW.access())
   .get(controller.getAllDoctors)
   .post(
     upload.single("photo"),
@@ -21,7 +23,7 @@ router
 
 router
   .route("/doctor/:id")
-  .all(numberIdParamsValidation, validatorMiddleware)
+  .all(numberIdParamsValidation, validatorMiddleware,authorizationMW.access("doctor"))
   .get(controller.getDoctorById)
   .put(
     upload.single("photo"),

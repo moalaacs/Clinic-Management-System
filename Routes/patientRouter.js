@@ -24,28 +24,20 @@ router
 router
   .route("/patient/:id")
   .all(
-    authorizationMW.checkPatient,
     numberIdParamsValidation,
-    validatorMiddleware
+    validatorMiddleware,
+    authorizationMW.access("patient")
   )
   .get(controller.getPatientById)
+  .put(upload.single("photo"),validatePatient, validatorMiddleware, controller.putPatientById)
   .patch(
     upload.single("photo"),
     validatePatchPatient,
     validatorMiddleware,
     controller.patchPatientById
-  );
-
-router
-  .route("/patient/:id")
-  .all(
-    authorizationMW.checkAdmin,
-    numberIdParamsValidation,
-    validatorMiddleware
   )
-  .get(controller.getPatientById)
-  .patch(validatePatchPatient, validatorMiddleware, controller.patchPatientById)
-  .put(validatePatient, validatorMiddleware, controller.putPatientById)
   .delete(controller.removePatientById);
+
+
 
 module.exports = router;

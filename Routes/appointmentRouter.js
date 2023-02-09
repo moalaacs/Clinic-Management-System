@@ -12,9 +12,9 @@ const router = express.Router();
 
 router
   .route("/appointment")
-  .get(authorizationMW.checkAdmin, controller.getAllAppointments)
+  .all(authorizationMW.accessClinicResources("receptionist"))
+  .get(controller.getAllAppointments)
   .post(
-    authorizationMW.access("admin", "receptionist"),
     validateAppointment,
     validatorMiddleware,
     controller.addAppointment
@@ -22,26 +22,26 @@ router
 
 router
   .route("/appointmentReports/all")
-  .get(authorizationMW.checkAdmin, controller.allAppointmentsReports);
+  .get(authorizationMW.access(), controller.allAppointmentsReports);
 
 router
   .route("/appointmentReports/daily")
-  .get(authorizationMW.checkAdmin, controller.dailyAppointmentsReports);
+  .get(authorizationMW.access(), controller.dailyAppointmentsReports);
 
 router
   .route("/appointmentReports/patient")
-  .get(authorizationMW.checkAdmin, controller.patientAppointmentsReports);
+  .get(authorizationMW.access(), controller.patientAppointmentsReports);
 
 router
   .route("/appointmentReports/doctor")
-  .get(authorizationMW.checkAdmin, controller.doctorAppointmentsReports);
+  .get(authorizationMW.access(), controller.doctorAppointmentsReports);
 
 router
   .route("/appointment/:id")
   .all(
     numberIdParamsValidation,
     validatorMiddleware,
-    authorizationMW.checkAdmin
+    authorizationMW.accessClinicResources("receptionist")
   )
   .get(controller.getAppointmentById)
   .patch(

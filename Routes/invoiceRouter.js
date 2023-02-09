@@ -11,25 +11,25 @@ const router = express.Router();
 
 router
   .route("/invoice")
-  .all(authorizationMW.checkDoctor)
+  .all(authorizationMW.access())
   .get(controller.getInvoices)
   .post(validateInvoice, errorValidation, controller.addInvoice);
 
   router
   .route("/invoiceReports/all")
-  .get(authorizationMW.checkAdmin, controller.allInvoicesReports);
+  .get(authorizationMW.access(), controller.allInvoicesReports);
 
   router
   .route("/invoiceReports/daily")
-  .get(authorizationMW.checkAdmin, controller.dailyInvoicesReports);
+  .get(authorizationMW.access(), controller.dailyInvoicesReports);
 
   router
   .route("/invoiceReports/patient")
-  .get(authorizationMW.checkAdmin, controller.patientInvoicesReports);
+  .get(authorizationMW.access(), controller.patientInvoicesReports);
 
 router
   .route("/invoice/:id")
-  .all(authorizationMW.checkDoctor)
+  .all(authorizationMW.access())
   .get(controller.getInvoiceById)
   .patch(validatePatchInvoice, errorValidation, controller.editInvoice)
   .delete(controller.removeInvoice);

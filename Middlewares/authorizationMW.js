@@ -25,7 +25,7 @@ module.exports.access = (...roles) => {
       const error = new Error("You are not authorized to access this resource");
       error.status = 403;
       next(error);
-    } else if (request.userData.id != request.params.id) {
+    } else if (request.userData.id != request.params.id && request.userData.role !== "admin") {
       const error = new Error("You have no access to this resource");
       error.status = 403;
       next(error);
@@ -35,53 +35,67 @@ module.exports.access = (...roles) => {
   };
 };
 
-module.exports.checkAdmin = (request, response, next) => {
-  if (request.userData.role !== "admin") {
-    const error = new Error("You are not authorized to access this resource");
-    error.status = 403;
-    next(error);
-  } else {
-    next();
-  }
-};
-module.exports.checkPatient = (request, response, next) => {
-  if (
-    request.userData.role == "admin" ||
-    (request.userData.role == "patient" &&
-      request.userData.id == request.params.id)
-  ) {
-    next();
-  } else {
-    const error = new Error("You are not authorized to access this resource");
-    error.status = 403;
-    next(error);
-  }
-};
-module.exports.checkDoctor = (request, response, next) => {
-  if (
-    request.userData.role == "admin" ||
-    (request.userData.role == "doctor" &&
-      request.userData.id == request.params.id)
-  ) {
-    next();
-  } else {
-    const error = new Error("You are not authorized to access this resource");
-    error.status = 403;
-    next(error);
-  }
+
+module.exports.accessClinicResources = (...roles) => {
+  return (request, response, next) => {
+    if (request.userData.role !== "admin" && !roles.includes(request.userData.role)) {
+      const error = new Error("You are not authorized to access this resource");
+      error.status = 403;
+      next(error);
+    } else {next();}
+  };
 };
 
 
-module.exports.checkEmployee = (request, response, next) => {
-  if (
-    request.userData.role == "admin" ||
-    (request.userData.role == "employee" &&
-      request.userData.id == request.params.id)
-  ) {
-    next();
-  } else {
-    const error = new Error("You are not authorized to access this resource");
-    error.status = 403;
-    next(error);
-  }
-};
+
+
+// module.exports.checkAdmin = (request, response, next) => {
+//   if (request.userData.role !== "admin") {
+//     const error = new Error("You are not authorized to access this resource");
+//     error.status = 403;
+//     next(error);
+//   } else {
+//     next();
+//   }
+// };
+// module.exports.checkPatient = (request, response, next) => {
+//   if (
+//     request.userData.role == "admin" ||
+//     (request.userData.role == "patient" &&
+//       request.userData.id == request.params.id)
+//   ) {
+//     next();
+//   } else {
+//     const error = new Error("You are not authorized to access this resource");
+//     error.status = 403;
+//     next(error);
+//   }
+// };
+// module.exports.checkDoctor = (request, response, next) => {
+//   if (
+//     request.userData.role == "admin" ||
+//     (request.userData.role == "doctor" &&
+//       request.userData.id == request.params.id)
+//   ) {
+//     next();
+//   } else {
+//     const error = new Error("You are not authorized to access this resource");
+//     error.status = 403;
+//     next(error);
+//   }
+// };
+
+
+// module.exports.checkEmployee = (request, response, next) => {
+//   if (
+//     request.userData.role == "admin" ||
+//     (request.userData.role == "employee" &&
+//       request.userData.id == request.params.id)
+//   ) {
+//     next();
+//   } else {
+//     const error = new Error("You are not authorized to access this resource");
+//     error.status = 403;
+//     next(error);
+//   }
+// };
