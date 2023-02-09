@@ -421,7 +421,7 @@ exports.dailyInvoicesReports = (request, response, next) => {
 // Patient Invoice Reports
 exports.patientInvoicesReports = (request, response, next) => {
   invoiceSchema
-    .find()
+    .find({ _patientId: request.params.id })
     .populate({ path: "_appointmentId", select: { _id: 0 } })
     .populate({ path: "_doctorId", select: { _id: 0 } })
     .populate({ path: "_clinicId", select: { _id: 0 } })

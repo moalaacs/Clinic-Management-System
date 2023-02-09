@@ -24,7 +24,7 @@ router
   .get(authorizationMW.access(), controller.dailyInvoicesReports);
 
   router
-  .route("/invoiceReports/patient")
+  .route("/invoiceReports/patient/:id")
   .get(authorizationMW.access(), controller.patientInvoicesReports);
 
 router
