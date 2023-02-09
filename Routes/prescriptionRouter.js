@@ -19,6 +19,7 @@ router
     .all(numberIdParamsValidation, errorValidation, authorizationMW.checkDoctor)
     .get(controller.getPrescriptionById)
     .patch(validatePatchPrescription, errorValidation, controller.editPrescription)
+    .put(validatePrescription, errorValidation, controller.putPrescriptionById)
     .delete(controller.removePrescription);
 
 module.exports = router;

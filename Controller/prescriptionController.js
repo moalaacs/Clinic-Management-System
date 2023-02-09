@@ -167,3 +167,26 @@ const reqNamesToSchemaNames = (query) => {
   }
   return replacedQuery;
 };
+
+// Edit a Prescription - put
+exports.putPrescriptionById = async (request, response, next) => {
+  try {
+    let updatedPrescription = await prescriptionSchema.updateOne(
+      { _id: request.params.id },
+      {
+        $set: {
+          clinicRef: request.body.clinic,
+          patientRef: request.body.patient,
+          doctorRef: request.body.doctor,
+          medications: request.body.medicine,
+          instructions: request.body.instructions,
+        },
+      }
+    );
+    if (!updatedPrescription)
+      response.status(200).json({ status: "Prescription not found" });
+    response.status(200).json({ status: "Updated", updatedPrescription });
+  } catch (error) {
+    next(error);
+  }
+};

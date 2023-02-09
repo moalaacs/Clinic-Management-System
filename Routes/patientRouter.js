@@ -45,6 +45,7 @@ router
   )
   .get(controller.getPatientById)
   .patch(validatePatchPatient, validatorMiddleware, controller.patchPatientById)
+  .put(validatePatient, validatorMiddleware, controller.putPatientById)
   .delete(controller.removePatientById);
 
 module.exports = router;
