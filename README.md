@@ -119,3 +119,12 @@ $ npm start
 |`/pay/:id`|
 
 [List of all contributors](https://github.com/moalaacs/Clinic-Management-System/graphs/contributors)
+
+
+## Team Members
+
+- [@Amr Allam](https://github.com/amriallam)
+- [@Mohammed Ibrahim](https://github.com/MoIbrahim10)
+- [@Mohammed Alaa](https://github.com/moalaacs)
+- [@Ahmed Hassan](https://github.com/hassan9810)
+- [@Hazem Magdy](https://github.com/Hazem-Magdy)
